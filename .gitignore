@@ -1,0 +1,9 @@
+node_modules/
+/dist
+.check/
+.fallow/
+coverage/
+*.log
+.DS_Store
+.env
+tsconfig.tsbuildinfo
