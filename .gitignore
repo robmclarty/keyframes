@@ -7,3 +7,6 @@ coverage/
 .DS_Store
 .env
 tsconfig.tsbuildinfo
+.stryker-tmp/
+*.tsbuildinfo
+.pnpm-store/

@@ -51,7 +51,7 @@ The 2026-10-02 draft cited several sources loosely. Corrected:
     models. This is the deferred design-simulation path.
 - <a id="kleppmann-2025"></a>**Kleppmann 2025.** ✔ Martin Kleppmann, "Prediction: AI will make formal
   verification go mainstream," blog, 8 Dec 2025.
-  [Link](https://martin.kleppmann.com/2025/12/08/ai-formal-verification.html)
+  [Kleppmann's post](https://martin.kleppmann.com/2025/12/08/ai-formal-verification.html)
   - *Supports:* "rather than having humans review AI-generated code, I'd much rather have the AI
     prove to me that the code it has generated is correct", and "the challenge will move to
     correctly defining the specification." The human's job moves to the spec, which is the
@@ -101,7 +101,7 @@ The 2026-10-02 draft cited several sources loosely. Corrected:
     few simple rules." It is why the parts of keyframes that gate are the small formal parts
     (IDs, pointers, edges), never the prose.
 - <a id="acemoglu-2026"></a>**Acemoglu, Kong & Ozdaglar 2026.** ✔ "AI, Human Cognition and Knowledge
-  Collapse," NBER Working Paper 34910, Feb 2026. [Link](https://www.nber.org/papers/w34910)
+  Collapse," NBER Working Paper 34910, Feb 2026. [NBER w34910](https://www.nber.org/papers/w34910)
   - *Supports:* human effort produces "a 'thin' public signal that accumulates into the
     community's stock of general knowledge"; agentic AI substitutes for that effort, and the
     economy can "tip into a knowledge-collapse steady state". A standing, human-written plan is
@@ -156,7 +156,7 @@ The 2026-10-02 draft cited several sources loosely. Corrected:
   [DOI 10.1145/3448016.3457559](https://doi.org/10.1145/3448016.3457559) ·
   [testing docs](https://apple.github.io/foundationdb/testing.html) ·
   [Wilson, Strange Loop 2014](https://www.youtube.com/watch?v=4fFDFbi3toc)
-  - *Supports:* "a _deterministic_ simulation of an entire FoundationDB cluster within a
+  - *Supports:* "a *deterministic* simulation of an entire FoundationDB cluster within a
     single-threaded process." This is the far end of the deferred paths gauge.
 - <a id="tigerbeetle-vopr"></a>**TigerBeetle VOPR.** ✔
   [VOPR docs](https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/internals/vopr.md) ·

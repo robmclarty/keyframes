@@ -203,6 +203,7 @@ The process depends on a person holding the theory of the system
   understanding *to participate*.
 
 keyframes' answer is division of labor:
+
 - gauges carry *verification*;
 - *authoring* the keyframes keeps people participating (principle K1);
 - the plan is the "thin public signal" written back on purpose
@@ -252,6 +253,7 @@ We found no tool that combines all five of these:
 5. **no LLM in the gate, no writes, and no changes to other tools** to integrate.
 
 The nearest neighbors each have some of these:
+
 - **Spec Growth Engine** has the graph gate, but AI agents maintain its specs and the
   implementation isn't public.
 - **Tessl** checks its spec-to-test links, but judges drift with an LLM and aims at spec-as-source.

@@ -180,12 +180,14 @@ Checker (machinery):
 
 ## Steps
 
-### Milestone 1: the format and the binding check
+The repo was scaffolded with `checkride init --shape flat` on 2026-10-04, before planning, so the
+gate is green from the first step. Steps 1–8 are milestone 1 (the format and the binding check).
+Steps 9–11 are milestone 2 (the shape gauge).
 
-1. [ ] chore(repo): scaffold the package with a checkride gate, **done when:** `pnpm check` is
-   green and `keyframes --help` prints the commands
-   - seam: `package.json`, `bin/keyframes.js`, `src/cli.ts`, `checkride.config.json`, `rules/`
-   - model: sonnet (mechanical scaffold)
+1. [ ] feat(cli): add the CLI entry and the `keyframes` bin, **done when:** `keyframes --help`
+   prints the commands, an unknown command exits 2, and `pnpm check` is green
+   - seam: `package.json`, `bin/keyframes.js`, `src/cli.ts`, `src/index.ts`
+   - model: sonnet (mechanical, fully specified)
 2. [ ] feat(plan): find the plan and split it into sections, **done when:** fixtures for single
    file, folder, both (exit 2) and neither (exit 2) pass, with line offsets preserved
    - seam: `src/plan/`, `test/fixtures/plans/`
@@ -226,9 +228,6 @@ Checker (machinery):
    "held"
    - seam: `keyframes.md`, `test/fixtures/plumbbob/`, `pilots/`, `docs/pilots.md`
    - model: opus (triage is judgment)
-
-### Milestone 2: the shape gauge
-
 9. [ ] feat(extract): run the configured extractor and diff edges against the map,
    **done when:** a Go-shaped fixture, whose extractor only prints a committed JSON file,
    reports divergences as errors, absences as warnings (or as planned per D13), and strays
@@ -237,15 +236,15 @@ Checker (machinery):
    - seam: `src/extract/`, `schema/keyframes.edges.schema.json`, `test/fixtures/go-repo/`
    - model: opus (roll-up and diff semantics)
 10. [ ] feat(extract-ts): add the TypeScript extractor as `keyframes-extract-ts`, **done when:**
-   on runciter (read-only), the concept roll-up matches the fallow-derived directory graph edge
-   for edge, and each edge carries `kind: value | type`
-   - seam: `src/extractors/ts/`, `bin/keyframes-extract-ts.js`
-   - model: opus (module resolution is subtle)
+    on runciter (read-only), the concept roll-up matches the fallow-derived directory graph edge
+    for edge, and each edge carries `kind: value | type`
+    - seam: `src/extractors/ts/`, `bin/keyframes-extract-ts.js`
+    - model: opus (module resolution is subtle)
 11. [ ] test(pilots): rerun the runciter pilot with extraction, **done when:** the
-   `intents → stores` value import appears as a finding on the `type-only` edge (D27), and its
-   triage is recorded in `docs/pilots.md`
-   - seam: `pilots/runciter/`, `docs/pilots.md`
-   - model: sonnet (run and record)
+    `intents → stores` value import appears as a finding on the `type-only` edge (D27), and its
+    triage is recorded in `docs/pilots.md`
+    - seam: `pilots/runciter/`, `docs/pilots.md`
+    - model: sonnet (run and record)
 
 ## Ownership
 

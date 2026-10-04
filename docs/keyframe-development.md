@@ -58,6 +58,7 @@ An animator draws the keyframes and lets the machine draw the in-betweens. For s
   They are the only reason it is safe not to read every line.
 
 Two outside arguments frame where the human's work goes:
+
 - [Kleppmann](references.md#kleppmann-2025): when AI writes the code, "the challenge will move to
   correctly defining the specification."
 - [Litt](references.md#litt-2026): understanding *to verify* can be handed to machines;
@@ -160,6 +161,7 @@ The revision keeps the *concept* and cuts the *synchronization DSL* for now:
   restate it.
 
 So the map has two edge styles, each with one meaning:
+
 - a **solid** `-->` means "depends on", and is checked against the import graph (the meaning
   follows reflexion models: a prediction, not a permission; [SPEC D13](SPEC.md#d13));
 - a **dotted** `-.->` means "talks to at runtime", and is documented, not yet checked.
@@ -355,6 +357,7 @@ Nobody holds a line-level theory of code they didn't write
 ([Naur](references.md#naur-1985)). So the PR's front page is the keyframes diff: the map
 before and after (GitHub renders both), changed constraints, and new scenarios. The code diff is
 a second tab, read by risk tier:
+
 - auth, money, deletion, student data and anything irreversible get line-level eyes;
 - the rest gets sampled.
 
@@ -406,6 +409,7 @@ The draft's risks stand, and the revision answers them more concretely:
 ## 12. The first slice [replaced]
 
 See [`SPEC.md`](SPEC.md).
+
 - **Milestone 1:** the format, the binding check, the contract, and read-only pilots (plumbbob's
   constraints and runciter).
 - **Milestone 2:** the shape gauge, with the TypeScript extractor as its first adapter.
