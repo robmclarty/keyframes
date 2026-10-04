@@ -1,0 +1,19 @@
+id: no-focused-or-skipped-test
+valid:
+  - |
+    it('adds a row', run)
+  - |
+    describe('the parser', () => {})
+  - |
+    router.only('/health')
+  - |
+    it.each([1, 2])('handles %i', run)
+invalid:
+  - |
+    it.only('adds a row', run)
+  - |
+    it.skip('adds a row', run)
+  - |
+    test.todo('parses anchors')
+  - |
+    describe.only('the parser', () => {})

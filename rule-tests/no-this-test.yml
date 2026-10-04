@@ -1,0 +1,7 @@
+id: no-this
+valid:
+  - |
+    const make = (name) => ({ name })
+invalid:
+  - |
+    function bump() { return this.count + 1 }

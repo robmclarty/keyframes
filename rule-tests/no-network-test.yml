@@ -1,0 +1,13 @@
+id: no-network
+valid:
+  - |
+    import { readFileSync } from 'node:fs'
+  - |
+    const url = 'https://example.com'
+invalid:
+  - |
+    await fetch(url)
+  - |
+    import { request } from 'node:https'
+  - |
+    import net from 'net'

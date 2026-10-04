@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/checkride/schema/checkride.config.schema.json",
+  "checks": {
+    "links": {
+      "use": "links",
+      "exclude": ["fixtures"],
+      "note": "test/fixtures/ holds deliberately broken plans and fake repos; their links are data, not docs."
+    },
+    "typecheck-tests": {
+      "command": "pnpm",
+      "args": ["exec", "tsc", "-p", "tsconfig.test.json"],
+      "description": "Type-check test files",
+      "note": "tsconfig.json is the published build and covers src/ only, so test/ would otherwise never be type-checked.",
+      "order": 2
+    },
+    "rule-tests": {
+      "command": "pnpm",
+      "args": ["exec", "ast-grep", "test"],
+      "description": "ast-grep rule fixtures and snapshots",
+      "note": "Every content rule in rules/ has a fixture in rule-tests/. Location rules are covered by test/integration/layout-rules.test.ts.",
+      "order": 1
+    }
+  }
+}

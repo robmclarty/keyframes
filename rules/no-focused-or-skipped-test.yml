@@ -1,0 +1,21 @@
+id: no-focused-or-skipped-test
+language: typescript
+severity: error
+message: |
+  `.only` hides the rest of the suite, and `.skip` or `.todo` hide a test that
+  isn't running. Drop the modifier or delete the test. A skipped test also
+  can't hold a keyframes constraint, but a `test:` pointer would still find
+  its title (SPEC Q4 (test-matching)).
+note: |
+  Adapted from agent-tools' ast-grep-rules starter catalogue (it adds `todo`
+  and is an error here, not a warning).
+rule:
+  pattern: $FN.$MODIFIER($$$ARGS)
+constraints:
+  FN:
+    regex: '^(it|test|describe)$'
+  MODIFIER:
+    regex: '^(only|skip|todo)$'
+ignores:
+  - '**/*.d.ts'
+  - 'test/fixtures/**'

@@ -1,0 +1,15 @@
+id: no-logic-in-barrel
+valid:
+  - |
+    export { parse } from './parse.js'
+  - |
+    export type { Plan } from './types.js'
+  - |
+    export * from './items.js'
+invalid:
+  - |
+    export const KEYFRAMES = 'keyframes'
+  - |
+    const cache = new Map()
+  - |
+    export function parse() {}

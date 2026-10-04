@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "import"],
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "import"
+  ],
   "categories": {
     "correctness": "error",
     "suspicious": "error",
@@ -18,16 +22,25 @@
     "typescript/no-unnecessary-type-assertion": "error",
     "typescript/prefer-nullish-coalescing": "error",
     "typescript/prefer-optional-chain": "error",
-    "no-console": "warn",
+    "no-console": "error",
     "eqeqeq": "error"
   },
   "overrides": [
     {
-      "files": ["**/*.test.ts"],
+      "files": [
+        "**/*.test.ts"
+      ],
       "rules": {
         "typescript/no-unsafe-type-assertion": "off"
       }
     }
   ],
-  "ignorePatterns": ["dist/**", ".check/**", ".claude/**", ".cursor/**", "node_modules/**"]
+  "ignorePatterns": [
+    ".check/**",
+    ".claude/**",
+    ".cursor/**",
+    "dist/**",
+    "node_modules/**",
+    "test/fixtures/**"
+  ]
 }

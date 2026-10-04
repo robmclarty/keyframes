@@ -1,0 +1,21 @@
+id: node-builtins-only
+language: typescript
+severity: error
+message: |
+  C2 (node-only-core): the core imports `node:` builtins and relative paths
+  only. Only the TypeScript extractor (`src/extractors/ts/`) may import
+  `typescript`. Tests may import dev dependencies such as vitest.
+files:
+  - 'src/**/*.ts'
+ignores:
+  - 'src/**/__tests__/**'
+  - 'src/extractors/ts/**'
+rule:
+  all:
+    - kind: string
+    - inside:
+        any:
+          - kind: import_statement
+          - kind: export_statement
+    - not:
+        regex: "^['\"](node:|\\.)"

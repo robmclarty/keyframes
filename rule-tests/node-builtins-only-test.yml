@@ -1,0 +1,15 @@
+id: node-builtins-only
+valid:
+  - |
+    import { readFileSync } from 'node:fs'
+  - |
+    import { parse } from './parse.js'
+  - |
+    export { parse } from '../plan/index.js'
+invalid:
+  - |
+    import ts from 'typescript'
+  - |
+    import { z } from 'zod'
+  - |
+    export { load } from 'yaml'

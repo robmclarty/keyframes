@@ -1,0 +1,16 @@
+id: no-extends
+snapshots:
+  ? |
+    class Parser extends Base {}
+  : labels:
+    - source: extends Base
+      style: primary
+      start: 13
+      end: 25
+  ? |
+    interface Item extends Base { id: string }
+  : labels:
+    - source: extends Base
+      style: primary
+      start: 15
+      end: 27

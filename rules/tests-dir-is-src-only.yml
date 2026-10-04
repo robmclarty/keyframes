@@ -1,0 +1,16 @@
+id: tests-dir-is-src-only
+language: typescript
+severity: error
+message: |
+  `__tests__/` folders hold colocated unit tests and live only under `src/`.
+  Outside `src/`, tests go in `test/integration/`, `test/e2e/` or
+  `test/contract/`, and shared test code goes in `test/helpers/`.
+note: |
+  Location rule; verified by test/integration/layout-rules.test.ts.
+files:
+  - '**/__tests__/**/*.ts'
+ignores:
+  - 'src/**'
+  - 'test/fixtures/**'
+rule:
+  kind: program

@@ -1,0 +1,9 @@
+id: no-this
+snapshots:
+  ? |
+    function bump() { return this.count + 1 }
+  : labels:
+    - source: this
+      style: primary
+      start: 25
+      end: 29

@@ -2,7 +2,7 @@
 
 Instructions for any coding agent working in this repository.
 
-<!-- checkride:begin hash=v1ecef79927d8626ad -->
+<!-- checkride:begin hash=v15dbbcd1d686fce67 -->
 
 ## Checkride: the definition of done
 
@@ -44,6 +44,39 @@ The `struct` check runs whatever ast-grep rules `sgconfig.yml` points at
 (`rules/` by default). Those files are this repo's boundary convention —
 read them rather than assuming one.
 
-Active checks in this repo: types, lint, struct, dead, test, docs, links, spell.
+Active checks in this repo: types, lint, struct, dead, test, docs, links, spell, rule-tests, typecheck-tests.
 
 <!-- checkride:end -->
+
+## Repository layout
+
+Each rule below fails the gate; the id in parentheses is the ast-grep rule in `rules/`.
+
+- **Unit tests** sit in a `__tests__/` folder beside the code they cover, named
+  `<thing>.test.ts` (`colocate-unit-tests`, `tests-dir-is-src-only`, `no-spec-suffix`).
+- **`test/`** holds five things only (`test-dir-layout`):
+  - `test/integration/`, `test/e2e/` and `test/contract/` for tests that span modules;
+  - `test/helpers/` for shared test code;
+  - `test/fixtures/` for data that is never run or linted (plans, fake repos).
+- **Shipped code** never imports from `test/` (`src-never-imports-test`), and barrels
+  re-export only (`no-logic-in-barrel`).
+- **The checker stays read-only** (spec C3):
+  - `child_process` only in `src/extract/` (`centralize-subprocess`);
+  - filesystem writes only in `src/init/` (`writes-only-in-init`);
+  - no network (`no-network`);
+  - no `process.exit` in `src/` (`no-process-exit`).
+- **The core imports Node builtins only** (spec C2, `node-builtins-only`). Only
+  `src/extractors/ts/` may import `typescript`.
+- **Functional only** (spec C1: `no-class`, `no-this`, `no-extends`). Every top-level
+  function carries a `/** */` doc comment (`function-doc-comment`).
+
+Content rules have fixtures in `rule-tests/`; record snapshots with `pnpm exec ast-grep test -U`.
+Location rules match on paths, which `ast-grep test` can't see, so
+`test/integration/layout-rules.test.ts` checks them by scanning a real tree.
+
+## Taste
+
+Guidance, not gated:
+
+- camelCase for functions and values, PascalCase for types.
+- Single quotes and semicolons, as the scaffold's files use.

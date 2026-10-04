@@ -1,0 +1,14 @@
+id: function-doc-comment
+valid:
+  - |
+    /** Parse one plan. */
+    export function parsePlan(text: string) { return text }
+  - |
+    /** Count the items. */
+    const count = (xs: string[]) => xs.length
+invalid:
+  - |
+    export function parsePlan(text: string) { return text }
+  - |
+    // not a doc comment
+    const count = (xs: string[]) => xs.length

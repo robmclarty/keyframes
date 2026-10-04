@@ -1,0 +1,35 @@
+id: node-builtins-only
+snapshots:
+  ? |
+    export { load } from 'yaml'
+  : labels:
+    - source: '''yaml'''
+      style: primary
+      start: 21
+      end: 27
+    - source: export { load } from 'yaml'
+      style: secondary
+      start: 0
+      end: 27
+  ? |
+    import ts from 'typescript'
+  : labels:
+    - source: '''typescript'''
+      style: primary
+      start: 15
+      end: 27
+    - source: import ts from 'typescript'
+      style: secondary
+      start: 0
+      end: 27
+  ? |
+    import { z } from 'zod'
+  : labels:
+    - source: '''zod'''
+      style: primary
+      start: 18
+      end: 23
+    - source: import { z } from 'zod'
+      style: secondary
+      start: 0
+      end: 23

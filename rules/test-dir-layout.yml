@@ -1,0 +1,19 @@
+id: test-dir-layout
+language: typescript
+severity: error
+message: |
+  `test/` holds five things: `integration/`, `e2e/` and `contract/` tests,
+  `helpers/` (shared test code) and `fixtures/` (data that is never run). Move
+  this file into one of them.
+note: |
+  Location rule; verified by test/integration/layout-rules.test.ts.
+files:
+  - 'test/**/*.ts'
+ignores:
+  - 'test/integration/**'
+  - 'test/e2e/**'
+  - 'test/contract/**'
+  - 'test/helpers/**'
+  - 'test/fixtures/**'
+rule:
+  kind: program

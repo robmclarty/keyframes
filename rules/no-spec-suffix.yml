@@ -1,0 +1,12 @@
+id: no-spec-suffix
+language: typescript
+severity: error
+message: 'One test suffix: rename `*.spec.ts` to `*.test.ts`.'
+note: |
+  Location rule; verified by test/integration/layout-rules.test.ts.
+files:
+  - '**/*.spec.ts'
+ignores:
+  - 'test/fixtures/**'
+rule:
+  kind: program

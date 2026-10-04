@@ -1,0 +1,15 @@
+id: src-never-imports-test
+valid:
+  - |
+    import { parse } from '../plan/parse.js'
+  - |
+    export { parse } from './parse.js'
+  - |
+    const testName = '../test/not-an-import'
+invalid:
+  - |
+    import { plan } from '../../test/fixtures/plan.js'
+  - |
+    export { make } from '../../test/helpers/make.js'
+  - |
+    const mod = await import('../../test/helpers/make.js')

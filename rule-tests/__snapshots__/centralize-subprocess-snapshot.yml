@@ -1,0 +1,24 @@
+id: centralize-subprocess
+snapshots:
+  ? |
+    import { execFileSync } from 'child_process'
+  : labels:
+    - source: '''child_process'''
+      style: primary
+      start: 29
+      end: 44
+    - source: import { execFileSync } from 'child_process'
+      style: secondary
+      start: 0
+      end: 44
+  ? |
+    import { spawn } from 'node:child_process'
+  : labels:
+    - source: '''node:child_process'''
+      style: primary
+      start: 22
+      end: 42
+    - source: import { spawn } from 'node:child_process'
+      style: secondary
+      start: 0
+      end: 42

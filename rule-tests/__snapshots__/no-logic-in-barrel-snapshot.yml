@@ -1,0 +1,32 @@
+id: no-logic-in-barrel
+snapshots:
+  ? |
+    const cache = new Map()
+  : labels:
+    - source: const cache = new Map()
+      style: primary
+      start: 0
+      end: 23
+    - source: |
+        const cache = new Map()
+      style: secondary
+      start: 0
+      end: 24
+  ? |
+    export const KEYFRAMES = 'keyframes'
+  : labels:
+    - source: export const KEYFRAMES = 'keyframes'
+      style: primary
+      start: 0
+      end: 36
+    - source: const KEYFRAMES = 'keyframes'
+      style: secondary
+      start: 7
+      end: 36
+  ? |
+    export function parse() {}
+  : labels:
+    - source: function parse() {}
+      style: primary
+      start: 7
+      end: 26

@@ -1,0 +1,40 @@
+id: function-doc-comment
+snapshots:
+  ? |
+    // not a doc comment
+    const count = (xs: string[]) => xs.length
+  : labels:
+    - source: 'const count = (xs: string[]) => xs.length'
+      style: primary
+      start: 21
+      end: 62
+    - source: '(xs: string[]) => xs.length'
+      style: secondary
+      start: 35
+      end: 62
+    - source: 'count = (xs: string[]) => xs.length'
+      style: secondary
+      start: 27
+      end: 62
+    - source: |
+        // not a doc comment
+        const count = (xs: string[]) => xs.length
+      style: secondary
+      start: 0
+      end: 63
+  ? |
+    export function parsePlan(text: string) { return text }
+  : labels:
+    - source: 'export function parsePlan(text: string) { return text }'
+      style: primary
+      start: 0
+      end: 55
+    - source: 'function parsePlan(text: string) { return text }'
+      style: secondary
+      start: 7
+      end: 55
+    - source: |
+        export function parsePlan(text: string) { return text }
+      style: secondary
+      start: 0
+      end: 56

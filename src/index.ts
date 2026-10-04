@@ -1,1 +1,1 @@
-export const KEYFRAMES = 'keyframes';
+export { KEYFRAMES } from './name.js';

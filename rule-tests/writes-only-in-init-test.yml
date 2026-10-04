@@ -1,0 +1,15 @@
+id: writes-only-in-init
+valid:
+  - |
+    readFileSync(path, 'utf8')
+  - |
+    fs.readdirSync(root)
+  - |
+    process.stdout.write(report)
+invalid:
+  - |
+    writeFileSync(path, text)
+  - |
+    fs.mkdirSync(dir, { recursive: true })
+  - |
+    await fsp.rm(dir)

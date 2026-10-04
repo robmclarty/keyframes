@@ -1,0 +1,43 @@
+id: writes-only-in-init
+snapshots:
+  ? |
+    await fsp.rm(dir)
+  : labels:
+    - source: fsp.rm(dir)
+      style: primary
+      start: 6
+      end: 17
+    - source: rm
+      style: secondary
+      start: 10
+      end: 12
+    - source: fsp.rm
+      style: secondary
+      start: 6
+      end: 12
+  ? |
+    fs.mkdirSync(dir, { recursive: true })
+  : labels:
+    - source: 'fs.mkdirSync(dir, { recursive: true })'
+      style: primary
+      start: 0
+      end: 38
+    - source: mkdirSync
+      style: secondary
+      start: 3
+      end: 12
+    - source: fs.mkdirSync
+      style: secondary
+      start: 0
+      end: 12
+  ? |
+    writeFileSync(path, text)
+  : labels:
+    - source: writeFileSync(path, text)
+      style: primary
+      start: 0
+      end: 25
+    - source: writeFileSync
+      style: secondary
+      start: 0
+      end: 13

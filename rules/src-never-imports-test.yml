@@ -1,0 +1,29 @@
+id: src-never-imports-test
+language: typescript
+severity: error
+message: |
+  Shipped code never imports from `test/`: fixtures and helpers must not leak
+  into the published package. Unit tests in `__tests__/` may.
+files:
+  - 'src/**/*.ts'
+ignores:
+  - 'src/**/__tests__/**'
+rule:
+  any:
+    - all:
+        - kind: string
+        - regex: "^['\"](\\.\\./)+test/"
+        - inside:
+            any:
+              - kind: import_statement
+              - kind: export_statement
+    - all:
+        - kind: call_expression
+        - has:
+            field: function
+            kind: import
+        - has:
+            field: arguments
+            has:
+              kind: string
+              regex: "^['\"](\\.\\./)+test/"

@@ -1,0 +1,11 @@
+id: centralize-subprocess
+valid:
+  - |
+    import { readFileSync } from 'node:fs'
+  - |
+    const name = 'node:child_process'
+invalid:
+  - |
+    import { spawn } from 'node:child_process'
+  - |
+    import { execFileSync } from 'child_process'

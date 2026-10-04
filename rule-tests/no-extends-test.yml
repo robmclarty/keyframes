@@ -1,0 +1,13 @@
+id: no-extends
+valid:
+  - |
+    type Item = Base & { id: string }
+  - |
+    function first<T extends string>(xs: T[]) { return xs[0] }
+  - |
+    type IsString<T> = T extends string ? true : false
+invalid:
+  - |
+    class Parser extends Base {}
+  - |
+    interface Item extends Base { id: string }

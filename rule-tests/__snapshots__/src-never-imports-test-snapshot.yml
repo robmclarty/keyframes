@@ -1,0 +1,43 @@
+id: src-never-imports-test
+snapshots:
+  ? |
+    const mod = await import('../../test/helpers/make.js')
+  : labels:
+    - source: import('../../test/helpers/make.js')
+      style: primary
+      start: 18
+      end: 54
+    - source: import
+      style: secondary
+      start: 18
+      end: 24
+    - source: '''../../test/helpers/make.js'''
+      style: secondary
+      start: 25
+      end: 53
+    - source: '''../../test/helpers/make.js'''
+      style: secondary
+      start: 25
+      end: 53
+  ? |
+    export { make } from '../../test/helpers/make.js'
+  : labels:
+    - source: '''../../test/helpers/make.js'''
+      style: primary
+      start: 21
+      end: 49
+    - source: export { make } from '../../test/helpers/make.js'
+      style: secondary
+      start: 0
+      end: 49
+  ? |
+    import { plan } from '../../test/fixtures/plan.js'
+  : labels:
+    - source: '''../../test/fixtures/plan.js'''
+      style: primary
+      start: 21
+      end: 50
+    - source: import { plan } from '../../test/fixtures/plan.js'
+      style: secondary
+      start: 0
+      end: 50

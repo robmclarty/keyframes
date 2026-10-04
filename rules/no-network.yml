@@ -1,0 +1,18 @@
+id: no-network
+language: typescript
+severity: error
+message: 'C3 (read-only-check): keyframes makes no network calls. No `fetch`, and no `http`, `https`, `net`, `tls` or `dgram` imports.'
+files:
+  - 'src/**/*.ts'
+ignores:
+  - 'src/**/__tests__/**'
+rule:
+  any:
+    - pattern: fetch($$$ARGS)
+    - all:
+        - kind: string
+        - regex: "^['\"](node:)?(http|https|http2|net|tls|dgram)['\"]$"
+        - inside:
+            any:
+              - kind: import_statement
+              - kind: export_statement

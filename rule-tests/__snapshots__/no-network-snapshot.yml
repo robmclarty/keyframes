@@ -1,0 +1,31 @@
+id: no-network
+snapshots:
+  ? |
+    await fetch(url)
+  : labels:
+    - source: fetch(url)
+      style: primary
+      start: 6
+      end: 16
+  ? |
+    import net from 'net'
+  : labels:
+    - source: '''net'''
+      style: primary
+      start: 16
+      end: 21
+    - source: import net from 'net'
+      style: secondary
+      start: 0
+      end: 21
+  ? |
+    import { request } from 'node:https'
+  : labels:
+    - source: '''node:https'''
+      style: primary
+      start: 24
+      end: 36
+    - source: import { request } from 'node:https'
+      style: secondary
+      start: 0
+      end: 36

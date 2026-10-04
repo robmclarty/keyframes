@@ -1,0 +1,14 @@
+id: no-extends
+language: typescript
+severity: error
+message: 'C1 (functional-only): no inheritance. Compose with type intersections and functions.'
+files:
+  - 'src/**/*.ts'
+  - 'test/**/*.ts'
+ignores:
+  - 'test/fixtures/**'
+rule:
+  any:
+    - kind: class_heritage
+    - kind: extends_clause
+    - kind: extends_type_clause

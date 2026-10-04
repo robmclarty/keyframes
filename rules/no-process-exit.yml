@@ -1,0 +1,11 @@
+id: no-process-exit
+language: typescript
+severity: error
+message: |
+  D18 (exit-taxonomy): commands return their exit code and only
+  `bin/keyframes.js` sets it, so everything in `src/` stays importable by
+  tests.
+files:
+  - 'src/**/*.ts'
+rule:
+  pattern: process.exit($$$ARGS)

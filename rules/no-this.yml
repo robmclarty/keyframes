@@ -1,0 +1,11 @@
+id: no-this
+language: typescript
+severity: error
+message: 'C1 (functional-only): no `this`. Use modules, closures and plain values.'
+files:
+  - 'src/**/*.ts'
+  - 'test/**/*.ts'
+ignores:
+  - 'test/fixtures/**'
+rule:
+  kind: this
