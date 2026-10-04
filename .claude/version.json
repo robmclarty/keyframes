@@ -1,10 +1,14 @@
 {
   "targets": [
-    { "type": "json", "path": "package.json", "key": "version" }
+    {
+      "type": "json",
+      "path": "package.json",
+      "key": "version"
+    }
   ],
   "marker": {
     "commit": "v{version}",
-    "tag": false,
+    "tag": true,
     "tagAuthoritative": false,
     "legacy": []
   },
@@ -15,7 +19,7 @@
   },
   "verify": null,
   "publish": {
-    "pushTag": false,
+    "pushTag": true,
     "pushBranch": false,
     "confirm": false
   }

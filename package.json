@@ -4,6 +4,12 @@
   "description": "A human-authored plan for a codebase, checked against the code: people draw the keyframes, machines draw the in-betweens.",
   "license": "Apache-2.0",
   "author": "Rob McLarty",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robmclarty/keyframes.git"
+  },
+  "homepage": "https://github.com/robmclarty/keyframes#readme",
+  "bugs": "https://github.com/robmclarty/keyframes/issues",
   "type": "module",
   "engines": {
     "node": ">=24",
