@@ -1,14 +1,13 @@
-id: centralize-subprocess
+id: no-subprocess
 language: typescript
 severity: error
 message: |
-  C3 (read-only-check): `check` spawns nothing except the configured
-  extractor, so `child_process` is imported only in `src/extract/`.
+  `check` starts no process (docs/prototype.md, Build constraints), so
+  nothing in `src/` imports `child_process`.
 files:
   - 'src/**/*.ts'
 ignores:
   - 'src/**/__tests__/**'
-  - 'src/extract/**'
 rule:
   all:
     - kind: string

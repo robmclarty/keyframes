@@ -32,12 +32,11 @@ const CASES: ReadonlyArray<readonly [string, string, readonly string[]]> = [
   ['test/helpers/make.ts', EXPORT, []],
   ['test/fixtures/repo/src/z.test.ts', EXPORT, []],
   ['test/fixtures/repo/src/index.ts', 'export default 1;\n', []],
-  ['src/extract/run.ts', SPAWN, []],
-  ['src/check/run.ts', SPAWN, ['centralize-subprocess']],
+  ['src/check/run.ts', SPAWN, ['no-subprocess']],
+  ['src/cli.ts', SPAWN, ['no-subprocess']],
   ['src/init/write.ts', WRITE, []],
   ['src/report/out.ts', WRITE, ['writes-only-in-init']],
-  ['src/extractors/ts/scan.ts', TYPESCRIPT, []],
-  ['src/map/parse.ts', TYPESCRIPT, ['node-builtins-only']],
+  ['src/scan/parse.ts', TYPESCRIPT, ['node-builtins-only']],
   // Reaching into test/ is also a deep import, so both rules agree here.
   ['src/report/leak.ts', LEAK, ['no-deep-sibling-import', 'src-never-imports-test']],
 ];

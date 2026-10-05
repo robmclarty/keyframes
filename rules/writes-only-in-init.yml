@@ -2,8 +2,8 @@ id: writes-only-in-init
 language: typescript
 severity: error
 message: |
-  C3 (read-only-check) and D22 (init-writes-once): the checker writes
-  nothing. Filesystem writes live only in `src/init/`.
+  `check` writes nothing (docs/prototype.md, Build constraints). Only `init`
+  writes, and filesystem writes live only in `src/init/`.
 files:
   - 'src/**/*.ts'
 ignores:

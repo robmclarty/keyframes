@@ -1,5 +1,8 @@
 # References
 
+> **Archived 2026-10-04.** Historical reference, not current intent. The current plan is
+> [`docs/prototype.md`](../prototype.md); see [this folder's README](README.md) for why.
+
 These are the outside sources behind the keyframes design, each verified on the web on
 2026-10-04. Every entry says what it supports in the argument, and where the claim had to be
 narrowed. The design docs cite these entries by anchor.

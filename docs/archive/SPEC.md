@@ -1,11 +1,14 @@
 # Spec: keyframes, the first slice
 
+> **Archived 2026-10-04.** Historical reference, not current intent. The current plan is
+> [`docs/prototype.md`](../prototype.md); see [this folder's README](README.md) for why.
+
 **Size:** medium
 **Scope:** keyframes
 
 This spec covers one standalone tool. It is written so `/plumbbob:plan` can absorb it, or
 spec-to-ridgeline can split it. The background is in [`inventory.md`](inventory.md) (what the
-existing tools do, verified against code) and [`../README.md`](../README.md) (what keyframes is).
+existing tools do, verified against code) and [`README.md`](../../README.md) (what keyframes is).
 
 ## Frame
 

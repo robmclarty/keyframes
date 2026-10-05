@@ -1,5 +1,8 @@
 # Keyframe development, revised
 
+> **Archived 2026-10-04.** Historical reference, not current intent. The current plan is
+> [`docs/prototype.md`](../prototype.md); see [this folder's README](README.md) for why.
+
 *People draw the keyframes, machines draw the in-betweens, and a check confirms the two still
 agree.*
 

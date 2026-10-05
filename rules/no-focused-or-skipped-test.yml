@@ -3,9 +3,9 @@ language: typescript
 severity: error
 message: |
   `.only` hides the rest of the suite, and `.skip` or `.todo` hide a test that
-  isn't running. Drop the modifier or delete the test. A skipped test also
-  can't hold a keyframes constraint, but a `test:` pointer would still find
-  its title (SPEC Q4 (test-matching)).
+  isn't running. Drop the modifier or delete the test. A skipped test can't
+  back a keyframes constraint, yet a `file:...#"title"` pointer would still
+  find its title and report the constraint as linked.
 note: |
   Adapted from agent-tools' ast-grep-rules starter catalogue (it adds `todo`
   and is an error here, not a warning).

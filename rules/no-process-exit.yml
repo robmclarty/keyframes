@@ -2,8 +2,8 @@ id: no-process-exit
 language: typescript
 severity: error
 message: |
-  D18 (exit-taxonomy): commands return their exit code and only
-  `bin/keyframes.js` sets it, so everything in `src/` stays importable by
+  Commands return their exit code (docs/prototype.md, Build constraints), and
+  only `bin/keyframes.js` sets it, so everything in `src/` stays importable by
   tests.
 files:
   - 'src/**/*.ts'

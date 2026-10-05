@@ -1,7 +1,7 @@
 id: no-network
 language: typescript
 severity: error
-message: 'C3 (read-only-check): keyframes makes no network calls. No `fetch`, and no `http`, `https`, `net`, `tls` or `dgram` imports.'
+message: 'keyframes makes no network calls (docs/prototype.md, Build constraints). No `fetch`, and no `http`, `https`, `net`, `tls` or `dgram` imports.'
 files:
   - 'src/**/*.ts'
 ignores:

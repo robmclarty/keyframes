@@ -1,4 +1,4 @@
-id: centralize-subprocess
+id: no-subprocess
 valid:
   - |
     import { readFileSync } from 'node:fs'

@@ -1,0 +1,700 @@
+# Spec: the keyframes prototype
+
+**Status:** draft, 2026-10-04. This replaces the first-slice spec as the first thing we build.
+That spec and its design documents are in [`archive/`](archive/README.md) as historical
+reference. Nothing here depends on them.
+
+## Frame
+
+- **What keyframes is.** One markdown file, `keyframes.md`, where people write down what a
+  project is for, what matters, what must hold, how it should feel, and why. Other people build
+  on it and refine it. Agents read it and are guided by it. A small CLI keeps the file consistent
+  and checks whatever can be checked, the same way every time.
+- **The problem.** Every project carries intent that never gets written down in one place. It
+  lives in people's heads, chat threads, PR comments and stale READMEs. New people piece it
+  together slowly, and agents see none of it unless someone pastes it into a prompt.
+- **The bet.** A short, shared, lightly structured file closes that gap if three things are true:
+  it's easy to write, other people can pick it up and improve it, and agents behave differently
+  when it's there. Deterministic checks make the file trustworthy. They don't make it useful, so
+  they come fourth.
+
+**Goals, in order.** When two conflict, the earlier one wins.
+
+1. A person can easily express intent, including the soft parts: purpose, values and feel.
+2. Another person can read it quickly, then extend and refine it.
+3. Agents read it and are guided by it.
+4. Whatever can be checked deterministically is checked, with the same result every time.
+
+**The prototype is done when:**
+
+- `keyframes init` and `keyframes check` work in any repo, in any language, with no config;
+- this repo has its own `keyframes.md`, checked in its own gate;
+- three pilot repos have a `keyframes.md` written by their owners, and the findings are recorded
+  in `docs/pilots.md` with a decision on what to build next.
+
+**Not doing in the prototype:**
+
+- checking the map against the code (dependency extraction, import graphs);
+- running anything: no tests, linters, subprocesses, network calls or LLMs;
+- knowing about any other tool, harness, language or CI system, beyond plain-text snippets;
+- a folder form, a config file, a formatter or auto-fix;
+- parsing Mermaid (a diagram in the Map is a picture);
+- scanning code, commits or PRs for citations;
+- anything that reads git history.
+
+## What the prototype tests
+
+| | Hypothesis | How we'll know |
+| --- | --- | --- |
+| **H1** | **Expressible.** An owner writes a useful first plan from `init` in under 45 minutes, reading nothing but the template. | Time taken. Which sections they used and skipped. Anything they wanted to say and couldn't place. |
+| **H2** | **Shareable.** A second person reads the plan in under 10 minutes, explains the project back, and makes a meaningful edit. | The owner rates the explanation. The edit passes `check` first time, and its diff reads clearly. |
+| **H3** | **Guiding.** With the plan and the agent snippet present, agents cite the items they rely on, cross fewer constraints, and ask before crossing one. | The paired trial in [Pilots](#pilots). |
+| **H4** | **Checkable.** Most findings are worth knowing. | The owner triages every finding as useful, noise or wrong. Target: at least 80% useful. |
+
+**What would change the plan:**
+
+- H1 fails: simplify the format before building anything else.
+- H3 shows no difference: rethink how agents receive the plan before adding checks.
+- H4 is noisy: cut checks. Don't add configuration to quiet them.
+
+## Principles
+
+- **People own the file.** Agents may draft an edit while a person approves it. Nothing edits
+  the file unattended.
+- **It's just markdown.** It reads well with nothing installed and renders wherever markdown
+  renders. Someone who has never heard of keyframes can edit it, and if they break the
+  structure, `check` says exactly where and how to fix it.
+- **Soft things are first-class.** Purpose, values and feel get named sections, not a leftover
+  prose bucket. The tool never judges them, but it keeps them findable and citable.
+- **Same answer everywhere.** `check` is a pure function of the plan and the repo tree. The same
+  inputs give byte-identical output on any OS, from any working directory. No clock, network,
+  randomness, subprocess or LLM.
+- **Sparse by budget.** Budgets warn. They never fail unless `--strict` is set. A plan nobody can
+  read in ten minutes stops being read.
+- **Narrow words.** The report claims only what it checked. A pointer *resolves*; it is never
+  *enforced*.
+- **Stands alone.** No format rule names a language, toolchain or product.
+
+## The format
+
+### The file
+
+- The plan is `keyframes.md` at the repo root.
+- `##` headings divide it into sections. A `###` or deeper heading stays inside its section, so
+  people can group items under it. A `#` heading closes the current section.
+- The known sections are below. Heading text matches case-insensitively, after trimming. Any
+  other `##` heading is free prose: kept, read by people and agents, and not parsed.
+- Every section is optional, and order is free. A known section that appears twice is an error.
+- Fenced code blocks (backticks or tildes), inline code and HTML comments are invisible to the
+  parser. Nothing inside them is a heading, an item or a citation.
+
+| Section | Item letter | What goes there | Agents treat it as |
+| --- | --- | --- | --- |
+| **Intent** | none: prose | Why this exists, who it's for, what good looks like, what it isn't | Orientation |
+| **Principles** | P | Values that settle judgment calls | How to decide when nothing else says |
+| **Map** | M | The main parts, what each is for, and where each lives | Where things go |
+| **Constraints** | C | What must always be true; breaking one is a bug | Hard limits: stop and ask before crossing one |
+| **Scenarios** | S | Journeys the system must support | Behavior to keep working |
+| **Decisions** | D | Choices made, and why | Settled: don't reverse without a person |
+| **Taste** | T | How it should look, read and feel | Preferences: follow unless there's a reason |
+| **Questions** | Q | Questions that still need an answer | Unsettled: raise them, don't decide alone |
+| **Ideas** | I | Statements for future consideration: possibilities, hunches, someday | Not agreed: don't build one unless a person asks |
+
+### Items
+
+In every known section except Intent, an item is a top-level list item, with its `-` at column 0:
+
+```markdown
+- **C3 (one-writer)**: Only the sync worker writes to the database.
+  - because: two writers made the replay disagree with the live state.
+  - held-by: file:test/writes.test.ts#"only the sync worker writes"
+```
+
+- **The item line** is `- **<letter><number> (<slug>)**: <text>`.
+  - The letter matches the section.
+  - The number is a positive integer with no leading zeros.
+  - The slug is lowercase letters and digits in hyphen-separated words, like `one-writer`.
+  - The text isn't empty. Indented lines after it that aren't bullets continue it.
+- **IDs are unique in the file.** Gaps are fine. A deleted item's ID is never reused. That's a
+  convention: the prototype can't see history.
+- **A sub-line** is a bullet indented two to five spaces under its item, of the form
+  `- <key>: <value>`. Indented lines after it that aren't bullets continue its value. Each key
+  appears at most once per item. Any other nested bullet is part of the item's prose.
+- **The item ends** at the next non-blank line at column 0.
+
+| Key | Allowed on | Value |
+| --- | --- | --- |
+| `because` | any item | Why. Expected on every Decision. |
+| `held-by` | C, S | `review`, one or more pointers, or both, comma-separated |
+| `paths` | M | Repo paths, comma-separated; directories end in `/` |
+| `superseded-by` | D | The ID of the decision that replaces this one |
+| `resolved-by` | Q, I | The ID of the decision that settled this question or idea |
+
+Paragraphs between items are welcome. A plain bullet in an itemized section warns, because people
+and agents will read it as a rule that has no ID.
+
+### Citations
+
+- A citation is an ID and its slug in square brackets: `[C3 (one-writer)]`.
+- Citations count anywhere outside code and comments: in Intent, in free-prose sections, in item
+  text and in sub-line values.
+- Only this form counts. A bare `C3`, `S3` or `D3` is plain text, *because* bare IDs collide with
+  ordinary words: Amazon S3, D3.js, the C4 model.
+- A citation must name an existing ID with that item's current slug. When a slug changes, `check`
+  lists every citation still using the old one.
+- `superseded-by:` and `resolved-by:` take a bare ID, such as `D9`. It must exist and be a
+  decision.
+
+### Pointers
+
+`held-by:` takes pointers:
+
+| Pointer | Resolves when |
+| --- | --- |
+| `review` | Always. A person checks this. |
+| `file:<path>` | `<path>` is a file in the repo. |
+| `file:<path>#"<text>"` | The file exists and contains `<text>` exactly. Use it to point at a test's name, a rule's ID or a config entry. |
+
+- Add `(new)` after a pointer whose target doesn't exist yet. It's **planned**: counted, not an
+  error.
+- One pointer kind is enough, *because* every test, lint rule and config entry lives in a file.
+  Naming tools would tie the format to them.
+- Inside `"<text>"`, `\"` and `\\` are escapes, and commas don't split pointers.
+- Paths are relative to the repo root and use `/`. Paths can't contain commas. An absolute path,
+  a `..` segment, or a path that resolves outside the root is an error. Backticks around a pointer
+  or path are ignored.
+
+### The Map
+
+- An M item names a part. `paths:` says where it lives: files, or directories ending in `/`. A
+  part with no paths is fine: it may be a concept, or not built yet.
+- Each path must exist and be the kind it claims (file or directory). A path marked `(new)` is
+  planned.
+- The same path in two parts, or one part's path inside another's, warns.
+- A Mermaid diagram in the Map is welcome. It's a picture, and the prototype doesn't parse it.
+
+### Budgets
+
+These are starting values, and the pilots will tune them. Every breach is a warning.
+
+| What | Budget |
+| --- | --- |
+| The whole file, outside code and comments | 2000 words |
+| One item's text | 60 words |
+| Principles, and Map parts | 7 each |
+| Constraints, and Taste | 12 each |
+| Scenarios, open Questions, and open Ideas | 10 each |
+| Active Decisions (not superseded) | 20 |
+
+A word is a run of non-whitespace characters.
+
+### What supports refinement
+
+The format is built for a file that many people edit over a long time.
+
+- **Stable IDs with slugs.** References survive reordering, and a renamed slug is caught at every
+  citation.
+- **History stays.** A replaced decision is marked `superseded-by:`, and a settled question or
+  idea is marked `resolved-by:`. Citations to any of them still resolve, so the trail of thinking
+  survives.
+- **Unsettled thinking has a home.** Questions and Ideas are sections, so half-formed thoughts
+  can be written down without being mistaken for agreement. Agents know not to settle a question
+  or build an idea on their own.
+- **`check` is the safety net.** After any edit, from anyone, it reports what the edit broke.
+- **Budgets keep diffs small enough to review.**
+
+## The tool
+
+```text
+keyframes init [dir]                        write a starter keyframes.md; refuse if one exists
+keyframes check [dir] [--json] [--strict]   check the plan against itself and the repo
+keyframes --help | --version
+```
+
+`dir` defaults to the working directory. It's the repo root, and the plan is `<dir>/keyframes.md`.
+
+### check
+
+- **Exit codes.**
+  - 0: no errors. Warnings are allowed.
+  - 1: errors, or any warning under `--strict`.
+  - 2: a usage or read problem: no plan, an unreadable or non-UTF-8 plan, a bad flag, a missing
+    directory.
+- **Output.** The text report goes to stdout. `--json` replaces it with one JSON object; the
+  schema is `schema/report.schema.json`. Usage errors go to stderr.
+- **Determinism rules.**
+  - Findings are sorted by line, then code, then message. JSON keys come in a fixed order.
+  - Paths in the output are relative to the root and use `/`.
+  - No timestamps, durations, colors, absolute paths or locale-formatted numbers.
+  - A BOM is stripped, CRLF is read as LF, and leading tabs expand to four spaces.
+  - Existence is checked with exact case, by reading directory entries, so macOS, Windows and
+    Linux agree.
+  - Files are read as UTF-8 with CRLF normalized before text matching. A pointer's file over
+    1 MiB isn't searched.
+
+**Item statuses**, for Constraints and Scenarios:
+
+| Status | Meaning |
+| --- | --- |
+| `linked` | Every pointer resolves |
+| `planned` | Some pointer is `(new)`, and none is broken |
+| `review` | Held only by `review` |
+| `unlinked` | No `held-by:` line |
+| `broken` | Some pointer doesn't resolve (an error) |
+
+`unlinked` and `review` are counted, not warned, *because* a warning should mean "probably a
+mistake", and most constraints start life without a check.
+
+### Findings
+
+Codes are stable, and every finding names its line in the plan.
+
+| Code | Severity | When |
+| --- | --- | --- |
+| `duplicate-section` | error | A known section appears twice |
+| `malformed-item` | error | A top-level bullet starts like an item (`**`, a capital letter, a digit) but doesn't fit the grammar |
+| `wrong-letter` | error | An item's letter doesn't match its section |
+| `duplicate-id` | error | Two items share an ID |
+| `duplicate-key` | error | An item repeats a sub-line key |
+| `broken-citation` | error | A citation names an ID that doesn't exist |
+| `slug-mismatch` | error | A citation's slug isn't the item's current slug |
+| `bad-pointer` | error | An unknown kind, bad quoting, an empty `held-by:`, or an absolute, `..` or escaping path |
+| `broken-pointer` | error | A pointer's file or text isn't there, and it isn't `(new)` |
+| `broken-path` | error | A Map path doesn't exist or is the wrong kind, and it isn't `(new)` |
+| `bad-reference` | error | `superseded-by` or `resolved-by` names a missing ID or a non-decision |
+| `file-too-large` | error | A pointer's file is over 1 MiB |
+| `no-intent` | warning | There's no Intent section, or it's empty |
+| `not-an-item` | warning | A plain top-level bullet in an itemized section |
+| `item-outside-section` | warning | An item-shaped bullet in Intent, under an unknown heading, or before any heading |
+| `unknown-key` | warning | A sub-line key isn't one of the five |
+| `key-not-allowed` | warning | A known key on the wrong kind of item, such as `held-by` on a Principle |
+| `missing-because` | warning | A Decision without `because:` |
+| `built-not-new` | warning | A `(new)` target exists now, so the marker can go |
+| `planned-text-missing` | warning | A `(new)` pointer's file exists but doesn't contain its text: a typo? |
+| `path-overlap` | warning | Two parts claim the same path, or one part's path is inside another's |
+| `over-budget` | warning | A budget is exceeded |
+| `unclosed-fence` | warning | A code fence never closes, so the rest of the file reads as code |
+
+Every message says what's wrong and how to fix it, with the expected form:
+
+```text
+keyframes.md:14  error  malformed-item  "- **C4 one-writer**" needs its slug in parentheses: - **C4 (one-writer)**: …
+```
+
+### The report
+
+```text
+keyframes.md
+
+intent        yes
+principles    4
+map           5 parts · 9 paths · 2 planned
+constraints   6 · 3 linked · 1 planned · 1 review · 1 unlinked
+scenarios     3 · 1 linked · 1 planned · 1 review
+decisions     8 · 6 active · 2 superseded
+taste         3
+questions     3 · 2 open · 1 resolved
+ideas         2 · 2 open
+words         1240 of 2000
+
+keyframes.md:41  warning  built-not-new  file:test/kill.test.ts#"escalates" resolves now; drop "(new)"
+keyframes.md:63  error    slug-mismatch  [D4 (sqlite-only)] cites D4, which is now (one-database)
+
+1 error · 1 warning
+```
+
+Sections absent from the plan are left out. A clean run ends with `no findings`.
+
+The JSON report has the same content:
+
+```json
+{
+  "schema_version": 1,
+  "plan": "keyframes.md",
+  "intent": true,
+  "sections": {
+    "constraints": { "items": 6, "linked": 3, "planned": 1, "review": 1, "unlinked": 1, "broken": 0 }
+  },
+  "words": { "count": 1240, "budget": 2000 },
+  "items": [{ "id": "C3", "slug": "one-writer", "line": 41, "status": "linked" }],
+  "findings": [{ "line": 63, "severity": "error", "code": "slug-mismatch", "message": "…" }],
+  "errors": 1,
+  "warnings": 1
+}
+```
+
+Within a `schema_version`, fields are only ever added.
+
+### init
+
+- Writes `<dir>/keyframes.md` from the [template](#appendix-a-the-template), titled with the
+  directory's name. If the file exists, it refuses and exits 2. It's the only command that writes.
+- Then prints the [agent snippet](#appendix-b-the-agent-snippet) to stdout, with one line saying
+  where to paste it.
+- `check` on a fresh template exits 0 with exactly one finding: `no-intent`. That warning is the
+  first prompt to write something.
+
+## Agents
+
+Agents learn about the plan through a short snippet that a person pastes into whatever file their
+agents already read (`AGENTS.md`, `CLAUDE.md` and the like). The snippet is the same everywhere.
+`docs/agents.md` shows where it goes for a few common harnesses, as examples, not integrations.
+
+The snippet asks agents to:
+
+- read `keyframes.md` before changing code;
+- treat each section the way the table in [The file](#the-file) says;
+- cite the items they relied on, as `[C3 (slug)]`, in their summary or commit message;
+- leave `keyframes.md` alone unless a person asks, and propose a change when it looks wrong or
+  incomplete;
+- run `keyframes check` after changing anything the plan points at.
+
+This part is guidance, and an agent can ignore it. H3 measures how much it doesn't.
+
+## Build constraints
+
+- TypeScript, ESM, Node 24 or later. **No runtime dependencies:** Node builtins only.
+- A pure core: `check(plan, repo)` returns a report. `repo` is a small read-only interface
+  (exact-case stat, list a directory, read a file). The CLI is a thin shell around it, so tests
+  run against in-memory repos.
+- The parser is line-based over the markdown subset defined here. It doesn't use a general
+  markdown parser.
+- `check` writes nothing, opens no network connection and starts no process. Only `src/init/`
+  writes files.
+- Commands return their exit code, and only `bin/keyframes.js` sets it, so everything in `src/`
+  stays importable by tests.
+- Functional style: no classes, `this` or inheritance, and a doc comment on every top-level
+  function.
+- This repo's existing scaffold and gate stay. They're how we build, not what we build. The
+  ast-grep rules in `rules/` hold the constraints above, and `AGENTS.md` lists them.
+
+## Steps
+
+Steps 1–9 build the tool. Step 10 runs the pilots.
+
+1. [x] chore(scaffold): realign the scaffold to this spec, **done when:** the rules in `rules/`
+   and `AGENTS.md` cite this spec instead of `SPEC.md`; `centralize-subprocess` becomes
+   `no-subprocess` with no `src/extract/` exception, and `node-builtins-only` has no TypeScript
+   exception, since there's no extractor; the README and the `package.json` description match
+   the Frame above; and the gate is green
+   - seam: `rules/`, `rule-tests/`, `test/integration/layout-rules.test.ts`, `AGENTS.md`,
+     `README.md`, `package.json`
+2. [ ] feat(cli): add the CLI entry and the `keyframes` bin, **done when:** `--help` and
+   `--version` work, and an unknown command or flag exits 2
+   - seam: `bin/keyframes.js`, `src/cli.ts`
+3. [ ] feat(scan): read markdown into blocks and sections, **done when:** fixtures pass for both
+   fence styles, a long fence containing a shorter one, an unclosed fence, multi-line comments,
+   CRLF, a BOM, tabs and `###` grouping, each with correct line numbers
+   - seam: `src/scan/`
+4. [ ] feat(items): parse items and sub-lines, **done when:** every item and sub-line finding in
+   the table has a fixture, including `malformed-item` against `not-an-item`,
+   `item-outside-section`, and continuation lines for both items and sub-lines
+   - seam: `src/items/`
+5. [ ] feat(cite): resolve citations and references, **done when:** citations resolve in every
+   section and in sub-line values, but never inside code or comments; `broken-citation`,
+   `slug-mismatch` and `bad-reference` have fixtures; and bare `S3` or `D3.js` in prose produces
+   no finding
+   - seam: `src/cite/`
+6. [ ] feat(repo): resolve pointers and Map paths, **done when:** each status has found, missing
+   and planned fixtures; a wrong-case path is broken on every OS; a CRLF file matches LF text;
+   absolute, `..` and escaping paths error; and `built-not-new`, `planned-text-missing` and
+   `path-overlap` have fixtures
+   - seam: `src/repo/`, `test/fixtures/repos/`
+7. [ ] feat(report): count, budget, and render text and JSON, **done when:** golden tests pass
+   for both outputs; the JSON validates against the schema; exit codes and `--strict` behave as
+   specified; and a determinism test runs `check` from two working directories and compares
+   the bytes
+   - seam: `src/check/`, `src/report/`, `schema/report.schema.json`
+8. [ ] feat(init): write the template, snippet and docs, **done when:** `init` writes only when no
+   plan exists; `check` on a fresh template yields exactly `no-intent`; `docs/format.md` (the
+   format, written for people) and `docs/agents.md` (the snippet and where it goes) exist; and a
+   test checks every example plan in them
+   - seam: `src/init/`, `docs/format.md`, `docs/agents.md`
+9. [ ] test(dogfood): give this repo its own plan, **done when:** a person has edited the
+   [draft](#appendix-c-this-repos-plan-a-draft) and committed it as `keyframes.md`, and
+   `keyframes check --strict` runs green in this repo's gate
+   - seam: `keyframes.md`, the gate's config
+10. [ ] docs(pilots): run the pilots, **done when:** `docs/pilots.md` holds each repo's results
+    and the closing decision
+    - seam: `docs/pilots.md`
+
+## Pilots
+
+- **Repos.** Three, chosen by their owners. At least one isn't TypeScript, at least one has a
+  second regular contributor, and at least one gets a real share of its code from agents.
+- **H1.** The owner runs `init`, writes the plan and times it. They note anything they wanted to
+  say and couldn't place.
+- **H2.** A second person reads the plan cold, timed, and explains the project back in three
+  sentences. Then they make one edit of their choice and run `check`.
+- **H3.** Pick four real tasks per repo, at least two of which touch a constraint or a decision.
+  Run each task twice, in fresh agent sessions: once with the plan and the snippet, once with
+  neither. For each run, record:
+  - the items cited;
+  - the constraints crossed;
+  - whether the agent asked before crossing one;
+  - whether it followed the taste, in the owner's judgment.
+
+  That's 24 runs. Agents vary from run to run, so treat the result as a direction, not proof.
+- **H4.** The owner triages every finding: useful, noise or wrong.
+- **Close.** Keep, change or cut each section, pointer form and finding. Then choose what to build
+  next. The candidates:
+  - checking the Map against the code;
+  - a formatter that puts the file in one canonical form;
+  - scanning code and commits for citations;
+  - giving agents a scoped slice of the plan;
+  - something the pilots surface.
+
+## Open questions
+
+- **Q1 (section-names):** *resolved 2026-10-04.* Constraints stays, because "Rules" is too vague:
+  principles are rules too. Taste stays, because it says what it holds. Questions holds only real
+  questions, and a separate Ideas section holds statements for future consideration. Each section
+  has exactly one name, with no aliases, so the parser stays simple. H1 still watches for
+  misplaced items.
+- **Q2 (unlinked-warns):** should a constraint with no `held-by:` warn? *Lean:* no. Revisit with
+  H4's data.
+- **Q3 (intent-structure):** should Intent have parsed parts (problem, who it's for, what good
+  looks like, what it isn't)? *Lean:* no. The template suggests them, and Intent stays prose.
+- **Q4 (one-file):** will a large project need a folder of files? *Lean:* not until a pilot hits
+  the word budget and splitting is clearly better than cutting.
+
+## Appendix A: the template
+
+What `init` writes. Everything but the headings sits in comments, so the template checks clean
+apart from `no-intent`.
+
+````markdown
+# <directory name>
+
+<!--
+keyframes.md holds the intent behind this project: what it's for, what matters, what must hold,
+and how it should feel. People write it. Everyone who works here, human or agent, works from it.
+Keep it short enough to read in ten minutes. Every section is optional. Delete these comments
+whenever you like, and run `keyframes check` after you edit.
+-->
+
+## Intent
+
+<!--
+Why does this exist, and who is it for? What should it feel like to use? What does "good" look
+like? What is it deliberately not? Write it the way you'd explain it to a new teammate.
+-->
+
+## Principles
+
+<!--
+The values that settle judgment calls when nothing else does. For example:
+
+- **P1 (no-lost-work)**: Losing someone's work is worse than being slow.
+  - because: people forgive a spinner; they don't forgive a blank page.
+-->
+
+## Map
+
+<!--
+The main parts, seven or fewer: what each is for, and where each lives. For example:
+
+- **M1 (api)**: The HTTP API: requests in, events out.
+  - paths: src/api/
+
+A Mermaid diagram is welcome here. It's a picture, and nothing checks it.
+-->
+
+## Constraints
+
+<!--
+Things that must always be true. Breaking one is a bug. Say what checks it, if anything does:
+
+- **C1 (one-writer)**: Only the sync worker writes to the database.
+  - because: two writers made the replay disagree with the live state.
+  - held-by: file:test/writes.test.ts#"only the sync worker writes"
+
+Write `held-by: review` if a person checks it. Add (new) after a pointer that doesn't exist yet.
+-->
+
+## Scenarios
+
+<!--
+Journeys the system must support, a sentence or two each:
+
+- **S1 (offline-edit)**: Someone edits on a plane, lands, and their changes sync without a prompt.
+  - held-by: review
+-->
+
+## Decisions
+
+<!--
+Choices made, and why. When a decision changes, don't delete it: add the new one, and mark the
+old one `superseded-by: D2`.
+
+- **D1 (sqlite)**: One SQLite file holds all state.
+  - because: one boring database beats two clever ones.
+-->
+
+## Taste
+
+<!--
+How it should look, read and feel:
+
+- **T1 (calm-errors)**: Error messages are calm, specific, and say what to do next.
+-->
+
+## Questions
+
+<!--
+Questions that still need an answer. When one is settled, record a decision and mark the question
+`resolved-by: D3`.
+
+- **Q1 (sharing)**: Should plans be shareable by link, or is that a different product?
+-->
+
+## Ideas
+
+<!--
+Things worth considering someday: possibilities, hunches, directions. Writing one down doesn't
+mean anyone agreed to it. If one is taken up or turned down, record a decision and mark the idea
+`resolved-by: D4`.
+
+- **I1 (dark-mode)**: A dark theme that follows the system setting.
+-->
+````
+
+## Appendix B: the agent snippet
+
+What `init` prints, for a person to paste into the file their agents read.
+
+```markdown
+## Keyframes
+
+This project's intent is in `keyframes.md`. Read it before you change code.
+
+- **Constraints (C)** must always hold. If a change would break one, stop and ask.
+- **Scenarios (S)** must keep working.
+- **Decisions (D)** are settled. Don't reverse one without asking.
+- **Questions (Q)** are open. Raise them; don't settle them on your own.
+- **Ideas (I)** aren't agreed yet. Don't build one unless a person asks.
+- **Principles (P)** decide judgment calls the plan doesn't cover.
+- **Taste (T)** is preference. Follow it unless you have a reason, and say what the reason was.
+- **Map (M)** says where things live. Put new code in the part it belongs to.
+- When your work relies on an item, cite it as `[C3 (slug)]` in your summary or commit message.
+- Don't edit `keyframes.md` unless a person asks you to. If it looks wrong or incomplete, say so
+  and propose the change.
+- After changing anything the plan points at, run `keyframes check`.
+```
+
+## Appendix C: this repo's plan, a draft
+
+The starting point for step 9, and the fullest example of the format. A person edits it before
+it's committed; it isn't committed as written. Targets that don't exist yet are marked `(new)`.
+The three rule files under C1 exist today.
+
+````markdown
+# keyframes
+
+## Intent
+
+Every project carries intent that never gets written down in one place: why it exists, what
+matters, what must never happen, how it should feel. keyframes is one short markdown file where
+people write that down, so that others, human or agent, can work from it and refine it.
+
+- **For:** solo builders and small teams who work alongside coding agents.
+- **Good looks like:** someone new reads the file in ten minutes and can explain the project
+  back. An agent working in the repo cites the items it relied on, and stops before crossing a
+  constraint.
+- **Not:** a spec for every feature, a code generator, a project tracker or a judge of prose.
+
+## Principles
+
+- **P1 (people-own-it)**: People decide what the file says. Agents propose; a person accepts.
+  - because: the file is only worth trusting if someone stands behind every line.
+- **P2 (expression-first)**: When ease of writing and ease of checking conflict, writing wins.
+  - because: a perfectly checkable file that nobody writes is worth nothing.
+- **P3 (same-answer-everywhere)**: The same files give the same answer on every machine.
+  - because: people stop trusting a check they can't reproduce.
+- **P4 (narrow-words)**: The report claims only what it checked, in the narrowest true words.
+  - because: "linked" read as "enforced" is how intent and code drift apart without anyone
+    noticing.
+
+## Map
+
+- **M1 (scan)**: Reads markdown into sections, items, sub-lines and citations.
+  - paths: src/scan/ (new), src/items/ (new), src/cite/ (new)
+- **M2 (repo)**: A read-only, exact-case view of the repo for pointers and paths.
+  - paths: src/repo/ (new)
+- **M3 (check)**: Turns a parsed plan and a repo view into findings and counts.
+  - paths: src/check/ (new)
+- **M4 (report)**: Renders the result as text or JSON.
+  - paths: src/report/ (new), schema/report.schema.json (new)
+- **M5 (cli)**: Commands, flags, exit codes and the starter template.
+  - paths: src/cli.ts (new), src/init/ (new), bin/keyframes.js (new)
+
+## Constraints
+
+- **C1 (read-only-check)**: `check` writes nothing, opens no network connection and starts no
+  process.
+  - held-by: file:rules/writes-only-in-init.yml#"id: writes-only-in-init",
+    file:rules/no-network.yml#"id: no-network",
+    file:rules/no-subprocess.yml#"id: no-subprocess"
+- **C2 (byte-identical)**: The same plan and tree give byte-identical output on any OS, from any
+  working directory.
+  - held-by: file:test/integration/determinism.test.ts#"byte-identical" (new)
+- **C3 (no-runtime-deps)**: The published package has no runtime dependencies.
+  - held-by: review
+- **C4 (fresh-template)**: `check` on a fresh template reports exactly one finding, `no-intent`.
+  - held-by: file:src/init/__tests__/init.test.ts#"fresh template" (new)
+- **C5 (stands-alone)**: No format rule names a language, toolchain or product.
+
+## Scenarios
+
+- **S1 (first-plan)**: Someone runs `init`, writes a little intent and a few items, runs `check`,
+  and gets either a clean report or a finding that says exactly how to fix it.
+  - held-by: file:test/e2e/first-plan.test.ts#"first plan" (new)
+- **S2 (second-editor)**: A second person replaces a decision, marks the old one superseded,
+  cites the new one elsewhere, and `check` passes.
+  - held-by: file:test/e2e/second-editor.test.ts#"second editor" (new)
+- **S3 (agent-cites)**: An agent working in a repo with the snippet cites the items it relied on.
+  - held-by: review
+
+## Decisions
+
+- **D1 (one-file)**: One `keyframes.md` at the repo root.
+  - because: one place to look, and budgets keep it small.
+- **D2 (bracket-citations)**: A citation is only the bracketed form, `[C3 (slug)]`.
+  - because: bare IDs collide with ordinary words like S3 and D3.
+- **D3 (file-pointers)**: `held-by:` has one pointer kind, `file:`, with optional `#"text"`.
+  - because: every test, rule and config entry lives in a file, and naming tools would tie the
+    format to them.
+- **D4 (no-config)**: The prototype has no config file.
+  - because: the pilots should show what needs configuring before we add knobs.
+- **D5 (counts-not-nags)**: Unlinked and review-only items are counted, not warned.
+  - because: a warning should mean "probably a mistake".
+- **D6 (map-is-a-picture)**: The Map's Mermaid diagram isn't parsed in the prototype.
+  - because: checking the map against the code waits on what the pilots show.
+- **D7 (section-names)**: Keep Constraints and Taste. Questions hold only real questions, and
+  Ideas hold statements for future consideration.
+  - because: "Rules" is too vague, since principles are rules too, and an idea written down
+    shouldn't read as a question someone has to answer.
+
+## Taste
+
+- **T1 (fixable-messages)**: Every finding says what's wrong and how to fix it, with the expected
+  form.
+- **T2 (quiet-when-fine)**: A clean report is short. Nothing celebrates.
+- **T3 (warm-template)**: The template reads like a note from a teammate, not a form.
+
+## Questions
+
+- **Q1 (section-names)**: Are these the right section names?
+  - resolved-by: D7
+- **Q2 (unlinked-warns)**: Should an unlinked constraint warn? Decide after the pilots.
+- **Q3 (map-vs-code)**: Is checking the Map against the code the next thing to build?
+
+## Ideas
+
+- **I1 (formatter)**: A formatter that puts the file in one canonical form, so diffs between
+  editors show only real changes.
+- **I2 (scoped-slice)**: Give an agent only the part of the plan that touches the files it's
+  changing, once plans outgrow one read.
+- **I3 (code-citations)**: Check citations in code comments and commit messages too, so they
+  break loudly when the plan changes.
+````

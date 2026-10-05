@@ -1,4 +1,4 @@
-id: centralize-subprocess
+id: no-subprocess
 snapshots:
   ? |
     import { execFileSync } from 'child_process'

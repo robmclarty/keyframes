@@ -48,6 +48,11 @@ Active checks in this repo: types, lint, struct, dead, test, docs, links, spell,
 
 <!-- checkride:end -->
 
+## Current plan
+
+[`docs/prototype.md`](docs/prototype.md) is the current plan. [`docs/archive/`](docs/archive/)
+is historical reference, not current intent, so don't build from it.
+
 ## Repository layout
 
 Each rule below fails the gate; the id in parentheses is the ast-grep rule in `rules/`.
@@ -60,15 +65,18 @@ Each rule below fails the gate; the id in parentheses is the ast-grep rule in `r
   - `test/fixtures/` for data that is never run or linted (plans, fake repos).
 - **Shipped code** never imports from `test/` (`src-never-imports-test`), and barrels
   re-export only (`no-logic-in-barrel`).
-- **The checker stays read-only** (spec C3):
-  - `child_process` only in `src/extract/` (`centralize-subprocess`);
+These rules hold the prototype spec's build constraints (`docs/prototype.md`, Build
+constraints).
+
+- **The checker stays read-only:**
+  - no `child_process` anywhere in `src/` (`no-subprocess`);
   - filesystem writes only in `src/init/` (`writes-only-in-init`);
   - no network (`no-network`);
-  - no `process.exit` in `src/` (`no-process-exit`).
-- **The core imports Node builtins only** (spec C2, `node-builtins-only`). Only
-  `src/extractors/ts/` may import `typescript`.
-- **Functional only** (spec C1: `no-class`, `no-this`, `no-extends`). Every top-level
-  function carries a `/** */` doc comment (`function-doc-comment`).
+  - no `process.exit` in `src/`: commands return their exit code (`no-process-exit`).
+- **No runtime dependencies:** `src/` imports Node builtins and relative paths only
+  (`node-builtins-only`).
+- **Functional style** (`no-class`, `no-this`, `no-extends`). Every top-level function
+  carries a `/** */` doc comment (`function-doc-comment`).
 
 Content rules have fixtures in `rule-tests/`; record snapshots with `pnpm exec ast-grep test -U`.
 Location rules match on paths, which `ast-grep test` can't see, so

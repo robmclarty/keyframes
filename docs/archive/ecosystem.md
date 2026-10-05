@@ -1,5 +1,8 @@
 # keyframes in the wider ecosystem
 
+> **Archived 2026-10-04.** Historical reference, not current intent. The current plan is
+> [`docs/prototype.md`](../prototype.md); see [this folder's README](README.md) for why.
+
 This is where keyframes sits among existing practice: what it adopts, where it departs, and why.
 Sources are in [`references.md`](references.md), cited here by name. Your own tools are covered
 in §9 and in full in [`inventory.md`](inventory.md). Written 2026-10-04.

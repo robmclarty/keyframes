@@ -1,7 +1,7 @@
 id: no-this
 language: typescript
 severity: error
-message: 'C1 (functional-only): no `this`. Use modules, closures and plain values.'
+message: 'Functional style (docs/prototype.md, Build constraints): no `this`. Use modules, closures and plain values.'
 files:
   - 'src/**/*.ts'
   - 'test/**/*.ts'

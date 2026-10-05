@@ -1,7 +1,7 @@
 {
   "name": "@robmclarty/keyframes",
   "version": "0.1.1",
-  "description": "A human-authored plan for a codebase, checked against the code: people draw the keyframes, machines draw the in-betweens.",
+  "description": "One markdown file where people write a project's intent, for other people to build on and agents to be guided by, checked the same way every time.",
   "license": "Apache-2.0",
   "author": "Rob McLarty",
   "repository": {

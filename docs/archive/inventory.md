@@ -1,5 +1,8 @@
 # Inventory: what the tools actually do
 
+> **Archived 2026-10-04.** Historical reference, not current intent. The current plan is
+> [`docs/prototype.md`](../prototype.md); see [this folder's README](README.md) for why.
+
 Phase 1 of the keyframe-development review. It checks the claims in
 `~/projects/_writing/_ai/ai_index_rocket_fuel/keyframe-development.md` (the draft)
 against source code, not READMEs. Written 2026-10-02.

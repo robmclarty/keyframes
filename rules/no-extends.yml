@@ -1,7 +1,7 @@
 id: no-extends
 language: typescript
 severity: error
-message: 'C1 (functional-only): no inheritance. Compose with type intersections and functions.'
+message: 'Functional style (docs/prototype.md, Build constraints): no inheritance. Compose with type intersections and functions.'
 files:
   - 'src/**/*.ts'
   - 'test/**/*.ts'
