@@ -1,8 +1,8 @@
 # Spec: the keyframes prototype
 
-**Status:** draft, 2026-10-04. This replaces the first-slice spec as the first thing we build.
-That spec and its design documents are in [`archive/`](archive/README.md) as historical
-reference. Nothing here depends on them.
+**Status:** draft, 2026-10-04, revised 2026-10-07. This replaces the first-slice spec as the
+first thing we build. That spec and its design documents are in [`archive/`](archive/README.md)
+as historical reference. Nothing here depends on them.
 
 ## Frame
 
@@ -305,7 +305,9 @@ keyframes.md:63  error    slug-mismatch  [D4 (sqlite-only)] cites D4, which is n
 
 Sections absent from the plan are left out. A clean run ends with `no findings`.
 
-The JSON report has the same content:
+The JSON report has the same counts and findings, and it also carries every item. A harness can
+then hand an agent the items that touch its work without parsing markdown, and without keyframes
+knowing anything about the harness:
 
 ```json
 {
@@ -316,14 +318,42 @@ The JSON report has the same content:
     "constraints": { "items": 6, "linked": 3, "planned": 1, "review": 1, "unlinked": 1, "broken": 0 }
   },
   "words": { "count": 1240, "budget": 2000 },
-  "items": [{ "id": "C3", "slug": "one-writer", "line": 41, "status": "linked" }],
+  "items": [
+    {
+      "id": "M2",
+      "slug": "repo",
+      "section": "map",
+      "line": 22,
+      "text": "A read-only, exact-case view of the repo for pointers and paths.",
+      "paths": [{ "path": "src/repo/", "result": "planned" }]
+    },
+    {
+      "id": "C3",
+      "slug": "one-writer",
+      "section": "constraints",
+      "line": 41,
+      "text": "Only the sync worker writes to the database.",
+      "because": "two writers made the replay disagree with the live state.",
+      "held_by": [{ "pointer": "file:test/writes.test.ts#\"only the sync worker writes\"", "result": "resolved" }],
+      "status": "linked"
+    }
+  ],
   "findings": [{ "line": 63, "severity": "error", "code": "slug-mismatch", "message": "…" }],
   "errors": 1,
   "warnings": 1
 }
 ```
 
-Within a `schema_version`, fields are only ever added.
+- `items` lists every item in the plan, in line order. Each has its `id`, `slug`, `section`,
+  `line` and `text`, plus the sub-lines it has: `because`, `paths`, `held_by`, `superseded_by`
+  and `resolved_by`. Sub-line keys are written with underscores, so `held-by` becomes `held_by`.
+- `text` is the item's prose without its ID or its sub-lines. Its lines are joined with `\n`, and
+  their indentation is removed.
+- Every path and pointer carries a `result`: `resolved`, `planned` or `broken`, or `review` for
+  the `review` pointer. Constraints and Scenarios also carry their item `status`.
+
+Within a `schema_version`, fields are only ever added, so step 7 settles this item shape along with
+the schema.
 
 ### init
 
@@ -401,9 +431,9 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
    `path-overlap` have fixtures
    - seam: `src/repo/`, `test/fixtures/repos/`
 7. [ ] feat(report): count, budget, and render text and JSON, **done when:** golden tests pass
-   for both outputs; the JSON validates against the schema; exit codes and `--strict` behave as
-   specified; and a determinism test runs `check` from two working directories and compares
-   the bytes
+   for both outputs; the JSON validates against the schema and carries every item with its text,
+   sub-lines and results; exit codes and `--strict` behave as specified; and a determinism test
+   runs `check` from two working directories and compares the bytes
    - seam: `src/check/`, `src/report/`, `schema/report.schema.json`
 8. [ ] feat(init): write the template, snippet and docs, **done when:** `init` writes only when no
    plan exists; `check` on a fresh template yields exactly `no-intent`; `docs/format.md` (the
@@ -427,14 +457,21 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
 - **H2.** A second person reads the plan cold, timed, and explains the project back in three
   sentences. Then they make one edit of their choice and run `check`.
 - **H3.** Pick four real tasks per repo, at least two of which touch a constraint or a decision.
-  Run each task twice, in fresh agent sessions: once with the plan and the snippet, once with
-  neither. For each run, record:
+  Run each task in fresh agent sessions, once with the plan and the snippet and once with
+  neither, on two models: a frontier model, and a local model in a harness with a small built-in
+  prompt. The local runs matter *because* a plan probably helps the weaker model most, and a large
+  built-in prompt can cost a local model minutes of reading before it reaches the plan. For each
+  run, record:
   - the items cited;
   - the constraints crossed;
   - whether the agent asked before crossing one;
-  - whether it followed the taste, in the owner's judgment.
+  - whether it followed the taste, in the owner's judgment;
+  - roughly how many tokens the plan and the snippet added to its context.
 
-  That's 24 runs. Agents vary from run to run, so treat the result as a direction, not proof.
+  That's 48 runs. Agents vary from run to run, so repeat any condition that's cheap to repeat,
+  and treat the result as a direction, not proof. If a repo has an agent that runs unattended,
+  also give it one of the four tasks, with and without the plan. With nobody to ask, "asked
+  before crossing one" means it stopped and flagged the crossing instead.
 - **H4.** The owner triages every finding: useful, noise or wrong.
 - **Close.** Keep, change or cut each section, pointer form and finding. Then choose what to build
   next. The candidates:
@@ -456,7 +493,9 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
 - **Q3 (intent-structure):** should Intent have parsed parts (problem, who it's for, what good
   looks like, what it isn't)? *Lean:* no. The template suggests them, and Intent stays prose.
 - **Q4 (one-file):** will a large project need a folder of files? *Lean:* not until a pilot hits
-  the word budget and splitting is clearly better than cutting.
+  the word budget and splitting is clearly better than cutting. Size may not be the only
+  pressure: a capability with its own instructions, such as a skill's folder, may want a plan of
+  its own that cites the root one (`I5 (scoped-plans)` in Appendix C).
 
 ## Appendix A: the template
 
@@ -697,4 +736,12 @@ people write that down, so that others, human or agent, can work from it and ref
   changing, once plans outgrow one read.
 - **I3 (code-citations)**: Check citations in code comments and commit messages too, so they
   break loudly when the plan changes.
+- **I4 (skill-form)**: Ship the snippet and a short guide to the format as an Agent Skill
+  (`SKILL.md`), so an agent asked to draft a plan edit knows the grammar even in repos without
+  the format docs. The snippet itself stays in `AGENTS.md`, since a skill loads only when it
+  looks relevant.
+- **I5 (scoped-plans)**: A plan scoped to one part or capability, such as a package or a skill's
+  folder, checked the same way and citing the root plan.
+- **I6 (drafting-interview)**: An agent that interviews the owner, or drafts a first plan from
+  existing notes, for a person to edit. Only after the pilots, since it would muddy H1.
 ````

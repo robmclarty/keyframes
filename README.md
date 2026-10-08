@@ -13,6 +13,11 @@ keyframes is one short markdown file, `keyframes.md`, where people write that in
 people can build on it and refine it, and agents can read it and be guided by it. A small CLI
 keeps the file consistent and checks whatever can be checked, the same way every time.
 
+It sits beside the files agents already read. `AGENTS.md` says how to work in a repo: setup,
+commands, style. A skill's `SKILL.md` says how to do one kind of task. `keyframes.md` says why
+the project exists, what must hold and how it should feel, as items with IDs that people and
+agents cite, and a short snippet in `AGENTS.md` points agents to it.
+
 ## What goes in it
 
 | Section | What it holds |
