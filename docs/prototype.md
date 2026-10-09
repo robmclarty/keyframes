@@ -1,6 +1,6 @@
 # Spec: the keyframes prototype
 
-**Status:** draft, 2026-10-04, revised 2026-10-07. This replaces the first-slice spec as the
+**Status:** draft, 2026-10-04, revised 2026-10-08. This replaces the first-slice spec as the
 first thing we build. That spec and its design documents are in [`archive/`](archive/README.md)
 as historical reference. Nothing here depends on them.
 
@@ -46,7 +46,7 @@ as historical reference. Nothing here depends on them.
 
 | | Hypothesis | How we'll know |
 | --- | --- | --- |
-| **H1** | **Expressible.** An owner writes a useful first plan from `init` in under 45 minutes, reading nothing but the template. | Time taken. Which sections they used and skipped. Anything they wanted to say and couldn't place. |
+| **H1** | **Expressible.** An owner writes a useful first plan from `init` in under 45 minutes, reading nothing but the template. | Time taken. Which sections they used and skipped. Anything they wanted to say and couldn't place. The variants `check` noted. |
 | **H2** | **Shareable.** A second person reads the plan in under 10 minutes, explains the project back, and makes a meaningful edit. | The owner rates the explanation. The edit passes `check` first time, and its diff reads clearly. |
 | **H3** | **Guiding.** With the plan and the agent snippet present, agents cite the items they rely on, cross fewer constraints, and ask before crossing one. | The paired trial in [Pilots](#pilots). |
 | **H4** | **Checkable.** Most findings are worth knowing. | The owner triages every finding as useful, noise or wrong. Target: at least 80% useful. |
@@ -64,6 +64,10 @@ as historical reference. Nothing here depends on them.
 - **It's just markdown.** It reads well with nothing installed and renders wherever markdown
   renders. Someone who has never heard of keyframes can edit it, and if they break the
   structure, `check` says exactly where and how to fix it.
+- **Easy to get right.** Each thing has one usual form, and the template, the docs and every
+  message show it. `check` also reads common variants, such as `*` bullets, a colon inside the
+  bold or `held by:`, exactly like the usual form, and notes them without failing. It never
+  guesses: errors are for what's unclear or broken, not for another way to write the same thing.
 - **Soft things are first-class.** Purpose, values and feel get named sections, not a leftover
   prose bucket. The tool never judges them, but it keeps them findable and citable.
 - **Same answer everywhere.** `check` is a pure function of the plan and the repo tree. The same
@@ -118,8 +122,9 @@ In every known section except Intent, an item is a top-level list item, with its
 - **IDs are unique in the file.** Gaps are fine. A deleted item's ID is never reused. That's a
   convention: the prototype can't see history.
 - **A sub-line** is a bullet indented two to five spaces under its item, of the form
-  `- <key>: <value>`. Indented lines after it that aren't bullets continue its value. Each key
-  appears at most once per item. Any other nested bullet is part of the item's prose.
+  `- <key>: <value>`, where the key is lowercase letters and hyphens. Indented lines after it
+  that aren't bullets continue its value. Each key appears at most once per item. Any other
+  nested bullet is part of the item's prose.
 - **The item ends** at the next non-blank line at column 0.
 
 | Key | Allowed on | Value |
@@ -130,16 +135,25 @@ In every known section except Intent, an item is a top-level list item, with its
 | `superseded-by` | D | The ID of the decision that replaces this one |
 | `resolved-by` | Q, I | The ID of the decision that settled this question or idea |
 
-Paragraphs between items are welcome. A plain bullet in an itemized section warns, because people
-and agents will read it as a rule that has no ID.
+Paragraphs between items are welcome, and so are bullets nested under an item. Other top-level
+bullets in an itemized section are read like this:
+
+- **No slug.** `- **C3**: …` still counts as an item, with a `missing-slug` warning, *because*
+  the slug is what lets a citation notice a rename.
+- **Starts like an item.** A bold ID followed by `(` or a colon, as in `**C4 (`, `**C4:**` or
+  `**C4**:`, is meant as an item. If it can't be read as one, even with no slug or as a
+  [variant](#variants), that's a `malformed-item` error.
+- **Anything else** is a `not-an-item` warning, *because* people and agents will read it as a
+  rule, but nothing can cite it. Bold text such as `- **C4 model**: …` lands here, not in
+  `malformed-item`.
 
 ### Citations
 
 - A citation is an ID and its slug in square brackets: `[C3 (one-writer)]`.
 - Citations count anywhere outside code and comments: in Intent, in free-prose sections, in item
   text and in sub-line values.
-- Only this form counts. A bare `C3`, `S3` or `D3` is plain text, *because* bare IDs collide with
-  ordinary words: Amazon S3, D3.js, the C4 model.
+- Outside brackets, an ID is plain text. A bare `C3`, `S3` or `D3` isn't a citation, *because*
+  bare IDs collide with ordinary words: Amazon S3, D3.js, the C4 model.
 - A citation must name an existing ID with that item's current slug. When a slug changes, `check`
   lists every citation still using the old one.
 - `superseded-by:` and `resolved-by:` take a bare ID, such as `D9`. It must exist and be a
@@ -163,6 +177,27 @@ and agents will read it as a rule that has no ID.
 - Paths are relative to the repo root and use `/`. Paths can't contain commas. An absolute path,
   a `..` segment, or a path that resolves outside the root is an error. Backticks around a pointer
   or path are ignored.
+
+### Variants
+
+The forms above are the usual ones, and the template, the docs, every message and the JSON report
+use them. `check` also accepts the common variants below. It reads each one exactly like its
+usual form, and gives it an `alternate-form` note that shows the usual form. A note never fails a
+run, even with `--strict`. Case never matters: headings, IDs, slugs and keys match in any case,
+without a note.
+
+| Form | Usual | Also accepted, with a note |
+| --- | --- | --- |
+| Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. `__` for bold, or no bold when a colon follows the slug. The colon inside the bold, a dash instead of it, or nothing. Other spacing, or leading zeros in the number |
+| Slug | `one-writer` | Spaces or underscores for the hyphens: `(one writer)` |
+| Sub-line | `- because: …`, two to five spaces in | A bold key, or a space or underscore for its hyphen: `held by:`. `path:` for `paths:`. A `*` or `+` bullet, at any indent under the item |
+| Heading | `## Constraints` | The singular: `## Constraint` |
+| Citation | `[C3 (one-writer)]` | Other spacing: `[C3(one-writer)]`. A bare `[C3]` while C3 exists, though it can't notice a rename |
+| Reference | `superseded-by: D9` | The ID with its slug, bracketed or not: `D9 (sqlite)` or `[D9 (sqlite)]`. The slug must match |
+
+Every variant reads one way only. A line that could mean two things isn't a variant: `check`
+reports it and shows the usual form, and never guesses. The list is a starting point, and the
+pilots will show which variants people actually write.
 
 ### The Map
 
@@ -216,14 +251,15 @@ keyframes --help | --version
 ### check
 
 - **Exit codes.**
-  - 0: no errors. Warnings are allowed.
+  - 0: no errors. Warnings are allowed, and notes always are.
   - 1: errors, or any warning under `--strict`.
   - 2: a usage or read problem: no plan, an unreadable or non-UTF-8 plan, a bad flag, a missing
     directory.
 - **Output.** The text report goes to stdout. `--json` replaces it with one JSON object; the
   schema is `schema/report.schema.json`. Usage errors go to stderr.
 - **Determinism rules.**
-  - Findings are sorted by line, then code, then message. JSON keys come in a fixed order.
+  - Findings are sorted by line, then code, then message, with notes after errors and warnings.
+    JSON keys come in a fixed order.
   - Paths in the output are relative to the root and use `/`.
   - No timestamps, durations, colors, absolute paths or locale-formatted numbers.
   - A BOM is stripped, CRLF is read as LF, and leading tabs expand to four spaces.
@@ -247,12 +283,13 @@ mistake", and most constraints start life without a check.
 
 ### Findings
 
-Codes are stable, and every finding names its line in the plan.
+Codes are stable, and every finding names its line in the plan. An error fails a run, a warning
+fails it only under `--strict`, and a note never does.
 
 | Code | Severity | When |
 | --- | --- | --- |
 | `duplicate-section` | error | A known section appears twice |
-| `malformed-item` | error | A top-level bullet starts like an item (`**`, a capital letter, a digit) but doesn't fit the grammar |
+| `malformed-item` | error | A bullet starts like an item (`**C4 (`, `**C4**:`) but can't be read as one, even as a variant |
 | `wrong-letter` | error | An item's letter doesn't match its section |
 | `duplicate-id` | error | Two items share an ID |
 | `duplicate-key` | error | An item repeats a sub-line key |
@@ -264,8 +301,9 @@ Codes are stable, and every finding names its line in the plan.
 | `bad-reference` | error | `superseded-by` or `resolved-by` names a missing ID or a non-decision |
 | `file-too-large` | error | A pointer's file is over 1 MiB |
 | `no-intent` | warning | There's no Intent section, or it's empty |
-| `not-an-item` | warning | A plain top-level bullet in an itemized section |
-| `item-outside-section` | warning | An item-shaped bullet in Intent, under an unknown heading, or before any heading |
+| `not-an-item` | warning | A top-level bullet in an itemized section isn't an item, and doesn't start like one |
+| `item-outside-section` | warning | An item is outside the itemized sections, as in Intent or under an unknown heading |
+| `missing-slug` | warning | An item has no slug, so citations to it can't notice a rename |
 | `unknown-key` | warning | A sub-line key isn't one of the five |
 | `key-not-allowed` | warning | A known key on the wrong kind of item, such as `held-by` on a Principle |
 | `missing-because` | warning | A Decision without `because:` |
@@ -274,11 +312,13 @@ Codes are stable, and every finding names its line in the plan.
 | `path-overlap` | warning | Two parts claim the same path, or one part's path is inside another's |
 | `over-budget` | warning | A budget is exceeded |
 | `unclosed-fence` | warning | A code fence never closes, so the rest of the file reads as code |
+| `alternate-form` | note | A [variant](#variants) of a usual form, read exactly like it |
 
-Every message says what's wrong and how to fix it, with the expected form:
+Every message says what it found and shows the usual form:
 
 ```text
-keyframes.md:14  error  malformed-item  "- **C4 one-writer**" needs its slug in parentheses: - **C4 (one-writer)**: …
+keyframes.md:14  warning  not-an-item     "- **C4 one-writer**" isn't read as an item; put its slug in parentheses: - **C4 (one-writer)**: …
+keyframes.md:22  note     alternate-form  "- **C5 (no-pii):**" reads fine; the usual form puts the colon after the bold: - **C5 (no-pii)**: …
 ```
 
 ### The report
@@ -297,13 +337,15 @@ questions     3 · 2 open · 1 resolved
 ideas         2 · 2 open
 words         1240 of 2000
 
-keyframes.md:41  warning  built-not-new  file:test/kill.test.ts#"escalates" resolves now; drop "(new)"
-keyframes.md:63  error    slug-mismatch  [D4 (sqlite-only)] cites D4, which is now (one-database)
+keyframes.md:41  warning  built-not-new   file:test/kill.test.ts#"escalates" resolves now; drop "(new)"
+keyframes.md:63  error    slug-mismatch   [D4 (sqlite-only)] cites D4, which is now (one-database)
+keyframes.md:12  note     alternate-form  "*" bullets read fine; the usual form is "-" (lines 12, 19, 27)
 
-1 error · 1 warning
+1 error · 1 warning · 3 notes
 ```
 
-Sections absent from the plan are left out. A clean run ends with `no findings`.
+Sections absent from the plan are left out. A clean run ends with `no findings`. Notes come last,
+one line for each kind of variant, naming every line that uses it, so a habit shows up once.
 
 The JSON report has the same counts and findings, and it also carries every item. A harness can
 then hand an agent the items that touch its work without parsing markdown, and without keyframes
@@ -340,13 +382,17 @@ knowing anything about the harness:
   ],
   "findings": [{ "line": 63, "severity": "error", "code": "slug-mismatch", "message": "…" }],
   "errors": 1,
-  "warnings": 1
+  "warnings": 1,
+  "notes": 3
 }
 ```
 
-- `items` lists every item in the plan, in line order. Each has its `id`, `slug`, `section`,
-  `line` and `text`, plus the sub-lines it has: `because`, `paths`, `held_by`, `superseded_by`
-  and `resolved_by`. Sub-line keys are written with underscores, so `held-by` becomes `held_by`.
+- `items` lists every item in the plan, in line order. Each has its `id`, `slug` (if it has one),
+  `section`, `line` and `text`, plus the sub-lines it has: `because`, `paths`, `held_by`,
+  `superseded_by` and `resolved_by`. Sub-line keys are written with underscores, so `held-by`
+  becomes `held_by`.
+- IDs, slugs and keys appear in their usual form, whatever variant the plan used. `findings` lists
+  every note separately, each with its own line.
 - `text` is the item's prose without its ID or its sub-lines. Its lines are joined with `\n`, and
   their indentation is removed.
 - Every path and pointer carries a `result`: `resolved`, `planned` or `broken`, or `review` for
@@ -414,16 +460,19 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
    - seam: `bin/keyframes.js`, `src/cli.ts`
 3. [ ] feat(scan): read markdown into blocks and sections, **done when:** fixtures pass for both
    fence styles, a long fence containing a shorter one, an unclosed fence, multi-line comments,
-   CRLF, a BOM, tabs and `###` grouping, each with correct line numbers
+   CRLF, a BOM, tabs, a thematic break such as `* * *`, `###` grouping and a singular heading,
+   each with correct line numbers
    - seam: `src/scan/`
 4. [ ] feat(items): parse items and sub-lines, **done when:** every item and sub-line finding in
    the table has a fixture, including `malformed-item` against `not-an-item`,
-   `item-outside-section`, and continuation lines for both items and sub-lines
+   `item-outside-section`, `missing-slug`, and continuation lines for both items and sub-lines;
+   and every item, slug and sub-line variant in [Variants](#variants) parses exactly like its
+   usual form, with one `alternate-form` note
    - seam: `src/items/`
 5. [ ] feat(cite): resolve citations and references, **done when:** citations resolve in every
    section and in sub-line values, but never inside code or comments; `broken-citation`,
-   `slug-mismatch` and `bad-reference` have fixtures; and bare `S3` or `D3.js` in prose produces
-   no finding
+   `slug-mismatch` and `bad-reference` have fixtures; citation and reference variants resolve
+   like their usual forms, with a note; and bare `S3` or `D3.js` in prose produces no finding
    - seam: `src/cite/`
 6. [ ] feat(repo): resolve pointers and Map paths, **done when:** each status has found, missing
    and planned fixtures; a wrong-case path is broken on every OS; a CRLF file matches LF text;
@@ -432,8 +481,9 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
    - seam: `src/repo/`, `test/fixtures/repos/`
 7. [ ] feat(report): count, budget, and render text and JSON, **done when:** golden tests pass
    for both outputs; the JSON validates against the schema and carries every item with its text,
-   sub-lines and results; exit codes and `--strict` behave as specified; and a determinism test
-   runs `check` from two working directories and compares the bytes
+   sub-lines and results; exit codes and `--strict` behave as specified, and notes never fail a
+   run and group by kind in the text report; and a determinism test runs `check` from two
+   working directories and compares the bytes
    - seam: `src/check/`, `src/report/`, `schema/report.schema.json`
 8. [ ] feat(init): write the template, snippet and docs, **done when:** `init` writes only when no
    plan exists; `check` on a fresh template yields exactly `no-intent`; `docs/format.md` (the
@@ -473,8 +523,8 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
   also give it one of the four tasks, with and without the plan. With nobody to ask, "asked
   before crossing one" means it stopped and flagged the crossing instead.
 - **H4.** The owner triages every finding: useful, noise or wrong.
-- **Close.** Keep, change or cut each section, pointer form and finding. Then choose what to build
-  next. The candidates:
+- **Close.** Keep, change or cut each section, pointer form, variant and finding. Then choose what
+  to build next. The candidates:
   - checking the Map against the code;
   - a formatter that puts the file in one canonical form;
   - scanning code and commits for citations;
@@ -486,8 +536,8 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
 - **Q1 (section-names):** *resolved 2026-10-04.* Constraints stays, because "Rules" is too vague:
   principles are rules too. Taste stays, because it says what it holds. Questions holds only real
   questions, and a separate Ideas section holds statements for future consideration. Each section
-  has exactly one name, with no aliases, so the parser stays simple. H1 still watches for
-  misplaced items.
+  has exactly one name, with no aliases, so the parser stays simple. A singular heading is a
+  [variant](#variants) of that name, not an alias. H1 still watches for misplaced items.
 - **Q2 (unlinked-warns):** should a constraint with no `held-by:` warn? *Lean:* no. Revisit with
   H4's data.
 - **Q3 (intent-structure):** should Intent have parsed parts (problem, who it's for, what good
@@ -653,6 +703,9 @@ people write that down, so that others, human or agent, can work from it and ref
 - **P4 (narrow-words)**: The report claims only what it checked, in the narrowest true words.
   - because: "linked" read as "enforced" is how intent and code drift apart without anyone
     noticing.
+- **P5 (easy-to-get-right)**: Each thing has one usual form that everything shows. Common variants
+  work too, with a note, and only what's unclear or broken is an error.
+  - because: nobody learns a format that punishes every slip, and nobody trusts one that guesses.
 
 ## Map
 
