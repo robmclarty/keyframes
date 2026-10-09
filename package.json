@@ -11,6 +11,14 @@
   "homepage": "https://github.com/robmclarty/keyframes#readme",
   "bugs": "https://github.com/robmclarty/keyframes/issues",
   "type": "module",
+  "bin": {
+    "keyframes": "bin/keyframes.js"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "!dist/**/*.test.*"
+  ],
   "engines": {
     "node": ">=24",
     "pnpm": ">=9.0.0"

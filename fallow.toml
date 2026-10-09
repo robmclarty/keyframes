@@ -13,6 +13,10 @@ entry = [
 # CLI/tooling deps used via command line or config files, not imported from source.
 ignoreDependencies = ["@ast-grep/cli"]
 
+# bin/keyframes.js imports the built CLI, which exists only after `pnpm build`.
+# Its source, src/cli.ts, is analyzed directly; test/e2e/bin.test.ts runs the bin.
+ignoreUnresolvedImports = ["../dist/cli.js"]
+
 [rules]
 unused-exports = "error"
 unused-files = "error"

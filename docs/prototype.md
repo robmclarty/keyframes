@@ -455,7 +455,7 @@ Steps 1–9 build the tool. Step 10 runs the pilots.
    the Frame above; and the gate is green
    - seam: `rules/`, `rule-tests/`, `test/integration/layout-rules.test.ts`, `AGENTS.md`,
      `README.md`, `package.json`
-2. [ ] feat(cli): add the CLI entry and the `keyframes` bin, **done when:** `--help` and
+2. [x] feat(cli): add the CLI entry and the `keyframes` bin, **done when:** `--help` and
    `--version` work, and an unknown command or flag exits 2
    - seam: `bin/keyframes.js`, `src/cli.ts`
 3. [ ] feat(scan): read markdown into blocks and sections, **done when:** fixtures pass for both
