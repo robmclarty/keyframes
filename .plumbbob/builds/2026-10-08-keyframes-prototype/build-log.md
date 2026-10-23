@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 5 — feat(scan): read markdown into blocks and sections
+**Current step:** 6 — feat(items): parse items and sub-lines
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -27,7 +27,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 2. feat(cli): add the CLI entry and the keyframes bin
 - ☑ 3. fix(cli): drop -v and make the CLI test titles name their arguments
 - ☑ 4. docs(design): point the spec at the plumbbob build and its decisions
-- ☐ 5. feat(scan): read markdown into blocks and sections
+- ☑ 5. feat(scan): read markdown into blocks and sections
 - ☐ 6. feat(items): parse items and sub-lines
 - ☐ 7. feat(cite): resolve citations and references
 - ☐ 8. feat(repo): resolve pointers and Map paths
@@ -85,3 +85,4 @@ folder, so it rides the branch into the PR.)*
 
 - 2026-10-23 — step 3 checkpointed · 73e60e846 — fix(cli): drop -v and make the CLI test titles name their arguments (2m)
 - 2026-10-23 — step 4 checkpointed · 43b15e90f — docs(design): point the spec at the plumbbob build and its decisions (4m)
+- 2026-10-23 — step 5 checkpointed · 9ead7bfb9 — feat(scan): read markdown into blocks and sections (9m)
