@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** none (at the boundary)
+**Current step:** 3 — fix(cli): drop -v and make the CLI test titles name their arguments
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -23,7 +23,19 @@ step boundaries. The antidote to "my plan got lost in the noise."
 line above. Only ONE step is in flight; a step is done only after a checkpoint:
 check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 
-- ☐ 1. <step>
+- ☑ 1. chore(scaffold): realign the scaffold to the prototype spec
+- ☑ 2. feat(cli): add the CLI entry and the keyframes bin
+- ☐ 3. fix(cli): drop -v and make the CLI test titles name their arguments
+- ☐ 4. docs(design): point the spec at the plumbbob build and its decisions
+- ☐ 5. feat(scan): read markdown into blocks and sections
+- ☐ 6. feat(items): parse items and sub-lines
+- ☐ 7. feat(cite): resolve citations and references
+- ☐ 8. feat(repo): resolve pointers and Map paths
+- ☐ 9. feat(report): count, budget, and render text and JSON
+- ☐ 10. feat(init): write the template, snippet and docs
+- ☐ 11. test(dogfood): give this repo its own plan
+- ☐ 12. docs(pilots): run the pilots
+- ☐ 13. chore(release): publish a 0.x for the pilots to install
 
 ## Park list
 

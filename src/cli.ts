@@ -30,7 +30,6 @@ const FLAGS: Readonly<Record<Command, readonly string[]>> = {
 
 const KNOWN_FLAGS: ReadonlySet<string> = new Set(Object.values(FLAGS).flat());
 const HELP_FLAGS: ReadonlySet<string> = new Set(['--help', '-h']);
-const VERSION_FLAGS: ReadonlySet<string> = new Set(['--version', '-v']);
 
 const USAGE = `Usage:
   keyframes init [dir]                        write a starter keyframes.md; refuse if one exists
@@ -65,7 +64,8 @@ const parse = (argv: readonly string[]): Request => {
   if (argv[0] === 'help' || argv.some((arg) => HELP_FLAGS.has(arg))) {
     return { kind: 'help' };
   }
-  if (argv.some((arg) => VERSION_FLAGS.has(arg))) {
+  // Not -v, which could as well mean verbose: a variant reads one way only.
+  if (argv.includes('--version')) {
     return { kind: 'version' };
   }
   const flags = argv.filter((arg) => arg.startsWith('-'));
