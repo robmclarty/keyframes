@@ -1,10 +1,11 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { run } from '../cli.js';
+import { SNIPPET, template } from '../init/index.js';
 
 const VERSION = (
   JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8')) as {
@@ -77,12 +78,6 @@ describe('usage problems exit 2, say what is wrong, and show the usage', () => {
   });
 });
 
-describe('commands not built yet', () => {
-  test('keyframes init parses, then says so and exits 2', () => {
-    expect(cli('keyframes init')).toEqual({ code: 2, stdout: '', stderr: "keyframes: init isn't built yet\n" });
-  });
-});
-
 // The trees the check commands run on, in a scratch directory the tests run from, so each command
 // line names its tree as a short relative path.
 const TREES: Readonly<Record<string, string | Uint8Array>> = {
@@ -92,6 +87,8 @@ const TREES: Readonly<Record<string, string | Uint8Array>> = {
   'upper/KEYFRAMES.md': '## Intent\nWhy.\n',
   'binary/keyframes.md': new Uint8Array([0x23, 0x20, 0xff, 0x0a]),
   'empty/README.md': '',
+  'blank/README.md': '',
+  'here/README.md': '',
 };
 
 let scratch = '';
@@ -169,5 +166,42 @@ describe('an unexpected error prints one line and exits 2', () => {
       throw new Error('stdout is closed:\n  EPIPE');
     });
     expect({ code, stderr }).toEqual({ code: 2, stderr: 'keyframes: stdout is closed: EPIPE\n' });
+  });
+});
+
+/** What init prints once it has written `plan`: one line saying where the snippet goes, then the snippet. */
+const wrote = (plan: string): string =>
+  `Wrote ${plan}. Paste this into the file your agents already read, such as AGENTS.md or CLAUDE.md:\n\n${SNIPPET}`;
+
+describe('init writes a starter plan only where there is none', () => {
+  test('keyframes init blank writes the template, titled blank, and prints the snippet; check then exits 0 with only no-intent', () => {
+    expect(cli('keyframes init blank')).toEqual({ code: 0, stdout: wrote(join('blank', 'keyframes.md')), stderr: '' });
+    expect(readFileSync(join('blank', 'keyframes.md'), 'utf8')).toBe(template('blank'));
+    const { code, stdout } = cli('keyframes check blank');
+    expect(code).toBe(0);
+    expect(stdout).toContain('  no-intent  ');
+    expect(stdout).toMatch(/\n1 warning\n$/);
+  });
+
+  test('keyframes init, from a directory with no plan, writes keyframes.md there', () => {
+    process.chdir('here');
+    try {
+      expect(cli('keyframes init')).toEqual({ code: 0, stdout: wrote('keyframes.md'), stderr: '' });
+      expect(readFileSync('keyframes.md', 'utf8')).toBe(template('here'));
+    } finally {
+      process.chdir('..');
+    }
+  });
+
+  test.each([
+    ['keyframes init warns', 'keyframes.md already exists; init never overwrites a plan'],
+    ['keyframes init upper', 'KEYFRAMES.md already exists; init never overwrites a plan'],
+    ['keyframes init gone', "there's no directory gone"],
+    ['keyframes init warns/keyframes.md', "warns/keyframes.md isn't a directory"],
+  ])('%s exits 2, writing nothing', (line, problem) => {
+    const before = readFileSync(join('warns', 'keyframes.md'), 'utf8');
+    expect(cli(line)).toEqual({ code: 2, stdout: '', stderr: `keyframes: ${problem}\n` });
+    expect(readFileSync(join('warns', 'keyframes.md'), 'utf8')).toBe(before);
+    expect(readdirSync('upper')).toEqual(['KEYFRAMES.md']);
   });
 });

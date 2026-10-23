@@ -151,6 +151,22 @@ bullets in an itemized section are read like this:
   rule, but nothing can cite it. Bold text such as `- **C4 model**: …` lands here, not in
   `malformed-item`.
 
+Some lines look like the grammar but stay prose, *because* a line that could mean two things isn't
+read as either, and prose never fails a run:
+
+- **An item line with no bold counts only under its own letter's section.** `- S3 (uploads): …` is
+  an item under Scenarios. Under another itemized section, such as the Map, it's `not-an-item`,
+  and under Intent or a free-prose heading it's prose. With bold, `- **S3 (uploads)**: …` is meant as an item wherever it sits:
+  `wrong-letter` in another itemized section, `item-outside-section` anywhere else.
+- **Bold with no slug and no colon isn't an ID.** `- **S3** holds uploads` is prose, or
+  `not-an-item` in an itemized section.
+- **An unknown sub-line key counts only in the usual form's shape:** a `-` bullet two to five
+  spaces in, a key of lowercase letters and hyphens, then a colon and a space or the end of the
+  line. Only then is it `unknown-key`. `- Pros: fast`, `- http://localhost` and a numbered bullet
+  are part of the item's prose.
+- **A bracketed ID with no slug is a citation only while that ID exists** ([Citations](#citations)),
+  so a markdown link such as `[S3]` stays a link.
+
 ### Citations
 
 - A citation is an ID and its slug in square brackets: `[C3 (one-writer)]`.
@@ -160,6 +176,8 @@ bullets in an itemized section are read like this:
   bare IDs collide with ordinary words: Amazon S3, D3.js, the C4 model.
 - A citation must name an existing ID with that item's current slug. When a slug changes, `check`
   lists every citation still using the old one.
+- A bracketed ID with no slug, such as `[C3]`, is a citation only while C3 exists, and then it's a
+  [variant](#variants). Otherwise it's plain text, like a markdown link.
 - `superseded-by:` and `resolved-by:` take a bare ID, such as `D9`. It must exist and be a
   decision.
 
@@ -180,7 +198,8 @@ bullets in an itemized section are read like this:
 - Inside `"<text>"`, `\"` and `\\` are escapes, and commas don't split pointers.
 - Paths are relative to the repo root and use `/`. Paths can't contain commas. An absolute path,
   a `..` segment, or a path that resolves outside the root is an error. Backticks around a pointer
-  or path are ignored.
+  or path are ignored, and so are `.` segments and doubled slashes: `./src//api/` reads as
+  `src/api/`, without a note.
 
 ### Variants
 
@@ -194,16 +213,19 @@ a path matches with exact case, and the plan's own name in another case is a var
 | Form | Usual | Also accepted, with a note |
 | --- | --- | --- |
 | Plan file | `keyframes.md` | The name in any other case: `KEYFRAMES.md` |
-| Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. `__` for bold, or no bold when a colon follows the slug. The colon inside the bold, a dash instead of it, or nothing. Other spacing, or leading zeros in the number |
-| Slug | `one-writer` | Spaces or underscores for the hyphens: `(one writer)` |
-| Sub-line | `- because: …`, two to five spaces in | A bold key, or a space or underscore for its hyphen: `held by:`. `path:` for `paths:`. A `*` or `+` bullet, at any indent under the item |
 | Heading | `## Constraints` | The singular: `## Constraint` |
+| Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. `__` for bold. No bold, when a colon follows the slug and the item is under its own section. The colon inside the bold, a dash (`-`, `–` or `—`) instead of it, or nothing when there's a slug. Other spacing |
+| ID | `C3` | Leading zeros: `C03` |
+| Slug | `one-writer` | Spaces or underscores for the hyphens: `(one writer)` |
+| Sub-line | `- because: …`, two to five spaces in | A `*` or `+` bullet, at any indent under the item. A bold key, with the colon inside the bold or after it. A space or underscore for the key's hyphen: `held by:`. `path:` for `paths:`. Other spacing |
 | Citation | `[C3 (one-writer)]` | Other spacing: `[C3(one-writer)]`. A bare `[C3]` while C3 exists, though it can't notice a rename |
-| Reference | `superseded-by: D9` | The ID with its slug, bracketed or not: `D9 (sqlite)` or `[D9 (sqlite)]`. The slug must match |
+| Reference | `superseded-by: D9` | Brackets, a slug, or both: `[D9]`, `D9 (sqlite)` or `[D9 (sqlite)]`. A slug must be the decision's own |
 
-Every variant reads one way only. A line that could mean two things isn't a variant: `check`
-reports it and shows the usual form, and never guesses. The list is a starting point, and the
-pilots will show which variants people actually write.
+This is every variant `check` reads. An ID and a slug read the same way wherever they're written:
+in an item line, a citation or a reference. Every variant reads one way only. A line that could
+mean two things isn't a variant: `check` reports it and shows the usual form, and never guesses.
+The list is a starting point, and the pilots will show which variants people actually write.
+[`format.md`](format.md) shows this table to people, and a test keeps the two the same.
 
 ### The Map
 
@@ -425,11 +447,15 @@ along with the schema that describes it.
 ### init
 
 - Writes `<dir>/keyframes.md` from the [template](#appendix-a-the-template), titled with the
-  directory's name. If the file exists, it refuses and exits 2. It's the only command that writes.
+  directory's name. If a plan is already there, in any case, as `check` would find it, it refuses
+  and exits 2, writing nothing. A missing directory exits 2 too. It's the only command that writes.
 - Then prints the [agent snippet](#appendix-b-the-agent-snippet) to stdout, with one line saying
   where to paste it.
 - `check` on a fresh template exits 0 with exactly one finding: `no-intent`. That warning is the
   first prompt to write something.
+- [`format.md`](format.md) is the format written for people, and [`agents.md`](agents.md) is the
+  snippet and where it goes. A test checks every example plan in them, the template's examples
+  included, and pins each report they show to what `check` prints.
 
 ## Agents
 

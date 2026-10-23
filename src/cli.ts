@@ -1,7 +1,8 @@
 import { readFileSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import { check, exitCode, findPlan } from './check/index.js';
+import { init, SNIPPET } from './init/index.js';
 import { KEYFRAMES } from './name.js';
 import { diskRepo } from './repo/index.js';
 import { renderJson, renderText } from './report/index.js';
@@ -110,24 +111,21 @@ const packageVersion = (): string => {
   throw new Error('package.json has no version');
 };
 
-/**
- * Checks the plan in `dir`, or the working directory, writes the report to stdout, and returns the
- * exit code it earns. A missing directory, or a plan that can't be found or read, is a read
- * problem: it goes to stderr and exits 2.
- */
-const runCheck = (dir: string | undefined, flags: ReadonlySet<string>, io: Io): number => {
+/** The repo root a command works in, from `dir` or the working directory, or why there's none. */
+const rootOf = (dir: string | undefined): { readonly root: string } | { readonly problem: string } => {
   const root = resolve(dir ?? '.');
   const stats = statSync(root, { throwIfNoEntry: false });
-  const problem =
-    stats === undefined
-      ? `there's no directory ${dir ?? '.'}`
-      : stats.isDirectory()
-        ? undefined
-        : `${dir ?? '.'} isn't a directory`;
-  if (problem !== undefined) {
-    io.stderr(`${KEYFRAMES}: ${problem}\n`);
-    return 2;
+  if (stats === undefined) {
+    return { problem: `there's no directory ${dir ?? '.'}` };
   }
+  return stats.isDirectory() ? { root } : { problem: `${dir ?? '.'} isn't a directory` };
+};
+
+/**
+ * Checks the plan in `root`, writes the report to stdout, and returns the exit code it earns. A
+ * plan that can't be found or read is a read problem: it goes to stderr and exits 2.
+ */
+const runCheck = (root: string, flags: ReadonlySet<string>, io: Io): number => {
   const repo = diskRepo(root);
   const found = findPlan(repo);
   if ('problem' in found) {
@@ -137,6 +135,35 @@ const runCheck = (dir: string | undefined, flags: ReadonlySet<string>, io: Io): 
   const report = check(found.plan, repo);
   io.stdout(flags.has('--json') ? renderJson(report) : renderText(report));
   return exitCode(report, flags.has('--strict'));
+};
+
+/**
+ * Writes a starter plan in `root`, then prints the agent snippet with one line saying where to paste
+ * it. A plan already there, in any case, goes to stderr and exits 2, since init never overwrites.
+ */
+const runInit = (root: string, dir: string | undefined, io: Io): number => {
+  const result = init(root);
+  if ('problem' in result) {
+    io.stderr(`${KEYFRAMES}: ${result.problem}\n`);
+    return 2;
+  }
+  const plan = dir === undefined ? result.written : join(dir, result.written);
+  io.stdout(
+    `Wrote ${plan}. Paste this into the file your agents already read, such as AGENTS.md or CLAUDE.md:\n\n${SNIPPET}`,
+  );
+  return 0;
+};
+
+/** Runs a command in the root it names, once that root is found. */
+const runCommand = (request: Extract<Request, { kind: 'command' }>, io: Io): number => {
+  const found = rootOf(request.dir);
+  if ('problem' in found) {
+    io.stderr(`${KEYFRAMES}: ${found.problem}\n`);
+    return 2;
+  }
+  return request.command === 'check'
+    ? runCheck(found.root, request.flags, io)
+    : runInit(found.root, request.dir, io);
 };
 
 /** Runs a command line once it's parsed, and returns its exit code. */
@@ -153,11 +180,7 @@ const dispatch = (argv: readonly string[], io: Io): number => {
       io.stderr(`${KEYFRAMES}: ${request.problem}\n\n${USAGE}`);
       return 2;
     default:
-      if (request.command === 'check') {
-        return runCheck(request.dir, request.flags, io);
-      }
-      io.stderr(`${KEYFRAMES}: ${request.command} isn't built yet\n`);
-      return 2;
+      return runCommand(request, io);
   }
 };
 

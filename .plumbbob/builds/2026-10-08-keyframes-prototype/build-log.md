@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 9 — feat(report): count, budget, and render text and JSON
+**Current step:** 10 — feat(init): write the template, snippet and docs
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -31,7 +31,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 6. feat(items): parse items and sub-lines
 - ☑ 7. feat(cite): resolve citations and references
 - ☑ 8. feat(repo): resolve pointers and Map paths
-- ☐ 9. feat(report): count, budget, and render text and JSON
+- ☑ 9. feat(report): count, budget, and render text and JSON
 - ☐ 10. feat(init): write the template, snippet and docs
 - ☐ 11. test(dogfood): give this repo its own plan
 - ☐ 12. docs(pilots): run the pilots
@@ -53,6 +53,8 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - [x] an item line with no bullet (**C3 (x)**: … as a paragraph), or with its bullet indented one to three spaces, reads as prose with no finding
 - [x] IDs, slugs and keys read only ASCII letters and digits, so a slug like (café) is malformed-item; a pilot writing in another language would show whether that bites
 - [x] the spec's Variants table should list what steps 6 and 7 accept beyond it (other spacing in a sub-line, en and em dashes, a leading zero or a bare [D9] in a citation or reference), and Items should say a no-bold item needs its section's letter and an unknown key counts only in the usual shape
+- [ ] a ./ or doubled / in a pointer or Map path reads silently with no alternate-form note, unlike every other variant D9 lists
+- [ ] item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example
 
 ## Harvest  *(run `/plumbbob:harvest` at each step boundary, after green)*
 
@@ -171,3 +173,81 @@ folder, so it rides the branch into the PR.)*
   **5.** Exact case is proven on this disk, and a link out of the root is an escaping path
 
   Both repos find each path segment among its parent's directory entries before looking at the path. So `file:docs/guide.txt` is broken against the committed tree `test/fixtures/repos/tree/Docs/Guide.txt`, even though this Mac's disk would open it (D16). With `..` and absolute paths already errors, a path can only resolve outside the root through a link. The disk repo follows links with `realpath` and reports one that leaves the root, and the pointer or path is `bad-pointer`, tested against links made in a temp dir. One judgment call: `file-too-large` fires only when a pointer would search the file's text. A plain `file:big.log` just needs the file to exist.
+
+- 2026-10-23 — step 9 checkpointed · 724989ece — feat(report): count, budget, and render text and JSON (1 drift, 22m)
+- 2026-10-23 — range 3 of 7's stop recorded — read the text and JSON reports and every finding's message before the docs quote them
+
+  **Summary**: Range 3 built the report and wired up `keyframes check`. `check(plan, repo)` counts each section, applies the budgets, and sorts the findings. Two renderers turn that into the text report and the JSON report, and `schema/report.schema.json` describes the JSON and ships in the package. The command has exit codes 0, 1 and 2, honors `--strict`, finds the plan in any case, and turns any unexpected error into one line with exit 2. Golden reports for two real trees pin both outputs, and the suite is at 354 tests, all green.
+
+  1. Two paths sit outside the seam, both on purpose
+  2. The golden reports are the read this stop asks for
+  3. Calls the spec left open, now written into it
+  4. An unexpected error is one line and exit 2, even after `run` returns
+  5. Determinism and the schema are each checked two ways
+
+  **Readout**:
+
+  ```text
+  steps        1 of 1 landed
+               - 9 724989e
+  check        green: 10 of 10 checks, 1 landing
+  done-when    met
+  decisions    honored
+               - D9 (easy-to-get-right), D11 (json-carries-items)
+               - D13 (crash-exits-2), D16 (local-proof), D17 (any-case-plan)
+  constraints  11 of 11 honored
+  seam         strayed: 14 paths outside step 9's seam
+               - src/cite/index.ts
+               - src/cite/references.ts
+               - test/fixtures/golden/clean.json
+               - test/fixtures/golden/clean.txt
+               - test/fixtures/golden/clean/keyframes.md
+               - test/fixtures/golden/clean/src/api/handler.ts
+               - test/fixtures/golden/clean/src/sync/worker.ts
+               - test/fixtures/golden/clean/test/offline.test.ts
+               - test/fixtures/golden/clean/test/writes.test.ts
+               - test/fixtures/golden/findings.json
+               - test/fixtures/golden/findings.txt
+               - test/fixtures/golden/findings/keyframes.md
+               - test/fixtures/golden/findings/src/api/handler.ts
+               - test/fixtures/golden/findings/test/writes.test.ts
+  diff         +2799 -38 across 35 files
+  spent        22 min · green first run at every landing · 1 drift warning
+  ```
+
+  **Verdict**: ◐ A hair off (seam strayed)
+
+  **Recommendation**: Read `test/fixtures/golden/findings.txt` first, then `clean.txt` and `findings.json`, looking hardest at the calls in highlight 3 and the quoting in highlight 2, then approve and type the next run. Step 10's template and docs will quote these messages and this report shape word for word, so a change now touches only the renderers, the golden files and the tests that pin them.
+
+  **1.** Two paths sit outside the seam, both on purpose
+
+  `src/cite/` now exports `referenceId`. The JSON's `superseded_by` and `resolved_by` must carry the decision's ID in its usual form (`[D2 (sqlite)]` is written as `D2`), and the only grammar for a reference lives in `src/cite/references.ts`. I moved its parse into one `readReference` that both the finding and the export use, rather than copy the regex into `src/check/`. Step 7 avoided the same kind of second copy for IDs and slugs.
+
+  The golden trees and their reports live in `test/fixtures/golden/`: `clean/` and `findings/`, each a small repo with a `keyframes.md`, beside `clean.txt`, `clean.json`, `findings.txt` and `findings.json`. They can't go in `test/integration/`, which is in the seam, because markdownlint and the links check read every `.md` outside `test/fixtures/`, and the findings plan is broken on purpose. Those 12 files and the two in `src/cite/` are the 14 paths the seam row names.
+
+  **2.** The golden reports are the read this stop asks for
+
+  `test/fixtures/golden/findings.txt` has 24 of the 25 finding codes in one report, so every message can be read in one place. The missing code is `file-too-large`, which needs a file over 1 MiB. The step 8 tests cover it in memory, with the message `file:<path>#"<text>" points at a file over 1 MiB, so its text isn't searched; point at a smaller file`. `clean.txt` shows every count row with nothing to report, and the two `.json` files are the same reports as JSON.
+
+  One thing to look for as you read: messages quote things in one of two ways. Text quoted as written, which `check` couldn't read or is pointing at, goes in double quotes (`"## Intent"`, `"test:signing"`, `"why:"`). Things shown in their usual form go bare: pointers, paths, IDs and citations (`file:test/worker.test.ts`, `src/jobs/`, `[D1 (sqlite-only)]`). The one exception is a citation, which is quoted as written but bare. If you'd rather have one rule, this is the cheapest moment to change it, before step 10's docs quote the messages.
+
+  **3.** Calls the spec left open, now written into it
+
+  These settle how the report reads, and `docs/prototype.md` now says each one:
+
+  - **`intent` always shows**, as `yes` or `no`, so a plan with no sections still reports something above `words`. Every other absent section is left out, and so is any count of zero after a row's first (`ideas  2 · 2 open`, with no `0 resolved`). One of a thing is singular: `map  1 part · 1 path`.
+  - **A word is any run of non-whitespace, markup included**, as the spec literally says. So `- **C3 (one-writer)**:` costs three words of the 2000, and inline code, fenced code and comments cost none. The pilots may want markup left out.
+  - **Budgets land on a line.** The whole file's breach goes on line 1, an item's on its own line, and a section's on its heading. A section counts its items by their letter, wherever they sit, which matches the JSON's `section`. So the message says `the plan has 9 principles; the budget is 7`, not that the heading holds nine.
+  - **A plan named in another case**, such as `KEYFRAMES.md`, is reported under that name, with its note on line 1. That settles the loose end left when the plan was approved. Two spellings side by side exit 2, which only an in-memory repo can show, since this disk can't hold both (D16).
+
+  **4.** An unexpected error is one line and exit 2, even after `run` returns
+
+  `run` now wraps every command, so a throw anywhere prints `keyframes: <message>` on one line and returns 2. `--help` now says `2  a usage or read problem, or an unexpected error`.
+
+  While testing that, I found a way past it. When `keyframes check | head` closes stdout on a report bigger than a pipe holds, node raises EPIPE after `run` has already returned. The bin then died with a stack trace and exit 1, on a plan with no errors at all, which breaks D13's rule that 1 only ever means errors. `bin/keyframes.js` now handles errors on its own streams: a stdout failure prints `keyframes: write EPIPE` and exits 2. An e2e test reproduces it with a 2000-item plan, and it fails if the handler is removed.
+
+  **5.** Determinism and the schema are each checked two ways
+
+  The test titled "byte-identical" runs `check` on the findings tree from three working directories: inside the tree, from the repo root with a relative path, and from a temp dir with an absolute path. It also checks a copy of the tree in another place, since an absolute path would be the same for every working directory that checks one tree. Its text and JSON bytes must match exactly. I also broke it on purpose by putting the root's path in the output, and it failed. A second test shows the same plan with CRLF, a BOM and tabs gives the same bytes. The bin's e2e test runs both golden trees from two working directories against the committed reports.
+
+  The schema validates through a small validator, about 100 lines inside `test/integration/report-schema.test.ts`, rather than a new dev dependency such as ajv. It reads only the keywords the schema uses and refuses any other, so the schema can't lean on one it would skip. It's also stricter than JSON Schema on purpose: a field the report writes but the schema doesn't declare fails the test. The shipped schema stays open, so a reader of a later report can ignore fields it doesn't know. Seven broken reports show the validator rejects what it should, and one more test checks that the schema's list of codes matches the spec's Findings table. If you'd rather lean on ajv, it's a dev-only swap.
