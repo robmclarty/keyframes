@@ -1,0 +1,14 @@
+keyframes.md
+
+intent        yes
+principles    2
+map           3 parts · 3 paths · 1 planned
+constraints   4 · 1 linked · 1 planned · 1 review · 1 unlinked
+scenarios     1 · 1 linked
+decisions     3 · 2 active · 1 superseded
+taste         1
+questions     2 · 1 open · 1 resolved
+ideas         1 · 1 open
+words         324 of 2000
+
+no findings

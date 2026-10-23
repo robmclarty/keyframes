@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "plan": "keyframes.md",
+  "intent": true,
+  "sections": {
+    "principles": {
+      "items": 2
+    },
+    "map": {
+      "items": 3,
+      "paths": 3,
+      "planned": 1,
+      "broken": 0
+    },
+    "constraints": {
+      "items": 4,
+      "linked": 1,
+      "planned": 1,
+      "review": 1,
+      "unlinked": 1,
+      "broken": 0
+    },
+    "scenarios": {
+      "items": 1,
+      "linked": 1,
+      "planned": 0,
+      "review": 0,
+      "unlinked": 0,
+      "broken": 0
+    },
+    "decisions": {
+      "items": 3,
+      "active": 2,
+      "superseded": 1
+    },
+    "taste": {
+      "items": 1
+    },
+    "questions": {
+      "items": 2,
+      "open": 1,
+      "resolved": 1
+    },
+    "ideas": {
+      "items": 1,
+      "open": 1,
+      "resolved": 0
+    }
+  },
+  "words": {
+    "count": 324,
+    "budget": 2000
+  },
+  "items": [
+    {
+      "id": "P1",
+      "slug": "local-first",
+      "section": "principles",
+      "line": 10,
+      "text": "The device holds the truth; the server only relays."
+    },
+    {
+      "id": "P2",
+      "slug": "boring-storage",
+      "section": "principles",
+      "line": 11,
+      "text": "Pick the storage nobody has to think about."
+    },
+    {
+      "id": "M1",
+      "slug": "sync",
+      "section": "map",
+      "line": 15,
+      "text": "The sync worker, the only writer.",
+      "paths": [
+        {
+          "path": "src/sync/",
+          "result": "resolved"
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "slug": "api",
+      "section": "map",
+      "line": 17,
+      "text": "The HTTP API the phone talks to.",
+      "paths": [
+        {
+          "path": "src/api/handler.ts",
+          "result": "resolved"
+        },
+        {
+          "path": "src/api/routes.ts",
+          "result": "planned"
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "slug": "history",
+      "section": "map",
+      "line": 19,
+      "text": "How a note's history is drawn; a concept for now."
+    },
+    {
+      "id": "C1",
+      "slug": "one-writer",
+      "section": "constraints",
+      "line": 23,
+      "text": "Only the sync worker writes to the database.",
+      "because": "two writers made the replay disagree with the live state.",
+      "held_by": [
+        {
+          "pointer": "file:test/writes.test.ts#\"only the sync worker writes\"",
+          "result": "resolved"
+        }
+      ],
+      "status": "linked"
+    },
+    {
+      "id": "C2",
+      "slug": "no-text-in-logs",
+      "section": "constraints",
+      "line": 26,
+      "text": "Logs never hold a note's text.",
+      "held_by": [
+        {
+          "pointer": "file:test/logs.test.ts",
+          "result": "planned"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "C3",
+      "slug": "small-payloads",
+      "section": "constraints",
+      "line": 28,
+      "text": "A sync payload stays under 64 KiB.",
+      "held_by": [
+        {
+          "pointer": "review",
+          "result": "review"
+        }
+      ],
+      "status": "review"
+    },
+    {
+      "id": "C4",
+      "slug": "utf8",
+      "section": "constraints",
+      "line": 30,
+      "text": "Notes are UTF-8 everywhere, per [P2 (boring-storage)].",
+      "status": "unlinked"
+    },
+    {
+      "id": "S1",
+      "slug": "offline-edit",
+      "section": "scenarios",
+      "line": 34,
+      "text": "Someone edits on a plane, lands, and sees the edit on the laptop.",
+      "held_by": [
+        {
+          "pointer": "file:test/offline.test.ts#\"edits made offline sync on reconnect\"",
+          "result": "resolved"
+        },
+        {
+          "pointer": "review",
+          "result": "review"
+        }
+      ],
+      "status": "linked"
+    },
+    {
+      "id": "D1",
+      "slug": "postgres",
+      "section": "decisions",
+      "line": 39,
+      "text": "Each device keeps its notes in Postgres.",
+      "because": "it was what we knew.",
+      "superseded_by": "D2"
+    },
+    {
+      "id": "D2",
+      "slug": "one-database",
+      "section": "decisions",
+      "line": 42,
+      "text": "Each device keeps its notes in one SQLite file.",
+      "because": "one file is easy to back up and to reason about, per [P2 (boring-storage)]."
+    },
+    {
+      "id": "D3",
+      "slug": "disk-encryption",
+      "section": "decisions",
+      "line": 44,
+      "text": "Notes rely on the device's disk encryption.",
+      "because": "a second layer of keys is one more thing to lose."
+    },
+    {
+      "id": "T1",
+      "slug": "quiet",
+      "section": "taste",
+      "line": 49,
+      "text": "Messages are short, and never cheerful."
+    },
+    {
+      "id": "Q1",
+      "slug": "merging",
+      "section": "questions",
+      "line": 53,
+      "text": "How should two edits to one line merge?"
+    },
+    {
+      "id": "Q2",
+      "slug": "encryption",
+      "section": "questions",
+      "line": 54,
+      "text": "Should notes be encrypted at rest?",
+      "resolved_by": "D3"
+    },
+    {
+      "id": "I1",
+      "slug": "web-viewer",
+      "section": "ideas",
+      "line": 59,
+      "text": "A read-only web view of one note, for sharing."
+    }
+  ],
+  "findings": [],
+  "errors": 0,
+  "warnings": 0,
+  "notes": 0
+}

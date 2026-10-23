@@ -227,7 +227,9 @@ These are starting values, and the pilots will tune them. Every breach is a warn
 | Scenarios, open Questions, and open Ideas | 10 each |
 | Active Decisions (not superseded) | 20 |
 
-A word is a run of non-whitespace characters.
+A word is a run of non-whitespace characters, markup included, so `- **C3 (one-writer)**:` is
+three. The whole file's breach is reported on line 1, an item's on its line, and a section's on its
+heading. A section counts its items by their letter, wherever they sit.
 
 ### What supports refinement
 
@@ -266,7 +268,8 @@ An unexpected error in any command prints one line, `keyframes: <message>`, and 
   - 2: a usage, read or internal problem: no plan, two plans whose names differ only in case, an
     unreadable or non-UTF-8 plan, a bad flag, a missing directory, an unexpected error.
 - **Output.** The text report goes to stdout. `--json` replaces it with one JSON object; the
-  schema is `schema/report.schema.json`. Usage errors go to stderr.
+  schema is `schema/report.schema.json`, which ships in the package. Usage and read problems go to
+  stderr.
 - **Determinism rules.**
   - Findings are sorted by line, then code, then message, with notes after errors and warnings.
     JSON keys come in a fixed order.
@@ -354,8 +357,11 @@ keyframes.md:12  note     alternate-form  "*" bullets read fine; the usual form 
 1 error · 1 warning · 3 notes
 ```
 
-Sections absent from the plan are left out. A clean run ends with `no findings`. Notes come last,
-one line for each kind of variant, naming every line that uses it, so a habit shows up once.
+`intent` always shows, `yes` or `no`. Other sections absent from the plan are left out, and so is
+any count of zero after a row's first. A clean run ends with `no findings`. Notes come last, one
+line for each kind of variant, naming every line that uses it, so a habit shows up once. A plan
+named in another case, such as `KEYFRAMES.md`, is reported under that name, with its note on
+line 1.
 
 The JSON report has the same counts and findings, and it also carries every item. A harness can
 then hand an agent the items that touch its work without parsing markdown, and without keyframes
@@ -397,6 +403,10 @@ knowing anything about the harness:
 }
 ```
 
+- `sections` has a count for each itemized section the plan has: its `items`, then what they break
+  down into, as the text report shows them. That's `paths`, `planned` and `broken` for the Map, the
+  five statuses for Constraints and Scenarios, `active` and `superseded` for Decisions, and `open`
+  and `resolved` for Questions and Ideas.
 - `items` lists every item in the plan, in line order. Each has its `id`, `slug` (if it has one),
   `section`, `line` and `text`, plus the sub-lines it has: `because`, `paths`, `held_by`,
   `superseded_by` and `resolved_by`. Sub-line keys are written with underscores, so `held-by`
@@ -408,9 +418,9 @@ knowing anything about the harness:
 - Every path and pointer carries a `result`: `resolved`, `planned` or `broken`, or `review` for
   the `review` pointer. Constraints and Scenarios also carry their item `status`.
 
-Within a `schema_version`, fields are only ever added, so the step
-`feat(report): count, budget, and render text and JSON` settles this item shape along with the
-schema.
+Within a `schema_version`, fields are only ever added, so a reader should ignore a field it doesn't
+know. The step `feat(report): count, budget, and render text and JSON` settled this item shape,
+along with the schema that describes it.
 
 ### init
 

@@ -1,0 +1,1 @@
+test('only the sync worker writes', () => {});

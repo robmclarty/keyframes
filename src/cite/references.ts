@@ -11,6 +11,26 @@ const KEYS: ReadonlySet<string> = new Set(['superseded-by', 'resolved-by']);
 // An ID, with an optional slug, bracketed or not: `D9`, `D9 (sqlite)` or `[D9 (sqlite)]`.
 const REFERENCE = /^(\[?)[ \t]*([A-Za-z])(\d+)(?:[ \t]*\(([^()]*)\))?[ \t]*(\]?)$/;
 
+/** A reference's value read into its parts, if it reads as an ID with an optional slug. */
+type Reference = {
+  readonly id: NonNullable<ReturnType<typeof readId>>;
+  readonly slugText: string | undefined;
+  readonly bracketed: boolean;
+};
+
+/** Reads a reference's value: `D9`, `D9 (sqlite)` or `[D9 (sqlite)]`, or undefined when it isn't one. */
+const readReference = (value: string): Reference | undefined => {
+  const match = REFERENCE.exec(value);
+  const [, open = '', letter = '', digits = '', slugText, close = ''] = match ?? [];
+  const id = readId(letter, digits);
+  return match === null || id === undefined || open.length !== close.length
+    ? undefined
+    : { id, slugText, bracketed: open !== '' };
+};
+
+/** The ID a `superseded-by:` or `resolved-by:` value names, in its usual form, if it names one. */
+export const referenceId = (value: string): string | undefined => readReference(value)?.id.id;
+
 /** Whether a sub-line's value is a reference rather than prose. */
 const isReference = (sub: SubLine): boolean => KEYS.has(sub.key);
 
@@ -37,12 +57,11 @@ const bad = (sub: SubLine, what: string): Finding =>
  * the decision's own, while the slug and brackets read fine with a note.
  */
 const reference = (sub: SubLine, items: Lookup): Finding[] => {
-  const match = REFERENCE.exec(sub.value);
-  const [, open = '', letter = '', digits = '', slugText, close = ''] = match ?? [];
-  const id = readId(letter, digits);
-  if (match === null || id === undefined || open.length !== close.length) {
+  const read = readReference(sub.value);
+  if (read === undefined) {
     return [bad(sub, `isn't a decision's ID`)];
   }
+  const { id, slugText, bracketed } = read;
   const item = items.get(id.id);
   if (item === undefined) {
     return [bad(sub, `names ${id.id}, but no item has that ID`)];
@@ -55,7 +74,7 @@ const reference = (sub: SubLine, items: Lookup): Finding[] => {
     return [slugMismatch(sub.value, item, sub.line)];
   }
   const varied =
-    open === '' && slugText === undefined
+    !bracketed && slugText === undefined
       ? []
       : [`"${sub.key}: ${sub.value}" reads fine; the usual form is the bare ID: - ${sub.key}: ${id.id}`];
   return [...id.notes, ...varied].map((note) => finding('alternate-form', sub.line, note));

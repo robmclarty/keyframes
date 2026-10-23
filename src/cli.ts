@@ -1,8 +1,12 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
 
+import { check, exitCode, findPlan } from './check/index.js';
 import { KEYFRAMES } from './name.js';
+import { diskRepo } from './repo/index.js';
+import { renderJson, renderText } from './report/index.js';
 
-/** Where the CLI writes: stdout for what was asked for, stderr for usage problems. */
+/** Where the CLI writes: stdout for what was asked for, stderr for usage and read problems and errors. */
 export type Io = {
   readonly stdout: (text: string) => void;
   readonly stderr: (text: string) => void;
@@ -45,7 +49,7 @@ dir is the repo root. It defaults to the working directory.
 Exit codes:
   0  no errors
   1  errors, or any warning under --strict
-  2  a usage or read problem
+  2  a usage or read problem, or an unexpected error
 `;
 
 /** Whether `name` is one of the commands. */
@@ -107,11 +111,36 @@ const packageVersion = (): string => {
 };
 
 /**
- * Runs the keyframes CLI on `argv`, without the node and script paths, and returns its exit code.
- *
- * It never exits the process or touches stdout itself, so tests can call it directly.
+ * Checks the plan in `dir`, or the working directory, writes the report to stdout, and returns the
+ * exit code it earns. A missing directory, or a plan that can't be found or read, is a read
+ * problem: it goes to stderr and exits 2.
  */
-export const run = (argv: readonly string[], io: Io): number => {
+const runCheck = (dir: string | undefined, flags: ReadonlySet<string>, io: Io): number => {
+  const root = resolve(dir ?? '.');
+  const stats = statSync(root, { throwIfNoEntry: false });
+  const problem =
+    stats === undefined
+      ? `there's no directory ${dir ?? '.'}`
+      : stats.isDirectory()
+        ? undefined
+        : `${dir ?? '.'} isn't a directory`;
+  if (problem !== undefined) {
+    io.stderr(`${KEYFRAMES}: ${problem}\n`);
+    return 2;
+  }
+  const repo = diskRepo(root);
+  const found = findPlan(repo);
+  if ('problem' in found) {
+    io.stderr(`${KEYFRAMES}: ${found.problem}\n`);
+    return 2;
+  }
+  const report = check(found.plan, repo);
+  io.stdout(flags.has('--json') ? renderJson(report) : renderText(report));
+  return exitCode(report, flags.has('--strict'));
+};
+
+/** Runs a command line once it's parsed, and returns its exit code. */
+const dispatch = (argv: readonly string[], io: Io): number => {
   const request = parse(argv);
   switch (request.kind) {
     case 'help':
@@ -124,7 +153,32 @@ export const run = (argv: readonly string[], io: Io): number => {
       io.stderr(`${KEYFRAMES}: ${request.problem}\n\n${USAGE}`);
       return 2;
     default:
+      if (request.command === 'check') {
+        return runCheck(request.dir, request.flags, io);
+      }
       io.stderr(`${KEYFRAMES}: ${request.command} isn't built yet\n`);
       return 2;
+  }
+};
+
+/** An unexpected error's message on one line, so the CLI's report of it is one line too. */
+const oneLine = (error: unknown): string => {
+  const message = (error instanceof Error ? error.message : String(error)).replaceAll(/\s*\n\s*/g, ' ').trim();
+  return message === '' ? 'an unexpected error' : message;
+};
+
+/**
+ * Runs the keyframes CLI on `argv`, without the node and script paths, and returns its exit code.
+ *
+ * It never exits the process or touches stdout itself, so tests can call it directly. An unexpected
+ * error prints one line, `keyframes: <message>`, and exits 2, since 1 must only ever mean the plan
+ * has errors, and 2 already means no verdict was reached.
+ */
+export const run = (argv: readonly string[], io: Io): number => {
+  try {
+    return dispatch(argv, io);
+  } catch (error) {
+    io.stderr(`${KEYFRAMES}: ${oneLine(error)}\n`);
+    return 2;
   }
 };

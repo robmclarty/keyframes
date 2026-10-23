@@ -1,0 +1,39 @@
+keyframes.md
+
+intent        no
+principles    9
+map           3 parts · 3 paths · 1 broken
+constraints   8 · 2 linked · 1 planned · 3 unlinked · 2 broken
+scenarios     1 · 1 unlinked
+decisions     2 · 1 active · 1 superseded
+taste         3
+words         386 of 2000
+
+keyframes.md:3   warning  no-intent             "## Intent" is empty; say why this project exists and who it's for
+keyframes.md:7   warning  over-budget           the plan has 9 principles; the budget is 7
+keyframes.md:13  warning  key-not-allowed       "held-by:" goes only on Constraints and Scenarios, so it isn't read on P4
+keyframes.md:24  warning  path-overlap          src/api/handler.ts in M2 is inside src/api/ in M1; give each path to one part
+keyframes.md:26  error    broken-path           src/jobs/ isn't in the repo; fix the path, or add "(new)" if it's planned
+keyframes.md:32  error    duplicate-id          C1 is already the ID on line 30; give this item a number no other item uses
+keyframes.md:35  error    duplicate-key         C2 already has "because:" on line 34; keep one "- because:" line
+keyframes.md:37  error    broken-pointer        file:test/worker.test.ts isn't in the repo; fix the path, or add "(new)" if it's planned
+keyframes.md:39  warning  built-not-new         file:src/api/handler.ts resolves now; drop "(new)"
+keyframes.md:41  warning  planned-text-missing  file:test/writes.test.ts#"batches writes" is planned, but its file exists without that text: a typo?
+keyframes.md:43  error    bad-pointer           "test:signing" isn't a pointer; held-by takes review or file:<path>, as in file:test/writes.test.ts
+keyframes.md:44  warning  not-an-item           "- **C7 model**" isn't read as an item; put its slug in parentheses: - **C7 (model)**: …
+keyframes.md:45  error    wrong-letter          P9 is under "## Constraint", but P items go under "## Principles"; move it there, or give it a C number
+keyframes.md:46  error    malformed-item        "- **C8 (bad slug!)**" starts like an item, but "bad slug!" isn't a slug, which is lowercase words joined by hyphens; the usual form is - **C8 (<slug>)**: …
+keyframes.md:48  warning  unknown-key           "why:" isn't a sub-line key; the keys are because, held-by, paths, superseded-by and resolved-by
+keyframes.md:52  error    broken-citation       [Q9 (gone)] cites Q9, but no item has that ID
+keyframes.md:52  warning  over-budget           S1's text has 69 words; the budget is 60
+keyframes.md:52  error    slug-mismatch         [D1 (sqlite-only)] cites D1, which is now (one-database)
+keyframes.md:56  warning  missing-because       D1 doesn't say why; add a line under it: - because: …
+keyframes.md:59  error    bad-reference         "superseded-by: C1" names C1, which isn't a decision; the usual form is - superseded-by: D<n>
+keyframes.md:63  warning  missing-slug          T1 has no slug, so citations to it can't notice a rename; add one: - **T1 (<slug>)**: …
+keyframes.md:67  warning  item-outside-section  T2 is under "## Notes", which holds no items; move it under "## Taste"
+keyframes.md:69  error    duplicate-section     "## Taste" repeats the section from line 61; merge them under one "## Taste"
+keyframes.md:73  warning  unclosed-fence        "```text" opens a fence that never closes, so the rest of the file reads as code; end it with a line of ```
+keyframes.md:9   note     alternate-form        "*" bullets read fine; the usual form is "-" (lines 9, 10, 11)
+keyframes.md:28  note     alternate-form        "## Constraint" reads fine; the usual form is "## Constraints"
+
+11 errors · 13 warnings · 4 notes

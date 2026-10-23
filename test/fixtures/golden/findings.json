@@ -1,0 +1,460 @@
+{
+  "schema_version": 1,
+  "plan": "keyframes.md",
+  "intent": false,
+  "sections": {
+    "principles": {
+      "items": 9
+    },
+    "map": {
+      "items": 3,
+      "paths": 3,
+      "planned": 0,
+      "broken": 1
+    },
+    "constraints": {
+      "items": 8,
+      "linked": 2,
+      "planned": 1,
+      "review": 0,
+      "unlinked": 3,
+      "broken": 2
+    },
+    "scenarios": {
+      "items": 1,
+      "linked": 0,
+      "planned": 0,
+      "review": 0,
+      "unlinked": 1,
+      "broken": 0
+    },
+    "decisions": {
+      "items": 2,
+      "active": 1,
+      "superseded": 1
+    },
+    "taste": {
+      "items": 3
+    }
+  },
+  "words": {
+    "count": 386,
+    "budget": 2000
+  },
+  "items": [
+    {
+      "id": "P1",
+      "slug": "local-first",
+      "section": "principles",
+      "line": 9,
+      "text": "The device holds the truth; the server only relays."
+    },
+    {
+      "id": "P2",
+      "slug": "boring-storage",
+      "section": "principles",
+      "line": 10,
+      "text": "Pick the storage nobody has to think about."
+    },
+    {
+      "id": "P3",
+      "slug": "small-steps",
+      "section": "principles",
+      "line": 11,
+      "text": "Ship the smallest change that works."
+    },
+    {
+      "id": "P4",
+      "slug": "quiet-failures",
+      "section": "principles",
+      "line": 12,
+      "text": "Fail where a person will see it, and nowhere else."
+    },
+    {
+      "id": "P5",
+      "slug": "one-way",
+      "section": "principles",
+      "line": 14,
+      "text": "Data flows from the device to the server, never back."
+    },
+    {
+      "id": "P6",
+      "slug": "readable",
+      "section": "principles",
+      "line": 15,
+      "text": "Code is read more than it's written."
+    },
+    {
+      "id": "P7",
+      "slug": "no-magic",
+      "section": "principles",
+      "line": 16,
+      "text": "Nothing happens that a reader can't find."
+    },
+    {
+      "id": "P8",
+      "slug": "offline",
+      "section": "principles",
+      "line": 17,
+      "text": "Every feature works on a plane."
+    },
+    {
+      "id": "M1",
+      "slug": "api",
+      "section": "map",
+      "line": 21,
+      "text": "The HTTP API the phone talks to.",
+      "paths": [
+        {
+          "path": "src/api/",
+          "result": "resolved"
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "slug": "handler",
+      "section": "map",
+      "line": 23,
+      "text": "The one request handler.",
+      "paths": [
+        {
+          "path": "src/api/handler.ts",
+          "result": "resolved"
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "slug": "jobs",
+      "section": "map",
+      "line": 25,
+      "text": "Background jobs.",
+      "paths": [
+        {
+          "path": "src/jobs/",
+          "result": "broken"
+        }
+      ]
+    },
+    {
+      "id": "C1",
+      "slug": "one-writer",
+      "section": "constraints",
+      "line": 30,
+      "text": "Only the sync worker writes to the database.",
+      "held_by": [
+        {
+          "pointer": "file:test/writes.test.ts#\"only the sync worker writes\"",
+          "result": "resolved"
+        }
+      ],
+      "status": "linked"
+    },
+    {
+      "id": "C1",
+      "slug": "no-text-in-logs",
+      "section": "constraints",
+      "line": 32,
+      "text": "Logs never hold a note's text.",
+      "status": "unlinked"
+    },
+    {
+      "id": "C2",
+      "slug": "small-payloads",
+      "section": "constraints",
+      "line": 33,
+      "text": "A sync payload stays small.",
+      "because": "phones are slow.",
+      "status": "unlinked"
+    },
+    {
+      "id": "C3",
+      "slug": "tested",
+      "section": "constraints",
+      "line": 36,
+      "text": "The worker has a test.",
+      "held_by": [
+        {
+          "pointer": "file:test/worker.test.ts",
+          "result": "broken"
+        }
+      ],
+      "status": "broken"
+    },
+    {
+      "id": "C4",
+      "slug": "handler",
+      "section": "constraints",
+      "line": 38,
+      "text": "The handler exists.",
+      "held_by": [
+        {
+          "pointer": "file:src/api/handler.ts",
+          "result": "resolved"
+        }
+      ],
+      "status": "linked"
+    },
+    {
+      "id": "C5",
+      "slug": "later",
+      "section": "constraints",
+      "line": 40,
+      "text": "Writes are batched.",
+      "held_by": [
+        {
+          "pointer": "file:test/writes.test.ts#\"batches writes\"",
+          "result": "planned"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "C6",
+      "slug": "pointer",
+      "section": "constraints",
+      "line": 42,
+      "text": "Requests are signed.",
+      "held_by": [
+        {
+          "pointer": "test:signing",
+          "result": "broken"
+        }
+      ],
+      "status": "broken"
+    },
+    {
+      "id": "P9",
+      "slug": "misplaced",
+      "section": "principles",
+      "line": 45,
+      "text": "This principle sits under Constraints."
+    },
+    {
+      "id": "C9",
+      "slug": "why",
+      "section": "constraints",
+      "line": 47,
+      "text": "Every write is logged.",
+      "status": "unlinked"
+    },
+    {
+      "id": "S1",
+      "slug": "offline-edit",
+      "section": "scenarios",
+      "line": 52,
+      "text": "Someone edits on a plane and lands, and the laptop has the edit, as [C1 (one-writer)] and [D1 (sqlite-only)] promise, with [Q9 (gone)] still open. The sync worker sends the edit the moment the phone sees a network, the laptop merges it, and the person never has to think about which device saw the change first, or whether any edit made in the air was lost along the way.",
+      "status": "unlinked"
+    },
+    {
+      "id": "D1",
+      "slug": "one-database",
+      "section": "decisions",
+      "line": 56,
+      "text": "Each device keeps its notes in one SQLite file."
+    },
+    {
+      "id": "D2",
+      "slug": "postgres",
+      "section": "decisions",
+      "line": 57,
+      "text": "The server used Postgres.",
+      "because": "it was what we knew.",
+      "superseded_by": "C1"
+    },
+    {
+      "id": "T1",
+      "section": "taste",
+      "line": 63,
+      "text": "Messages are short."
+    },
+    {
+      "id": "T2",
+      "slug": "stray",
+      "section": "taste",
+      "line": 67,
+      "text": "An item under a free-prose heading."
+    },
+    {
+      "id": "T3",
+      "slug": "calm",
+      "section": "taste",
+      "line": 71,
+      "text": "Never cheerful."
+    }
+  ],
+  "findings": [
+    {
+      "line": 3,
+      "severity": "warning",
+      "code": "no-intent",
+      "message": "\"## Intent\" is empty; say why this project exists and who it's for"
+    },
+    {
+      "line": 7,
+      "severity": "warning",
+      "code": "over-budget",
+      "message": "the plan has 9 principles; the budget is 7"
+    },
+    {
+      "line": 13,
+      "severity": "warning",
+      "code": "key-not-allowed",
+      "message": "\"held-by:\" goes only on Constraints and Scenarios, so it isn't read on P4"
+    },
+    {
+      "line": 24,
+      "severity": "warning",
+      "code": "path-overlap",
+      "message": "src/api/handler.ts in M2 is inside src/api/ in M1; give each path to one part"
+    },
+    {
+      "line": 26,
+      "severity": "error",
+      "code": "broken-path",
+      "message": "src/jobs/ isn't in the repo; fix the path, or add \"(new)\" if it's planned"
+    },
+    {
+      "line": 32,
+      "severity": "error",
+      "code": "duplicate-id",
+      "message": "C1 is already the ID on line 30; give this item a number no other item uses"
+    },
+    {
+      "line": 35,
+      "severity": "error",
+      "code": "duplicate-key",
+      "message": "C2 already has \"because:\" on line 34; keep one \"- because:\" line"
+    },
+    {
+      "line": 37,
+      "severity": "error",
+      "code": "broken-pointer",
+      "message": "file:test/worker.test.ts isn't in the repo; fix the path, or add \"(new)\" if it's planned"
+    },
+    {
+      "line": 39,
+      "severity": "warning",
+      "code": "built-not-new",
+      "message": "file:src/api/handler.ts resolves now; drop \"(new)\""
+    },
+    {
+      "line": 41,
+      "severity": "warning",
+      "code": "planned-text-missing",
+      "message": "file:test/writes.test.ts#\"batches writes\" is planned, but its file exists without that text: a typo?"
+    },
+    {
+      "line": 43,
+      "severity": "error",
+      "code": "bad-pointer",
+      "message": "\"test:signing\" isn't a pointer; held-by takes review or file:<path>, as in file:test/writes.test.ts"
+    },
+    {
+      "line": 44,
+      "severity": "warning",
+      "code": "not-an-item",
+      "message": "\"- **C7 model**\" isn't read as an item; put its slug in parentheses: - **C7 (model)**: …"
+    },
+    {
+      "line": 45,
+      "severity": "error",
+      "code": "wrong-letter",
+      "message": "P9 is under \"## Constraint\", but P items go under \"## Principles\"; move it there, or give it a C number"
+    },
+    {
+      "line": 46,
+      "severity": "error",
+      "code": "malformed-item",
+      "message": "\"- **C8 (bad slug!)**\" starts like an item, but \"bad slug!\" isn't a slug, which is lowercase words joined by hyphens; the usual form is - **C8 (<slug>)**: …"
+    },
+    {
+      "line": 48,
+      "severity": "warning",
+      "code": "unknown-key",
+      "message": "\"why:\" isn't a sub-line key; the keys are because, held-by, paths, superseded-by and resolved-by"
+    },
+    {
+      "line": 52,
+      "severity": "error",
+      "code": "broken-citation",
+      "message": "[Q9 (gone)] cites Q9, but no item has that ID"
+    },
+    {
+      "line": 52,
+      "severity": "warning",
+      "code": "over-budget",
+      "message": "S1's text has 69 words; the budget is 60"
+    },
+    {
+      "line": 52,
+      "severity": "error",
+      "code": "slug-mismatch",
+      "message": "[D1 (sqlite-only)] cites D1, which is now (one-database)"
+    },
+    {
+      "line": 56,
+      "severity": "warning",
+      "code": "missing-because",
+      "message": "D1 doesn't say why; add a line under it: - because: …"
+    },
+    {
+      "line": 59,
+      "severity": "error",
+      "code": "bad-reference",
+      "message": "\"superseded-by: C1\" names C1, which isn't a decision; the usual form is - superseded-by: D<n>"
+    },
+    {
+      "line": 63,
+      "severity": "warning",
+      "code": "missing-slug",
+      "message": "T1 has no slug, so citations to it can't notice a rename; add one: - **T1 (<slug>)**: …"
+    },
+    {
+      "line": 67,
+      "severity": "warning",
+      "code": "item-outside-section",
+      "message": "T2 is under \"## Notes\", which holds no items; move it under \"## Taste\""
+    },
+    {
+      "line": 69,
+      "severity": "error",
+      "code": "duplicate-section",
+      "message": "\"## Taste\" repeats the section from line 61; merge them under one \"## Taste\""
+    },
+    {
+      "line": 73,
+      "severity": "warning",
+      "code": "unclosed-fence",
+      "message": "\"```text\" opens a fence that never closes, so the rest of the file reads as code; end it with a line of ```"
+    },
+    {
+      "line": 9,
+      "severity": "note",
+      "code": "alternate-form",
+      "message": "\"*\" bullets read fine; the usual form is \"-\""
+    },
+    {
+      "line": 10,
+      "severity": "note",
+      "code": "alternate-form",
+      "message": "\"*\" bullets read fine; the usual form is \"-\""
+    },
+    {
+      "line": 11,
+      "severity": "note",
+      "code": "alternate-form",
+      "message": "\"*\" bullets read fine; the usual form is \"-\""
+    },
+    {
+      "line": 28,
+      "severity": "note",
+      "code": "alternate-form",
+      "message": "\"## Constraint\" reads fine; the usual form is \"## Constraints\""
+    }
+  ],
+  "errors": 11,
+  "warnings": 13,
+  "notes": 4
+}

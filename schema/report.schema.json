@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "keyframes check --json",
+  "description": "The report `keyframes check --json` writes: the plan's counts, every item with its text, sub-lines and results, and every finding. Within a schema_version, fields are only ever added, so a reader should ignore a field it doesn't know.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "plan",
+    "intent",
+    "sections",
+    "words",
+    "items",
+    "findings",
+    "errors",
+    "warnings",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "plan": {
+      "description": "The plan's name in the repo root, as the root spells it.",
+      "type": "string"
+    },
+    "intent": {
+      "description": "Whether the plan has an Intent section with something in it.",
+      "type": "boolean"
+    },
+    "sections": {
+      "description": "The itemized sections the plan has, each with its count of items and what they break down into. A section the plan doesn't have is left out.",
+      "type": "object",
+      "properties": {
+        "principles": { "$ref": "#/$defs/plainCount" },
+        "map": { "$ref": "#/$defs/mapCount" },
+        "constraints": { "$ref": "#/$defs/heldCount" },
+        "scenarios": { "$ref": "#/$defs/heldCount" },
+        "decisions": { "$ref": "#/$defs/decisionCount" },
+        "taste": { "$ref": "#/$defs/plainCount" },
+        "questions": { "$ref": "#/$defs/settledCount" },
+        "ideas": { "$ref": "#/$defs/settledCount" }
+      }
+    },
+    "words": {
+      "description": "Words outside code and comments, against the whole file's budget.",
+      "type": "object",
+      "required": ["count", "budget"],
+      "properties": {
+        "count": { "$ref": "#/$defs/count" },
+        "budget": { "$ref": "#/$defs/count" }
+      }
+    },
+    "items": {
+      "description": "Every item in the plan, in line order.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/item" }
+    },
+    "findings": {
+      "description": "Every finding, sorted by line, then code, then message, with notes after errors and warnings.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "errors": { "$ref": "#/$defs/count" },
+    "warnings": { "$ref": "#/$defs/count" },
+    "notes": { "$ref": "#/$defs/count" }
+  },
+  "$defs": {
+    "count": { "type": "integer", "minimum": 0 },
+    "line": {
+      "description": "A line of the plan, counting from 1.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "result": {
+      "description": "What a path or pointer resolved to; review is the review pointer, which a person checks.",
+      "enum": ["resolved", "planned", "broken", "review"]
+    },
+    "plainCount": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "items": { "$ref": "#/$defs/count" }
+      }
+    },
+    "mapCount": {
+      "type": "object",
+      "required": ["items", "paths", "planned", "broken"],
+      "properties": {
+        "items": { "$ref": "#/$defs/count" },
+        "paths": { "$ref": "#/$defs/count" },
+        "planned": { "$ref": "#/$defs/count" },
+        "broken": { "$ref": "#/$defs/count" }
+      }
+    },
+    "heldCount": {
+      "type": "object",
+      "required": ["items", "linked", "planned", "review", "unlinked", "broken"],
+      "properties": {
+        "items": { "$ref": "#/$defs/count" },
+        "linked": { "$ref": "#/$defs/count" },
+        "planned": { "$ref": "#/$defs/count" },
+        "review": { "$ref": "#/$defs/count" },
+        "unlinked": { "$ref": "#/$defs/count" },
+        "broken": { "$ref": "#/$defs/count" }
+      }
+    },
+    "decisionCount": {
+      "type": "object",
+      "required": ["items", "active", "superseded"],
+      "properties": {
+        "items": { "$ref": "#/$defs/count" },
+        "active": { "$ref": "#/$defs/count" },
+        "superseded": { "$ref": "#/$defs/count" }
+      }
+    },
+    "settledCount": {
+      "type": "object",
+      "required": ["items", "open", "resolved"],
+      "properties": {
+        "items": { "$ref": "#/$defs/count" },
+        "open": { "$ref": "#/$defs/count" },
+        "resolved": { "$ref": "#/$defs/count" }
+      }
+    },
+    "item": {
+      "description": "An item, with its ID, slug and keys in their usual form, whatever variant the plan used, and the sub-lines it has.",
+      "type": "object",
+      "required": ["id", "section", "line", "text"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[PMCSDTQI][1-9][0-9]*$" },
+        "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "section": {
+          "description": "The section the ID's letter belongs to.",
+          "enum": ["principles", "map", "constraints", "scenarios", "decisions", "taste", "questions", "ideas"]
+        },
+        "line": { "$ref": "#/$defs/line" },
+        "text": {
+          "description": "The item's prose without its ID or its sub-lines: its lines joined with a newline, their indentation removed.",
+          "type": "string"
+        },
+        "because": { "type": "string" },
+        "paths": {
+          "description": "A Map part's paths, each in its usual form; a directory ends in /.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "result"],
+            "properties": {
+              "path": { "type": "string" },
+              "result": { "$ref": "#/$defs/result" }
+            }
+          }
+        },
+        "held_by": {
+          "description": "A Constraint's or Scenario's pointers, each in its usual form.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pointer", "result"],
+            "properties": {
+              "pointer": { "type": "string" },
+              "result": { "$ref": "#/$defs/result" }
+            }
+          }
+        },
+        "status": {
+          "description": "On Constraints and Scenarios: what their pointers add up to.",
+          "enum": ["linked", "planned", "review", "unlinked", "broken"]
+        },
+        "superseded_by": {
+          "description": "The decision that replaces this one, by its ID, or the value as written when it names none.",
+          "type": "string"
+        },
+        "resolved_by": {
+          "description": "The decision that settled this question or idea, by its ID, or the value as written when it names none.",
+          "type": "string"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["line", "severity", "code", "message"],
+      "properties": {
+        "line": { "$ref": "#/$defs/line" },
+        "severity": { "enum": ["error", "warning", "note"] },
+        "code": {
+          "enum": [
+            "duplicate-section",
+            "malformed-item",
+            "wrong-letter",
+            "duplicate-id",
+            "duplicate-key",
+            "broken-citation",
+            "slug-mismatch",
+            "bad-pointer",
+            "broken-pointer",
+            "broken-path",
+            "bad-reference",
+            "file-too-large",
+            "no-intent",
+            "not-an-item",
+            "item-outside-section",
+            "missing-slug",
+            "unknown-key",
+            "key-not-allowed",
+            "missing-because",
+            "built-not-new",
+            "planned-text-missing",
+            "path-overlap",
+            "over-budget",
+            "unclosed-fence",
+            "alternate-form"
+          ]
+        },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}
