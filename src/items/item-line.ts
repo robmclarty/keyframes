@@ -1,5 +1,6 @@
 import type { SectionName } from '../scan/index.js';
 import { markerNote, quote, type Bullet } from './bullet.js';
+import { numberOf, readId, readSlug, type Id } from './id.js';
 import { toLetter, type Letter } from './kinds.js';
 
 /** An item line read into its parts, each in its usual form. */
@@ -57,8 +58,6 @@ const PLAIN = /^([A-Za-z])(\d+)([ \t]*)\(([^()]*)\)([ \t]*):([ \t]*)(.*)$/;
 const STARTS = /^(?:\*\*|__)([A-Za-z])(\d+)(?:[ \t]*[(:]|(?:\*\*|__)[ \t]*:)/;
 // A bold ID followed by words and no parentheses, as in `**C4 one-writer**`.
 const UNBRACKETED = /^(\*\*|__)([A-Za-z])(\d+)[ \t]+([A-Za-z0-9][A-Za-z0-9 _-]*?)[ \t]*\1/;
-// Lowercase letters and digits in words, joined by a hyphen, an underscore, or spaces, in any case.
-const SLUG = /^[A-Za-z0-9]+(?:(?:-|_| +)[A-Za-z0-9]+)*$/;
 const DASHES = new Set(['-', '–', '—']);
 
 /** The leading and trailing whitespace inside a slug's parentheses, which the usual form has none of. */
@@ -119,26 +118,6 @@ const fromPlain = (match: RegExpExecArray): Pieces => {
   };
 };
 
-/** A slug in its usual form, with a note for each variant in it, if it reads as one. */
-const readSlug = (written: string): { slug: string; notes: string[] } | undefined => {
-  const slug = written.trim();
-  if (!SLUG.test(slug)) {
-    return undefined;
-  }
-  const joined = 'the usual form joins its words with hyphens: (one-writer)';
-  const notes = [
-    slug.includes(' ') ? `spaces in a slug read fine; ${joined}` : undefined,
-    slug.includes('_') ? `underscores in a slug read fine; ${joined}` : undefined,
-  ];
-  return {
-    slug: slug.toLowerCase().replaceAll(/_| +/g, '-'),
-    notes: notes.filter((note) => note !== undefined),
-  };
-};
-
-/** An ID's number without its leading zeros. */
-const numberOf = (digits: string): string => digits.replace(/^0+(?=\d)/, '');
-
 /** The note for what follows the bold, unless it's the usual colon after it. */
 const separatorNote = (pieces: Pieces): string | undefined => {
   if (pieces.inner) {
@@ -153,7 +132,7 @@ const separatorNote = (pieces: Pieces): string | undefined => {
 };
 
 /** Every alternate-form note an item line earns, one for each kind of variant, in a fixed order. */
-const notesOf = (bullet: Bullet, pieces: Pieces, slugNotes: readonly string[]): string[] => {
+const notesOf = (bullet: Bullet, pieces: Pieces, idNotes: readonly string[]): string[] => {
   const spacing =
     bullet.space !== ' ' || pieces.gaps.some(([written, usual]) => written !== usual);
   const notes = [
@@ -162,10 +141,7 @@ const notesOf = (bullet: Bullet, pieces: Pieces, slugNotes: readonly string[]): 
     pieces.open === ''
       ? `an item without bold reads fine; the usual form puts its ID and slug in bold: ${USUAL}`
       : undefined,
-    /^0\d/.test(pieces.digits)
-      ? 'a leading zero in an ID reads fine; the usual form drops it: C3, not C03'
-      : undefined,
-    ...slugNotes,
+    ...idNotes,
     separatorNote(pieces),
     spacing ? `other spacing in an item line reads fine; the usual form is ${USUAL}` : undefined,
   ];
@@ -179,12 +155,15 @@ const malformed = (bullet: Bullet, reason: string, usual: string): ItemRead => (
 });
 
 /** Why pieces whose letter is an item letter still can't be read as an item, if they can't. */
-const problem = (pieces: Pieces, letter: Letter): readonly [string, string] | undefined => {
-  const number = numberOf(pieces.digits);
-  const usual = `${letter}${number} (<slug>)`;
-  if (number === '0') {
+const problem = (
+  pieces: Pieces,
+  letter: Letter,
+  id: Id | undefined,
+): readonly [string, string] | undefined => {
+  if (id === undefined) {
     return [`${letter}0 isn't an ID, since numbers start at 1`, `${letter}1 (<slug>)`];
   }
+  const usual = `${id.id} (<slug>)`;
   if (pieces.close !== pieces.open) {
     return [`its bold opens with "${pieces.open}" and closes with "${pieces.close}"`, usual];
   }
@@ -198,26 +177,28 @@ const problem = (pieces: Pieces, letter: Letter): readonly [string, string] | un
  * while a line with no bold that fails is just not an item.
  */
 const judge = (bullet: Bullet, pieces: Pieces): ItemRead => {
-  const known = toLetter(pieces.letter);
-  if (known === undefined) {
+  const letter = toLetter(pieces.letter)?.[0];
+  if (letter === undefined) {
     return { kind: 'other' };
   }
-  const [letter, section] = known;
-  const trouble = problem(pieces, letter);
-  if (trouble !== undefined) {
-    return pieces.open === '' ? { kind: 'other' } : malformed(bullet, ...trouble);
+  const id = readId(pieces.letter, pieces.digits);
+  const trouble = problem(pieces, letter, id);
+  if (trouble !== undefined || id === undefined) {
+    return pieces.open === '' || trouble === undefined
+      ? { kind: 'other' }
+      : malformed(bullet, ...trouble);
   }
   const slug = pieces.slug === undefined ? undefined : readSlug(pieces.slug);
   return {
     kind: 'item',
     item: {
-      id: `${letter}${numberOf(pieces.digits)}`,
-      letter,
-      section,
+      id: id.id,
+      letter: id.letter,
+      section: id.section,
       slug: slug?.slug,
       text: pieces.text,
       bold: pieces.open !== '',
-      notes: notesOf(bullet, pieces, slug?.notes ?? []),
+      notes: notesOf(bullet, pieces, [...id.notes, ...(slug?.notes ?? [])]),
       quote: quote(bullet),
     },
   };
