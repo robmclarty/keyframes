@@ -58,3 +58,7 @@ end, and an older step's detail is a scroll away. Add your own decision/event li
 you point at to say "I did that: the LLM helped, but those were my calls."
 `/plumbbob:finish` reads this for the report; `plumbbob finish` commits it with the build
 folder, so it rides the branch into the PR.)*
+
+- 2026-10-23 — plan committed · 9b687ce65
+
+  **Recommendation**: Approve it. The read checked that each of the eight answers lands where a builder will see it (Decisions D13 to D18, the wider case rule in [D9 (easy-to-get-right)](intent.md#d9), and the done-whens of steps 4, 8, 9 and 13), that step 13 builds before the pilots, and that every done-when names something a test or a person here can check; the one loose end, which line the note on a capitalized plan name points at, belongs to step 9's split.
