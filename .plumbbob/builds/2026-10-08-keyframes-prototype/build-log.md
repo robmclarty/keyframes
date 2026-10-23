@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 11 — test(dogfood): give this repo its own plan
+**Current step:** 13 — chore(release): publish a 0.x for the pilots to install
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -33,7 +33,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 8. feat(repo): resolve pointers and Map paths
 - ☑ 9. feat(report): count, budget, and render text and JSON
 - ☑ 10. feat(init): write the template, snippet and docs
-- ☐ 11. test(dogfood): give this repo its own plan
+- ☑ 11. test(dogfood): give this repo its own plan
 - ☐ 12. docs(pilots): run the pilots
 - ☐ 13. chore(release): publish a 0.x for the pilots to install
 
@@ -57,6 +57,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - [x] item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example
 - [ ] S1 and S2 in keyframes.md point at e2e tests that don't exist yet (first-plan, second-editor), so both scenarios stay planned until someone writes them
 - [ ] AGENTS.md doesn't carry the keyframes snippet yet, so agents here aren't told to read keyframes.md, and its generated checkride block lists active checks without the new keyframes slot
+- [ ] package.json's engines.pnpm (>=9.0.0) ships to every consumer, though it constrains only this repo's development; move it to devEngines or packageManager so a pilot's yarn or pnpm doesn't warn
 
 ## Harvest  *(run `/plumbbob:harvest` at each step boundary, after green)*
 
@@ -323,3 +324,83 @@ folder, so it rides the branch into the PR.)*
   **5.** init refuses any plan check would find, and leaves other failures to the one-line error
 
   `init` lists the root's names and refuses on any spelling of `keyframes.md`, so it never writes a second plan beside `KEYFRAMES.md`, which `check` would then refuse to read (D17). It also writes with the `wx` flag, so a plan that appears between the listing and the write still isn't overwritten. A missing directory or a file given as the directory exits 2 with the same message `check` gives, now that both commands share one root lookup in `src/cli.ts`. Any other failure, such as a read-only directory, goes through the one-line error and exits 2 (D13).
+
+- 2026-10-23 — step 11 checkpointed · f33be3963 — test(dogfood): give this repo its own plan (6m)
+
+  **Summary**: `keyframes.md` now sits at the repo root. It's the spec's Appendix C draft with only the fixes `check` and the docs lint asked for. A new `keyframes` slot in the gate runs `node bin/keyframes.js check --strict` last, after the `types` slot's `tsc --build` writes `dist/`, and the whole gate is green. At the pause, the owner approved it as it stood, without the candidate lines in highlight 3, so it lands as the draft plus those fixes.
+
+  1. The plan is the spec's draft, changed only where check or the lint asked
+  2. The new slot runs after the build that makes dist/, and it fails on a single warning
+  3. The draft predates five decisions and a constraint the build settled, and I left them for you
+  4. A few draft lines are judgment calls worth a second look
+  5. Two tangents parked, both outside this step's seam
+
+  **Readout**:
+
+  ```text
+  check        green: 11 of 11 checks
+  done-when    met
+  decisions    1 of 1 honored
+  constraints  11 of 11 honored
+  seam         held: 2 of 2 declared, no strays
+  diff         +125 -0 across 2 files
+  spent        6 min · 1 turn · 8s gate · green first run
+  ```
+
+  **Verdict**: ● Plumb
+
+  **Recommendation**: Edit `keyframes.md` yourself: read every line, take or cut the candidates in highlight 3, settle the D3 wording, then run `node bin/keyframes.js check --strict` and say looks good. The stop reserves this file for a person because P1 says agents propose and a person accepts, and the gate slot will hold whatever you write to the same standard from here on.
+
+  **1.** The plan is the spec's draft, changed only where check or the lint asked
+
+  The tool's first run on its own draft gave 12 `built-not-new` warnings, one for each `(new)` target that exists now: the ten Map paths and the pointers on C2 and C4. I dropped those markers. S1 and S2 keep theirs, since `test/e2e/first-plan.test.ts` and `test/e2e/second-editor.test.ts` don't exist yet, so both read as planned, which `--strict` allows.
+
+  The docs slot then failed: markdownlint read the `__tests__` in C4's pointer as bold (MD050). I wrapped that one pointer in backticks, which the spec says `check` ignores, and the JSON report shows C4 still `linked`. Every other line is the draft word for word. The report reads: 5 principles, 5 parts and 10 paths, 5 constraints (3 linked, 1 review, 1 unlinked), 3 scenarios (2 planned, 1 review), 7 decisions, 3 taste, 3 questions (2 open), 6 ideas, 960 of 2000 words, no findings.
+
+  **2.** The new slot runs after the build that makes dist/, and it fails on a single warning
+
+  `bin/keyframes.js` imports `../dist/cli.js`, so the slot has to wait for `types`. A custom check with no `order` would share the first wave with `types` and race it, so the entry sets `"order": "last"`, which checkride runs as its own wave after a barrier. To prove it, I deleted `dist/` and `tsconfig.tsbuildinfo` and ran the whole gate: `types` rebuilt `dist/`, and `keyframes` ran after every other slot and passed. Then I put one `(new)` back on `src/repo/`, and `checkride --only keyframes` went red on that single warning, which shows `--strict` is in effect. I restored the file, and the full gate is green (11 checks). `checkride doctor` lists the slot as `custom:keyframes`, installed.
+
+  One caveat: a narrowed run like `--only keyframes` skips `types`, so it checks whatever `dist/` is already there. The full gate and the stop hook both run `types` first.
+
+  **3.** The draft predates five decisions and a constraint the build settled, and I left them for you
+
+  The spec's draft was written before refine and the build settled D10, D11, D13, D17 and D19 in `intent.md`. Those are about the product, not this build, and the draft carries none of them. (D9 is already P5.) Since the stop reserves every line for you, I didn't add them. Instead I drafted them in the plan's format and checked them in a scratch copy of the repo: still no findings, C6 linked, 12 decisions and 1178 of 2000 words. To take any of them, paste it in, the decisions after D7 and C6 after C5:
+
+  ```markdown
+  - **C6 (exit-codes)**: Commands return their exit code, and only the bin sets it: 0 for no
+    errors, 1 for errors or any warning under `--strict`, and 2 when no verdict was reached.
+    - held-by: file:rules/no-process-exit.yml#"id: no-process-exit"
+
+  - **D8 (errors-for-unclear)**: Errors are for what's unclear or broken. A bullet is
+    `malformed-item` only when it starts like an item and still can't be read.
+    - because: ordinary bold text such as `- **C4 model**: …` must never fail a run.
+  - **D9 (crash-exits-2)**: An unexpected error prints one line, `keyframes: <message>`, and
+    exits 2.
+    - because: 1 must only ever mean the plan has errors, and 2 already means no verdict was
+      reached.
+  - **D10 (any-case-plan)**: `check` finds the plan in any case, with a note for any name but
+    `keyframes.md`. `init` still writes `keyframes.md`.
+    - because: the plan sits beside `AGENTS.md` and `README.md`, where people reach for capitals.
+  - **D11 (json-carries-items)**: `--json` carries every item in its usual form, with its text,
+    sub-lines and results.
+    - because: a harness can then hand an agent the items that touch its work without parsing
+      markdown.
+  - **D12 (prose-stays-prose)**: A line that could mean two things stays prose. A no-bold item
+    line counts only under its own section, and a bare `[C3]` is a citation only while C3 exists.
+    - because: `- S3 (uploads): …` in the Map and a markdown link like `[S3]` are ordinary prose.
+  ```
+
+  I left out the build's process decisions on purpose: D8 (spec-stays-live), D14 (npm-for-pilots), D15 (split-when-due), D16 (local-proof) and D18 (recruit-early). D12 (lenient-cli) is a smaller call, and it could join D11 if you want the command line's forgiveness on record.
+
+  **4.** A few draft lines are judgment calls worth a second look
+
+  - **D3 (file-pointers)** says `held-by:` "has one pointer kind, `file:`", yet C3 and S3 are held by `review`. That matches the spec's Pointers section, but a newcomer could read it as a contradiction. Something like "one pointer kind, `file:`, beside `review`" would close the gap.
+  - **C3 (no-runtime-deps)** is held by `review`. `rules/node-builtins-only.yml` holds only the `src/` imports half of it, not `package.json`, so `review` is the honest pointer unless you add a test over `package.json`.
+  - **C5 (stands-alone)** is unlinked, which counts but never warns (D5).
+  - **S1 and S2** stay planned until someone writes their e2e tests (parked as P13).
+  - **Q2, Q3 and Ideas I1 to I6** are as the spec wrote them on 2026-10-04 and since. Check that each is still open, and still something you'd want considered.
+
+  **5.** Two tangents parked, both outside this step's seam
+
+  P13 is the two missing e2e tests behind S1 and S2. P14 is `AGENTS.md`: it doesn't carry the keyframes snippet yet, so agents in this repo aren't told to read `keyframes.md`, and its generated checkride block still lists the active checks without `keyframes`. Both are for a later boundary.
