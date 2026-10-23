@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 4 — docs(design): point the spec at the plumbbob build and its decisions
+**Current step:** 5 — feat(scan): read markdown into blocks and sections
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -26,7 +26,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 1. chore(scaffold): realign the scaffold to the prototype spec
 - ☑ 2. feat(cli): add the CLI entry and the keyframes bin
 - ☑ 3. fix(cli): drop -v and make the CLI test titles name their arguments
-- ☐ 4. docs(design): point the spec at the plumbbob build and its decisions
+- ☑ 4. docs(design): point the spec at the plumbbob build and its decisions
 - ☐ 5. feat(scan): read markdown into blocks and sections
 - ☐ 6. feat(items): parse items and sub-lines
 - ☐ 7. feat(cite): resolve citations and references
@@ -47,6 +47,9 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - [ ] README.md and docs/archive/README.md still call docs/prototype.md 'the current plan', while AGENTS.md now names the plumbbob build as the plan and the spec as its reference
 - [ ] the spec's The report names `feat(report): count, budget, and render text and JSON` as the step that settles the item shape; when D15 splits step 9, point it at the piece that writes the schema
 - [ ] the spec's Appendix C draft still marks src/cli.ts and bin/keyframes.js (new), though step 2 built them; check would note built-not-new when step 11 runs it
+- [ ] step 6 will need Line, Section, SectionName and Finding re-exported from src/scan/index.ts, outside its seam: fallow rejects unused re-exports, so step 5's barrel exports only what its tests use; widen the seam when splitting step 6
+- [ ] a comment that starts a line and never closes hides the rest of the plan with no finding; the spec has unclosed-fence but no unclosed-comment
+- [ ] setext headings (a line of text over ---) render as h2 but the scanner reads only ## headings, so a setext Constraints heading is not a section; the pilots may show whether anyone writes them
 
 ## Harvest  *(run `/plumbbob:harvest` at each step boundary, after green)*
 
@@ -81,3 +84,4 @@ folder, so it rides the branch into the PR.)*
   **Recommendation**: Approve it. The read checked that each of the eight answers lands where a builder will see it (Decisions D13 to D18, the wider case rule in [D9 (easy-to-get-right)](intent.md#d9), and the done-whens of steps 4, 8, 9 and 13), that step 13 builds before the pilots, and that every done-when names something a test or a person here can check; the one loose end, which line the note on a capitalized plan name points at, belongs to step 9's split.
 
 - 2026-10-23 — step 3 checkpointed · 73e60e846 — fix(cli): drop -v and make the CLI test titles name their arguments (2m)
+- 2026-10-23 — step 4 checkpointed · 43b15e90f — docs(design): point the spec at the plumbbob build and its decisions (4m)
