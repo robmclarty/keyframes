@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 10 — feat(init): write the template, snippet and docs
+**Current step:** 11 — test(dogfood): give this repo its own plan
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -32,7 +32,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 7. feat(cite): resolve citations and references
 - ☑ 8. feat(repo): resolve pointers and Map paths
 - ☑ 9. feat(report): count, budget, and render text and JSON
-- ☐ 10. feat(init): write the template, snippet and docs
+- ☑ 10. feat(init): write the template, snippet and docs
 - ☐ 11. test(dogfood): give this repo its own plan
 - ☐ 12. docs(pilots): run the pilots
 - ☐ 13. chore(release): publish a 0.x for the pilots to install
@@ -53,8 +53,10 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - [x] an item line with no bullet (**C3 (x)**: … as a paragraph), or with its bullet indented one to three spaces, reads as prose with no finding
 - [x] IDs, slugs and keys read only ASCII letters and digits, so a slug like (café) is malformed-item; a pilot writing in another language would show whether that bites
 - [x] the spec's Variants table should list what steps 6 and 7 accept beyond it (other spacing in a sub-line, en and em dashes, a leading zero or a bare [D9] in a citation or reference), and Items should say a no-bold item needs its section's letter and an unknown key counts only in the usual shape
-- [ ] a ./ or doubled / in a pointer or Map path reads silently with no alternate-form note, unlike every other variant D9 lists
-- [ ] item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example
+- [x] a ./ or doubled / in a pointer or Map path reads silently with no alternate-form note, unlike every other variant D9 lists
+- [x] item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example
+- [ ] S1 and S2 in keyframes.md point at e2e tests that don't exist yet (first-plan, second-editor), so both scenarios stay planned until someone writes them
+- [ ] AGENTS.md doesn't carry the keyframes snippet yet, so agents here aren't told to read keyframes.md, and its generated checkride block lists active checks without the new keyframes slot
 
 ## Harvest  *(run `/plumbbob:harvest` at each step boundary, after green)*
 
@@ -83,6 +85,9 @@ Harvest results this boundary:
 - **tangent**: park 8 · an item line with no bullet (**C3 (x)**: … as a paragraph), or with its bullet indented one to three spaces, reads as prose with no finding → the pilots will show whether anyone writes an item without its bullet at column 0
 - **tangent**: park 9 · IDs, slugs and keys read only ASCII letters and digits, so a slug like (café) is malformed-item; a pilot writing in another language would show whether that bites → the pilots' non-TypeScript repo will show whether slugs want letters beyond ASCII
 - **blocker**: park 10 · the spec's Variants table should list what steps 6 and 7 accept beyond it (other spacing in a sub-line, en and em dashes, a leading zero or a bare [D9] in a citation or reference), and Items should say a no-bold item needs its section's letter and an unknown key counts only in the usual shape → the spec is the living reference (D8), and step 10's docs are written from it
+- 2026-10-23, at range 4 of 7's stop: 2 parked ideas, classified.
+- **tangent**: park 11 · a ./ or doubled / in a pointer or Map path reads silently with no alternate-form note, unlike every other variant D9 lists → `check` reads these paths correctly, and whether `./` earns a note is a call for the pilots' variant review
+- **tangent**: park 12 · item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example → the messages are correct and pinned by tests, so the wording can wait for the pilots' finding review
 
 ## Log
 
@@ -251,3 +256,70 @@ folder, so it rides the branch into the PR.)*
   The test titled "byte-identical" runs `check` on the findings tree from three working directories: inside the tree, from the repo root with a relative path, and from a temp dir with an absolute path. It also checks a copy of the tree in another place, since an absolute path would be the same for every working directory that checks one tree. Its text and JSON bytes must match exactly. I also broke it on purpose by putting the root's path in the output, and it failed. A second test shows the same plan with CRLF, a BOM and tabs gives the same bytes. The bin's e2e test runs both golden trees from two working directories against the committed reports.
 
   The schema validates through a small validator, about 100 lines inside `test/integration/report-schema.test.ts`, rather than a new dev dependency such as ajv. It reads only the keywords the schema uses and refuses any other, so the schema can't lean on one it would skip. It's also stricter than JSON Schema on purpose: a field the report writes but the schema doesn't declare fails the test. The shipped schema stays open, so a reader of a later report can ignore fields it doesn't know. Seven broken reports show the validator rejects what it should, and one more test checks that the schema's list of codes matches the spec's Findings table. If you'd rather lean on ajv, it's a dev-only swap.
+
+- 2026-10-23 — step 10 checkpointed · 9c761b56f — feat(init): write the template, snippet and docs (1 drift, <1m)
+- 2026-10-23 — range 4 of 7's stop recorded — read the template, `docs/format.md` and `docs/agents.md` the way a newcomer would, before this repo writes its own plan
+
+  **Summary**: Range 4 built `keyframes init` and the docs people learn the format from. `keyframes init [dir]` writes the template as `keyframes.md`, titled with the directory's name, then prints the agent snippet under one line saying where to paste it. It refuses with exit 2 when a plan is already there in any case, writing nothing, and the test titled "fresh template" shows `check` on its output finds exactly `no-intent`. `docs/format.md` teaches the format to people, and `docs/agents.md` gives the snippet and where it goes. The spec's Variants table now lists every variant `check` reads, and its Items section says what stays prose. A new test checks every example plan in the docs, and the suite is at 382 tests, all green.
+
+  1. One test sits outside the seam, where the layout rules put it
+  2. Every example in the docs is checked, and every report they show is pinned
+  3. Where a newcomer might trip, for this stop's read
+  4. The spec now lists every variant check reads, and what stays prose
+  5. init refuses any plan check would find, and leaves other failures to the one-line error
+
+  **Readout**:
+
+  ```text
+  steps        1 of 1 landed
+               - 10 9c761b5
+  check        green: 10 of 10 checks, 1 landing
+  done-when    met
+  decisions    honored
+               - D8 (spec-stays-live), D9 (easy-to-get-right)
+               - D13 (crash-exits-2), D17 (any-case-plan)
+               - D19 (prose-stays-prose)
+  constraints  11 of 11 honored
+  seam         strayed: 1 path outside step 10's seam
+               → test/integration/docs.test.ts
+  diff         +1103 -37 across 11 files
+  spent        50s · green first run at every landing · 1 drift warning
+  ```
+
+  **Verdict**: ◐ A hair off (seam strayed)
+
+  **Harvested**: 2 of 12 parked ideas open
+
+  - P11 · a ./ or doubled / in a pointer or Map path reads silently with no alternate-form note, unlike every other variant D9 lists → lean: tangent, `check` reads these paths correctly, and whether `./` earns a note is a call for the pilots' variant review
+  - P12 · item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example → lean: tangent, the messages are correct and pinned by tests, so the wording can wait for the pilots' finding review
+
+  **Recommendation**: Read `docs/format.md` top to bottom as a newcomer, then `docs/agents.md`, then run `node bin/keyframes.js init` on a scratch directory and check it, checking the harness table hardest; take both parks as tangents, and type the next run. Step 11's plan is the first one written from these docs, so a confusing passage is cheapest to fix now, and the tests pin every example and report, so an edit can't quietly drift from what `check` says.
+
+  **1.** One test sits outside the seam, where the layout rules put it
+
+  `test/integration/docs.test.ts` is the one path the seam row names. It checks the docs against `init` and `check` together, so it spans modules, and C10 (repo-layout) puts a test like that in `test/integration/`, not in a module's `__tests__/`. Every other change is inside the seam.
+
+  One slip in the record: I wrote the code before running `plumbbob build 10`, and entered the step just before the checkpoint. Nothing in the diff depends on it, but the step's recorded start time is late, so its `spent` reads shorter than the work took.
+
+  **2.** Every example in the docs is checked, and every report they show is pinned
+
+  Each markdown block in the docs is either the agent snippet, word for word, or an example plan with a comment above it saying what `check` finds there, such as `<!-- check: clean -->` or `<!-- check: no-intent, 8 alternate-form -->`. The comment is invisible when the docs render. The test runs `check` on each example against a small in-memory repo holding the files they point at, and fails on any block without a comment, so a new example can't slip past.
+
+  `docs/format.md` also shows three reports: the small plan's, the variants example's, and a plan with mistakes. Each must be byte for byte what `check` prints. The test also keeps three tables equal to the spec's (the sections, the variants and the finding codes with their severities), and checks that the spec's Appendix A and B are what `init` writes and prints. In `src/init/`, a second test opens the template's comments and checks its examples clean, so every example in it is safe to copy. I broke a doc example, a table row, a comment and a template path on purpose, one at a time, and each one failed a test.
+
+  **3.** Where a newcomer might trip, for this stop's read
+
+  - **The variants report says `8 notes` over seven note lines.** Notes of one kind share a line, as in `(lines 3, 4)`, and the summary counts each note. That's how step 9 settled it, and the spec's own example does the same, but it's the first thing a newcomer might count.
+  - **Each item-line note shows the usual form with C3's ID and slug**, as `- **C3 (one-writer)**: …`, even on C1 and C2. I parked that as P12.
+  - **The harness table in `docs/agents.md` is from memory.** It lists `AGENTS.md` (Codex, Cursor, Amp), `CLAUDE.md` with an `@AGENTS.md` import (Claude Code), `GEMINI.md` (Gemini CLI), `.github/copilot-instructions.md` (GitHub Copilot) and a `--read` conventions file (Aider). It says these are examples and that each agent's docs have the final word. Check it against the agents you actually use.
+  - **The template is the spec's Appendix A, unchanged.** `node bin/keyframes.js init <a scratch dir>` shows it the way an owner first sees it. Checking it right after lists all eight itemized sections at 0 (`principles    0`, `map           0 parts`, …) above the one `no-intent` warning, since the sections are there but empty. That's the first report every owner reads.
+
+  **4.** The spec now lists every variant check reads, and what stays prose
+
+  The Variants table gained an ID row (leading zeros, wherever an ID is written), the en and em dashes after the bold, "nothing when there's a slug", other spacing in a sub-line, and `[D9]` as a reference. A no-bold item line counts only under its own section. The rows now follow the order a plan is read in: file, heading, item line, ID, slug, sub-line, citation, reference.
+
+  Items has a new list of what stays prose (D19): a no-bold item line under another letter's section, bold with no slug and no colon, nested bullets not shaped like a key (`- Pros: fast`), and `[S3]` when there's no S3. Pointers now says `./` and doubled slashes are dropped without a note, which is what `check` does. I parked whether they should get a note as P11, since that's the only silent form besides case and backticks.
+
+  **5.** init refuses any plan check would find, and leaves other failures to the one-line error
+
+  `init` lists the root's names and refuses on any spelling of `keyframes.md`, so it never writes a second plan beside `KEYFRAMES.md`, which `check` would then refuse to read (D17). It also writes with the `wx` flag, so a plan that appears between the listing and the write still isn't overwritten. A missing directory or a file given as the directory exits 2 with the same message `check` gives, now that both commands share one root lookup in `src/cli.ts`. Any other failure, such as a read-only directory, goes through the one-line error and exits 2 (D13).

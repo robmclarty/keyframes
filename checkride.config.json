@@ -19,6 +19,13 @@
       "description": "ast-grep rule fixtures and snapshots",
       "note": "Every content rule in rules/ has a fixture in rule-tests/. Location rules are covered by test/integration/layout-rules.test.ts.",
       "order": 1
+    },
+    "keyframes": {
+      "command": "node",
+      "args": ["bin/keyframes.js", "check", "--strict"],
+      "description": "This repo's own keyframes.md, checked strictly",
+      "note": "bin/keyframes.js runs the CLI from dist/, which the types slot's tsc --build writes, so this check goes last, after that wave's barrier.",
+      "order": "last"
     }
   }
 }
