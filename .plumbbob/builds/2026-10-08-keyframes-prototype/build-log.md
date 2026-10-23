@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 7 — feat(cite): resolve citations and references
+**Current step:** 8 — feat(repo): resolve pointers and Map paths
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -29,7 +29,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 4. docs(design): point the spec at the plumbbob build and its decisions
 - ☑ 5. feat(scan): read markdown into blocks and sections
 - ☑ 6. feat(items): parse items and sub-lines
-- ☐ 7. feat(cite): resolve citations and references
+- ☑ 7. feat(cite): resolve citations and references
 - ☐ 8. feat(repo): resolve pointers and Map paths
 - ☐ 9. feat(report): count, budget, and render text and JSON
 - ☐ 10. feat(init): write the template, snippet and docs
@@ -87,3 +87,4 @@ folder, so it rides the branch into the PR.)*
 - 2026-10-23 — step 4 checkpointed · 43b15e90f — docs(design): point the spec at the plumbbob build and its decisions (4m)
 - 2026-10-23 — step 5 checkpointed · 9ead7bfb9 — feat(scan): read markdown into blocks and sections (9m)
 - 2026-10-23 — step 6 checkpointed · 6398818f1 — feat(items): parse items and sub-lines (1 drift, 8m)
+- 2026-10-23 — step 7 checkpointed · 64bde75d8 — feat(cite): resolve citations and references (1 drift, 3m)
