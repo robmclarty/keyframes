@@ -1,8 +1,8 @@
 # Spec: the keyframes prototype
 
-**Status:** draft, 2026-10-04, revised 2026-10-08. This replaces the first-slice spec as the
-first thing we build. That spec and its design documents are in [`archive/`](archive/README.md)
-as historical reference. Nothing here depends on them.
+**Status:** draft, 2026-10-04, revised 2026-10-08 and 2026-10-22. This replaces the first-slice
+spec as the first thing we build. That spec and its design documents are in
+[`archive/`](archive/README.md) as historical reference. Nothing here depends on them.
 
 ## Frame
 
@@ -83,7 +83,11 @@ as historical reference. Nothing here depends on them.
 
 ### The file
 
-- The plan is `keyframes.md` at the repo root.
+- The plan is `keyframes.md` at the repo root. `check` finds it in any case, by reading the root's
+  directory entries, *because* it sits beside files like `AGENTS.md` and `README.md`, where people
+  reach for capitals. Another spelling, such as `KEYFRAMES.md`, is a [variant](#variants). Two
+  spellings side by side are a read problem, since `check` never guesses which one is the plan.
+  `init` always writes `keyframes.md`.
 - `##` headings divide it into sections. A `###` or deeper heading stays inside its section, so
   people can group items under it. A `#` heading closes the current section.
 - The known sections are below. Heading text matches case-insensitively, after trimming. Any
@@ -183,11 +187,13 @@ bullets in an itemized section are read like this:
 The forms above are the usual ones, and the template, the docs, every message and the JSON report
 use them. `check` also accepts the common variants below. It reads each one exactly like its
 usual form, and gives it an `alternate-form` note that shows the usual form. A note never fails a
-run, even with `--strict`. Case never matters: headings, IDs, slugs and keys match in any case,
-without a note.
+run, even with `--strict`. Case never matters: headings, IDs, slugs, keys and the pointer keywords
+`review`, `file:` and `(new)` match in any case, without a note. Names in the repo are different:
+a path matches with exact case, and the plan's own name in another case is a variant.
 
 | Form | Usual | Also accepted, with a note |
 | --- | --- | --- |
+| Plan file | `keyframes.md` | The name in any other case: `KEYFRAMES.md` |
 | Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. `__` for bold, or no bold when a colon follows the slug. The colon inside the bold, a dash instead of it, or nothing. Other spacing, or leading zeros in the number |
 | Slug | `one-writer` | Spaces or underscores for the hyphens: `(one writer)` |
 | Sub-line | `- because: …`, two to five spaces in | A bold key, or a space or underscore for its hyphen: `held by:`. `path:` for `paths:`. A `*` or `+` bullet, at any indent under the item |
@@ -246,15 +252,19 @@ keyframes check [dir] [--json] [--strict]   check the plan against itself and th
 keyframes --help | --version
 ```
 
-`dir` defaults to the working directory. It's the repo root, and the plan is `<dir>/keyframes.md`.
+`dir` defaults to the working directory. It's the repo root, and the plan is `<dir>/keyframes.md`,
+found in any case ([The file](#the-file)).
+
+An unexpected error in any command prints one line, `keyframes: <message>`, and exits 2, *because*
+1 must only ever mean the plan has errors, and 2 already means no verdict was reached.
 
 ### check
 
 - **Exit codes.**
   - 0: no errors. Warnings are allowed, and notes always are.
   - 1: errors, or any warning under `--strict`.
-  - 2: a usage or read problem: no plan, an unreadable or non-UTF-8 plan, a bad flag, a missing
-    directory.
+  - 2: a usage, read or internal problem: no plan, two plans whose names differ only in case, an
+    unreadable or non-UTF-8 plan, a bad flag, a missing directory, an unexpected error.
 - **Output.** The text report goes to stdout. `--json` replaces it with one JSON object; the
   schema is `schema/report.schema.json`. Usage errors go to stderr.
 - **Determinism rules.**
@@ -398,8 +408,9 @@ knowing anything about the harness:
 - Every path and pointer carries a `result`: `resolved`, `planned` or `broken`, or `review` for
   the `review` pointer. Constraints and Scenarios also carry their item `status`.
 
-Within a `schema_version`, fields are only ever added, so step 7 settles this item shape along with
-the schema.
+Within a `schema_version`, fields are only ever added, so the step
+`feat(report): count, budget, and render text and JSON` settles this item shape along with the
+schema.
 
 ### init
 
@@ -446,57 +457,12 @@ This part is guidance, and an agent can ignore it. H3 measures how much it doesn
 
 ## Steps
 
-Steps 1–9 build the tool. Step 10 runs the pilots.
-
-1. [x] chore(scaffold): realign the scaffold to this spec, **done when:** the rules in `rules/`
-   and `AGENTS.md` cite this spec instead of `SPEC.md`; `centralize-subprocess` becomes
-   `no-subprocess` with no `src/extract/` exception, and `node-builtins-only` has no TypeScript
-   exception, since there's no extractor; the README and the `package.json` description match
-   the Frame above; and the gate is green
-   - seam: `rules/`, `rule-tests/`, `test/integration/layout-rules.test.ts`, `AGENTS.md`,
-     `README.md`, `package.json`
-2. [x] feat(cli): add the CLI entry and the `keyframes` bin, **done when:** `--help` and
-   `--version` work, and an unknown command or flag exits 2
-   - seam: `bin/keyframes.js`, `src/cli.ts`
-3. [ ] feat(scan): read markdown into blocks and sections, **done when:** fixtures pass for both
-   fence styles, a long fence containing a shorter one, an unclosed fence, multi-line comments,
-   CRLF, a BOM, tabs, a thematic break such as `* * *`, `###` grouping and a singular heading,
-   each with correct line numbers
-   - seam: `src/scan/`
-4. [ ] feat(items): parse items and sub-lines, **done when:** every item and sub-line finding in
-   the table has a fixture, including `malformed-item` against `not-an-item`,
-   `item-outside-section`, `missing-slug`, and continuation lines for both items and sub-lines;
-   and every item, slug and sub-line variant in [Variants](#variants) parses exactly like its
-   usual form, with one `alternate-form` note
-   - seam: `src/items/`
-5. [ ] feat(cite): resolve citations and references, **done when:** citations resolve in every
-   section and in sub-line values, but never inside code or comments; `broken-citation`,
-   `slug-mismatch` and `bad-reference` have fixtures; citation and reference variants resolve
-   like their usual forms, with a note; and bare `S3` or `D3.js` in prose produces no finding
-   - seam: `src/cite/`
-6. [ ] feat(repo): resolve pointers and Map paths, **done when:** each status has found, missing
-   and planned fixtures; a wrong-case path is broken on every OS; a CRLF file matches LF text;
-   absolute, `..` and escaping paths error; and `built-not-new`, `planned-text-missing` and
-   `path-overlap` have fixtures
-   - seam: `src/repo/`, `test/fixtures/repos/`
-7. [ ] feat(report): count, budget, and render text and JSON, **done when:** golden tests pass
-   for both outputs; the JSON validates against the schema and carries every item with its text,
-   sub-lines and results; exit codes and `--strict` behave as specified, and notes never fail a
-   run and group by kind in the text report; and a determinism test runs `check` from two
-   working directories and compares the bytes
-   - seam: `src/check/`, `src/report/`, `schema/report.schema.json`
-8. [ ] feat(init): write the template, snippet and docs, **done when:** `init` writes only when no
-   plan exists; `check` on a fresh template yields exactly `no-intent`; `docs/format.md` (the
-   format, written for people) and `docs/agents.md` (the snippet and where it goes) exist; and a
-   test checks every example plan in them
-   - seam: `src/init/`, `docs/format.md`, `docs/agents.md`
-9. [ ] test(dogfood): give this repo its own plan, **done when:** a person has edited the
-   [draft](#appendix-c-this-repos-plan-a-draft) and committed it as `keyframes.md`, and
-   `keyframes check --strict` runs green in this repo's gate
-   - seam: `keyframes.md`, the gate's config
-10. [ ] docs(pilots): run the pilots, **done when:** `docs/pilots.md` holds each repo's results
-    and the closing decision
-    - seam: `docs/pilots.md`
+The steps that build the prototype, and the decisions they settled, live in this repo's plumbbob
+build:
+[`.plumbbob/builds/2026-10-08-keyframes-prototype/intent.md`](../.plumbbob/builds/2026-10-08-keyframes-prototype/intent.md).
+Each step's done-when cites the section of this spec it's measured against. This spec stays the
+living reference for the format and the tool, so a change here that moves a step goes through
+`/plumbbob:refine`.
 
 ## Pilots
 
@@ -673,9 +639,9 @@ This project's intent is in `keyframes.md`. Read it before you change code.
 
 ## Appendix C: this repo's plan, a draft
 
-The starting point for step 9, and the fullest example of the format. A person edits it before
-it's committed; it isn't committed as written. Targets that don't exist yet are marked `(new)`.
-The three rule files under C1 exist today.
+The starting point for the step `test(dogfood): give this repo its own plan`, and the fullest
+example of the format. A person edits it before it's committed; it isn't committed as written.
+Targets that don't exist yet are marked `(new)`. The three rule files under C1 exist today.
 
 ````markdown
 # keyframes

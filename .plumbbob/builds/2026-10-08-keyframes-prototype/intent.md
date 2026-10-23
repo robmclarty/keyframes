@@ -77,7 +77,7 @@ Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and st
    - seam: `rules/`, `rule-tests/`, `test/integration/layout-rules.test.ts`, `AGENTS.md`, `README.md`, `package.json`
 2. [x] feat(cli): add the CLI entry and the keyframes bin, **done when:** `--help` and `--version` work, and an unknown command or flag exits 2
    - seam: `bin/keyframes.js`, `src/cli.ts`
-3. [ ] fix(cli): drop -v and make the CLI test titles name their arguments, **done when:** `keyframes -v` exits 2 as an unknown flag while `--version` still prints the version; and every test in `src/__tests__/cli.test.ts` is titled with its whole command line, with no two titles alike
+3. [x] fix(cli): drop -v and make the CLI test titles name their arguments, **done when:** `keyframes -v` exits 2 as an unknown flag while `--version` still prints the version; and every test in `src/__tests__/cli.test.ts` is titled with its whole command line, with no two titles alike
    - seam: `src/cli.ts`, `src/__tests__/cli.test.ts`
    - model: sonnet (mechanical, fully specified by the done-when)
 4. [ ] docs(design): point the spec at the plumbbob build and its decisions, **done when:** the spec's `## Steps` section is a short pointer to this plan; the spec names steps by title, never by number; the spec carries the calls settled here: exit 2 for an internal problem ([D13 (crash-exits-2)](#d13)), the plan file found in any case ([D17 (any-case-plan)](#d17)), and pointer keywords in any case ([D9 (easy-to-get-right)](#d9)); and `AGENTS.md` says the build plan and its record live in `.plumbbob/builds/2026-10-08-keyframes-prototype/`

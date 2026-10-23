@@ -50,8 +50,13 @@ Active checks in this repo: types, lint, struct, dead, test, docs, links, spell,
 
 ## Current plan
 
-[`docs/prototype.md`](docs/prototype.md) is the current plan. [`docs/archive/`](docs/archive/)
-is historical reference, not current intent, so don't build from it.
+The build plan and its record live in
+[`.plumbbob/builds/2026-10-08-keyframes-prototype/`](.plumbbob/builds/2026-10-08-keyframes-prototype/):
+`intent.md` holds the steps, with the decisions and constraints they build to, and `build-log.md`
+records each step as it lands. [`docs/prototype.md`](docs/prototype.md) is the spec the steps are
+measured against, and the living reference for the format and the tool.
+[`docs/archive/`](docs/archive/) is historical reference, not current intent, so don't build from
+it.
 
 ## Repository layout
 
