@@ -7,7 +7,8 @@ around a specific set of existing tools.
 On 2026-10-04 the concept was reframed. keyframes is now first a way for people to express a
 project's intent so that other people can build on it and agents can be guided by it. The
 deterministic checks still matter, but they come after that. It also stands alone and isn't tied
-to any earlier project. The current plan is [`docs/prototype.md`](../prototype.md).
+to any earlier project. This repo's plan is now [`keyframes.md`](../../keyframes.md), and
+[`docs/prototype.md`](../prototype.md) is the spec the prototype was built to.
 
 | Document | What it was |
 | --- | --- |

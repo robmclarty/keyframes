@@ -68,9 +68,12 @@ When `check` finds something, a person decides what's wrong: the plan, the code 
 
 ## Status
 
-Design stage. The prototype isn't built yet.
+The prototype is built, and three pilot repos try it next, to decide what comes after it.
 
-- [`docs/prototype.md`](docs/prototype.md) is the current plan: the prototype we build first,
-  and the pilots that decide what comes next.
+- [`keyframes.md`](keyframes.md) is this repo's own plan, and its gate runs
+  `keyframes check --strict` on it.
+- [`docs/prototype.md`](docs/prototype.md) is the spec the prototype was built to: the format,
+  the tool, and the pilots.
+- [`docs/pilots.md`](docs/pilots.md) is where the pilots record what they find.
 - [`docs/archive/`](docs/archive/) holds the first design and its research. It's historical
   reference, not current intent.

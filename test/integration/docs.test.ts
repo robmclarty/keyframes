@@ -154,6 +154,11 @@ describe('the docs and the spec agree with init', () => {
     expect(fences(doc('agents.md')).filter((fence) => fence.body === SNIPPET)).toHaveLength(1);
   });
 
+  test("this repo's AGENTS.md carries the snippet init prints, word for word, as a block of its own", () => {
+    const agents = readFileSync(new URL('../../AGENTS.md', import.meta.url), 'utf8');
+    expect(agents).toContain(`\n\n${SNIPPET}\n`);
+  });
+
   test("the spec's Appendix A is the template init writes, and its Appendix B the snippet init prints", () => {
     expect(fenceAfter(SPEC, '## Appendix A: the template')?.body).toBe(template('<directory name>'));
     expect(fenceAfter(SPEC, '## Appendix B: the agent snippet')?.body).toBe(SNIPPET);
