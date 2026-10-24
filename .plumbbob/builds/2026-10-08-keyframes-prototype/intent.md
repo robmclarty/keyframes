@@ -55,6 +55,8 @@ bin/keyframes.js ──► src/cli.ts       parses the command line, returns the
 - <a id="d17"></a>**D17 (any-case-plan)**: `check` finds the plan by reading the root's directory entries in any case, with an `alternate-form` note for any name but `keyframes.md`, and two spellings side by side is a read problem that exits 2; `init` still writes `keyframes.md`, *because* the plan sits beside `AGENTS.md` and `README.md`, where people reach for capitals.
 - <a id="d18"></a>**D18 (recruit-early)**: The pilot repos and second readers get lined up while steps 3 to 10 are built: two of your own agent-heavy TypeScript tools and one non-TypeScript repo from someone else, each with a named second reader, *because* recruiting has the longest lead time in the build, and none of it lives in the repo.
 - <a id="d19"></a>**D19 (prose-stays-prose)**: A no-bold item line is an item only under its own letter's section, an unknown sub-line key counts only in the usual form's shape (a `-` bullet two to five spaces in, a lowercase key, a colon and a space), and a bare `[C3]` is a citation only while C3 exists, *because* `- S3 (uploads): …` in the Map, `- Pros: fast` under a decision and a markdown link like `[S3]` are ordinary prose, and [D10 (errors-for-unclear)](#d10) keeps prose from failing a run.
+- <a id="d20"></a>**D20 (claude-imports-agents)**: This repo's `CLAUDE.md` pulls in `AGENTS.md` with an `@AGENTS.md` line, *because* Claude Code reads `CLAUDE.md` and not `AGENTS.md`, and it doesn't follow a markdown link, so without the import the snippet reaches every agent but the one this repo runs most.
+- <a id="d21"></a>**D21 (snippet-runs-npx)**: The snippet's last line runs `npx @robmclarty/keyframes check`, and this repo's `AGENTS.md` adds that `pnpm check` runs it here, *because* pilots install with npx ([D14 (npm-for-pilots)](#d14)), so `keyframes` isn't on their PATH, and the bare npm name `keyframes` is an unrelated package that `npx keyframes` would fetch instead.
 
 ## Constraints
 
@@ -72,7 +74,7 @@ bin/keyframes.js ──► src/cli.ts       parses the command line, returns the
 
 ## Steps
 
-Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and step 3 closes the findings from step 2's review. Each later step names the spec section its done-when is measured against. Step 13 was added later and builds before step 12. Steps 14 to 16 were added when the pilots moved out of the build, to close its loose ends; [Build order](#build-order) holds the sequence.
+Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and step 3 closes the findings from step 2's review. Each later step names the spec section its done-when is measured against. Step 13 was added later and builds before step 12. Steps 14 to 16 were added when the pilots moved out of the build, to close its loose ends, and steps 17 to 19 came from the three parks range 8's stop harvested as blockers; [Build order](#build-order) holds the sequence.
 
 1. [x] chore(scaffold): realign the scaffold to the prototype spec, **done when:** the rules in `rules/` and `AGENTS.md` cite the prototype spec; `no-subprocess` has no `src/extract/` exception and `node-builtins-only` no TypeScript exception; the README and the `package.json` description match the Frame; and the gate is green
    - seam: `rules/`, `rule-tests/`, `test/integration/layout-rules.test.ts`, `AGENTS.md`, `README.md`, `package.json`
@@ -115,9 +117,18 @@ Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and st
 15. [x] docs(agents): give this repo's agents the keyframes snippet, **done when:** `AGENTS.md` carries the snippet `keyframes init` prints, word for word, and a test keeps it so; its checkride block, refreshed with `checkride agent-setup --no-hook` rather than by hand, lists the `keyframes` slot among the active checks; and `README.md`'s Status and `docs/archive/README.md` name `keyframes.md` as this repo's plan and `docs/prototype.md` as the spec it was built to
     - seam: `AGENTS.md`, `README.md`, `docs/archive/README.md`, `test/integration/docs.test.ts`
     - model: sonnet (doc edits and one test)
-16. [ ] chore(package): keep the pnpm engine out of the published package, **done when:** `package.json`'s `engines` names only `node`; this repo still states the pnpm it develops with, in a field consumers don't check (`packageManager` or `devEngines`); `npm pack --dry-run` still lists only what step 13's done-when allows; and the gate is green
+16. [x] chore(package): keep the pnpm engine out of the published package, **done when:** `package.json`'s `engines` names only `node`; this repo still states the pnpm it develops with, in a field consumers don't check (`packageManager` or `devEngines`); `npm pack --dry-run` still lists only what step 13's done-when allows; and the gate is green
     - seam: `package.json`
     - model: sonnet (one field moves)
+17. [ ] docs(dogfood): finish I6 in this repo's plan, **done when:** `keyframes.md`'s I6 (drafting-interview) reads "An agent that interviews the owner, or drafts a first plan from existing notes, for a person to edit. Only after the pilots, since it would muddy H1.", the spec draft's wording, which its owner approved at range 8's stop; nothing else in `keyframes.md` changes; and `keyframes check --strict` stays green
+    - seam: `keyframes.md`
+    - model: sonnet (one line its owner already approved)
+18. [ ] docs(agents): have Claude Code read AGENTS.md, **done when:** `CLAUDE.md` pulls in `AGENTS.md` with an `@AGENTS.md` line ([D20 (claude-imports-agents)](#d20)), and a test in `test/integration/docs.test.ts` keeps it so
+    - seam: `CLAUDE.md`, `test/integration/docs.test.ts`
+    - model: sonnet (one line and one test)
+19. [ ] fix(init): give the snippet a check command that runs where keyframes isn't installed, **done when:** the snippet's last line runs `npx @robmclarty/keyframes check` ([D21 (snippet-runs-npx)](#d21)), word for word the same in `src/init/snippet.ts`, the spec's [Appendix B](../../../docs/prototype.md#appendix-b-the-agent-snippet), `docs/agents.md` and `AGENTS.md`, as the docs tests already hold; `docs/agents.md` names the same command in what the snippet asks of agents, and no longer says the snippet names no tool; `AGENTS.md` says, after the snippet, that in this repo `pnpm check` runs it as its `keyframes` check; and the gate is green
+    - seam: `src/init/snippet.ts`, `docs/prototype.md`, `docs/agents.md`, `AGENTS.md`
+    - model: sonnet (one line in four places, and a note)
 
 ## Build order
 
@@ -128,11 +139,11 @@ order. `plumbbob order 7 8 5 10 6` (`/plumbbob:order`) writes it, and `status`, 
 `/plumbbob:build`, and the card's Next Up agree. A step keeps its number for life; this
 line is where the sequence lives.)*
 
-12, 14, 15, 16
+17, 18, 19
 
 ## Build ranges
 
-Type `/plumbbob:run` once per range: the first lands the CLI fix, the spec's new wording and the scanner, the parser lands in one run, the report and the docs each stop for your read, the next three stop for things only you can do, and the last lands the loose ends before you publish.
+Type `/plumbbob:run` once per range: the first lands the CLI fix, the spec's new wording and the scanner, the parser lands in one run, the report and the docs each stop for your read, the next three stop for things only you can do, the eighth lands the loose ends, and the last lands what range 8's stop found before you publish.
 
 1. `/plumbbob:build 3-5`, **stop:** review the CLI fix, the spec's new wording and the scanner, then split step 6 with `/plumbbob:step` into items with their findings, then the variants
    - model: opus
@@ -147,6 +158,8 @@ Type `/plumbbob:run` once per range: the first lands the CLI fix, the spec's new
    - model: sonnet
 7. `/plumbbob:build 12`, **stop:** at step 12's pause, read the pilot record the way a pilot owner would, before the loose ends land
 8. `/plumbbob:build 14-16`, **stop:** review the scenario tests, the snippet in `AGENTS.md` and `package.json`, then `/plumbbob:finish`, and publish a patch for the pilots yourself (`/version patch`, then `npm publish`)
+   - model: sonnet
+9. `/plumbbob:build 17-19`, **stop:** review I6, `CLAUDE.md` and the snippet's new last line, then `/plumbbob:finish`, and publish a patch for the pilots yourself (`/version patch`, then `npm publish`)
    - model: sonnet
 
 ## Open questions

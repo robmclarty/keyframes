@@ -116,3 +116,4 @@ people write that down, so that others, human or agent, can work from it and ref
 - **I5 (scoped-plans)**: A plan scoped to one part or capability, such as a package or a skill's
   folder, checked the same way and citing the root plan.
 - **I6 (drafting-interview)**: An agent that interviews the owner, or drafts a first plan from
+  existing notes, for a person to edit. Only after the pilots, since it would muddy H1.

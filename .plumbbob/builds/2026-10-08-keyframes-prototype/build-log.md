@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 16 — chore(package): keep the pnpm engine out of the published package
+**Current step:** 17 — docs(dogfood): finish I6 in this repo's plan
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -38,7 +38,10 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 13. chore(release): publish a 0.x for the pilots to install
 - ☑ 14. test(e2e): hold the first-plan and second-editor scenarios
 - ☑ 15. docs(agents): give this repo's agents the keyframes snippet
-- ☐ 16. chore(package): keep the pnpm engine out of the published package
+- ☑ 16. chore(package): keep the pnpm engine out of the published package
+- ☐ 17. docs(dogfood): finish I6 in this repo's plan
+- ☐ 18. docs(agents): have Claude Code read AGENTS.md
+- ☐ 19. fix(init): give the snippet a check command that runs where keyframes isn't installed
 
 ## Park list
 
@@ -61,9 +64,9 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - [x] S1 and S2 in keyframes.md point at e2e tests that don't exist yet (first-plan, second-editor), so both scenarios stay planned until someone writes them
 - [x] AGENTS.md doesn't carry the keyframes snippet yet, so agents here aren't told to read keyframes.md, and its generated checkride block lists active checks without the new keyframes slot
 - [x] package.json's engines.pnpm (>=9.0.0) ships to every consumer, though it constrains only this repo's development; move it to devEngines or packageManager so a pilot's yarn or pnpm doesn't warn
-- [ ] keyframes.md's I6 (drafting-interview) stops mid-sentence at 'drafts a first plan from'; the spec's draft goes on 'existing notes, for a person to edit. Only after the pilots, since it would muddy H1', so a person should finish or cut it
-- [ ] CLAUDE.md links to AGENTS.md as a markdown link rather than an @AGENTS.md import, so Claude Code sessions here never load the snippet (this session's context held CLAUDE.md but not AGENTS.md); docs/agents.md itself recommends the @AGENTS.md line
-- [ ] the snippet's last line says to run keyframes check, which isn't on PATH in this repo; here pnpm check runs it as the keyframes slot, or node bin/keyframes.js check by hand
+- [x] keyframes.md's I6 (drafting-interview) stops mid-sentence at 'drafts a first plan from'; the spec's draft goes on 'existing notes, for a person to edit. Only after the pilots, since it would muddy H1', so a person should finish or cut it
+- [x] CLAUDE.md links to AGENTS.md as a markdown link rather than an @AGENTS.md import, so Claude Code sessions here never load the snippet (this session's context held CLAUDE.md but not AGENTS.md); docs/agents.md itself recommends the @AGENTS.md line
+- [x] the snippet's last line says to run keyframes check, which isn't on PATH in this repo; here pnpm check runs it as the keyframes slot, or node bin/keyframes.js check by hand
 
 ## Harvest  *(run `/plumbbob:harvest` at each step boundary, after green)*
 
@@ -99,6 +102,10 @@ Harvest results this boundary:
 - **blocker**: park 13 · S1 and S2 in keyframes.md point at e2e tests that don't exist yet (first-plan, second-editor), so both scenarios stay planned until someone writes them → the refine already folded it into the plan as step 14, which writes both e2e tests and drops S1's and S2's `(new)` markers
 - **blocker**: park 14 · AGENTS.md doesn't carry the keyframes snippet yet, so agents here aren't told to read keyframes.md, and its generated checkride block lists active checks without the new keyframes slot → the refine already folded it into the plan as step 15, which adds the snippet to `AGENTS.md` and refreshes its checkride block
 - **blocker**: park 15 · package.json's engines.pnpm (>=9.0.0) ships to every consumer, though it constrains only this repo's development; move it to devEngines or packageManager so a pilot's yarn or pnpm doesn't warn → the refine already folded it into the plan as step 16, which moves `engines.pnpm` out before the first publish
+- 2026-10-24, at range 8 of 9's stop: 3 parked ideas, classified.
+- **blocker**: park 16 · keyframes.md's I6 (drafting-interview) stops mid-sentence at 'drafts a first plan from'; the spec's draft goes on 'existing notes, for a person to edit. Only after the pilots, since it would muddy H1', so a person should finish or cut it → step 17 restores the draft's wording for I6, which you approved at this stop
+- **blocker**: park 17 · CLAUDE.md links to AGENTS.md as a markdown link rather than an @AGENTS.md import, so Claude Code sessions here never load the snippet (this session's context held CLAUDE.md but not AGENTS.md); docs/agents.md itself recommends the @AGENTS.md line → step 18 adds an `@AGENTS.md` line to `CLAUDE.md`, as D20 (claude-imports-agents), with a test that keeps it
+- **blocker**: park 18 · the snippet's last line says to run keyframes check, which isn't on PATH in this repo; here pnpm check runs it as the keyframes slot, or node bin/keyframes.js check by hand → before the publish, step 19 makes the snippet's last line `npx @robmclarty/keyframes check`, as D21 (snippet-runs-npx), and notes in `AGENTS.md` that `pnpm check` runs it here
 
 ## Log
 
@@ -527,3 +534,63 @@ folder, so it rides the branch into the PR.)*
 
 - 2026-10-24 — step 14 checkpointed · 65e4ac8d5 — test(e2e): hold the first-plan and second-editor scenarios (1 drift, 6m)
 - 2026-10-24 — step 15 checkpointed · 8fd4857c6 — docs(agents): give this repo's agents the keyframes snippet (3m)
+- 2026-10-24 — step 16 checkpointed · 151071eee — chore(package): keep the pnpm engine out of the published package (1m)
+- 2026-10-24 — range 8 of 9's stop recorded — review the scenario tests, the snippet in `AGENTS.md` and `package.json`, then `/plumbbob:finish`, and publish a patch for the pilots yourself (`/version patch`, then `npm publish`)
+
+  **Summary**: The last range closed the build's loose ends. Two end-to-end tests now hold S1 and S2, so `keyframes.md` reads both as `linked` under `--strict`. `AGENTS.md` opens with the keyframes snippet, word for word, and its checkride block lists the `keyframes` check. The README's Status names `keyframes.md` as this repo's plan and `docs/prototype.md` as the spec it was built to. `package.json` no longer ships a pnpm engine to the pilots. The gate was green on every step.
+
+  1. The three end-to-end test files now share one scratch build, the range's one file outside a seam
+  2. The first-plan test breaks an item the way a newcomer might, and the warning shows the line as it should be written
+  3. The second-editor test replaces a decision and keeps the old one
+  4. Agents here are told to read `keyframes.md`, but Claude Code doesn't load `AGENTS.md` in this repo
+  5. The pnpm this repo develops with is pinned in `packageManager`, because `devEngines` breaks `npm publish`
+
+  **Readout**:
+
+  ```text
+  steps        3 of 3 landed
+               - 14 65e4ac8 · 15 8fd4857 · 16 151071e
+  check        green: 11 of 11 checks, 3 landings
+  done-when    met
+  decisions    honored
+               - D2 (bracket-citations)
+               - D9 (easy-to-get-right)
+               - D14 (npm-for-pilots)
+  constraints  11 of 11 honored
+  seam         strayed: 1 path outside step 14's seam
+               → test/helpers/scratch.ts
+  diff         +267 -47 across 10 files
+  spent        10 min · green first run at every landing · 1 drift warning
+  ```
+
+  **Verdict**: ◐ A hair off (seam strayed)
+
+  **Harvested**: 3 of 18 parked ideas open
+
+  - P16 · keyframes.md's I6 (drafting-interview) stops mid-sentence at 'drafts a first plan from'; the spec's draft goes on 'existing notes, for a person to edit. Only after the pilots, since it would muddy H1', so a person should finish or cut it → lean: blocker, step 17 restores the draft's wording for I6, which you approved at this stop
+  - P17 · CLAUDE.md links to AGENTS.md as a markdown link rather than an @AGENTS.md import, so Claude Code sessions here never load the snippet (this session's context held CLAUDE.md but not AGENTS.md); docs/agents.md itself recommends the @AGENTS.md line → lean: blocker, step 18 adds an `@AGENTS.md` line to `CLAUDE.md`, as D20 (claude-imports-agents), with a test that keeps it
+  - P18 · the snippet's last line says to run keyframes check, which isn't on PATH in this repo; here pnpm check runs it as the keyframes slot, or node bin/keyframes.js check by hand → lean: blocker, before the publish, step 19 makes the snippet's last line `npx @robmclarty/keyframes check`, as D21 (snippet-runs-npx), and notes in `AGENTS.md` that `pnpm check` runs it here
+
+  **Recommendation**: Say `looks good` to fold the three blockers in as steps 17 to 19, with D20 (claude-imports-agents) and D21 (snippet-runs-npx), in a new range 9 that takes over this stop's finish and publish, then type `/plumbbob:run` to land them. Step 19 changes the snippet that pilot owners will paste, so it has to land before the first version reaches npm, and your answers already settled every call the three steps need.
+
+  **1.** The three end-to-end test files now share one scratch build, the range's one file outside a seam
+
+  `bin.test.ts` built `src/` into a scratch copy of the package in its own `beforeAll`, so its runs can't race the gate's own build of `dist/`. The two new files need the same build, and a third copy of that block would be three to keep in step. So it moved to `test/helpers/scratch.ts`, the folder `AGENTS.md` names for shared test code, and `bin.test.ts` calls it too. Step 14's seam named only `test/e2e/` and `keyframes.md`, so its checkpoint flagged the helper, and the step landed a hair off. Each file still builds its own copy. Across this range's gate runs the test slot took 4 to 9 seconds, against about 5 before.
+
+  **2.** The first-plan test breaks an item the way a newcomer might, and the warning shows the line as it should be written
+
+  The test runs the bin's `init` in an empty directory named `tally`, and checks that `keyframes.md` is the only file written. Then it writes an intent, a principle, a constraint and a decision under the template's headings, below its comments, and gets a report with no findings. The test pins that whole report, so it also shows all three items were read. Then it drops the parentheses around C1's slug, and the one finding is `"- **C1 one-scorer**" isn't read as an item; put its slug in parentheses: - **C1 (one-scorer)**: …`. That's a warning, so a plain `check` exits 0 and `--strict` exits 1, and the test checks both.
+
+  I picked this break over an error such as `- **C1 (one-scorer**`, because `malformed-item` shows `<slug>` where this message shows the item's own ID and slug, which is what S1 means by "exactly how to fix it". The constraint was first `C1 (one-writer)`, and the break landed in the template's commented example of the same name, so the test now uses a slug the template doesn't.
+
+  **3.** The second-editor test replaces a decision and keeps the old one
+
+  The plan starts with an Intent that cites `[D1 (json-file)]`. The second person adds `D2 (sqlite)`, marks D1 `superseded-by: D2`, and changes the Intent to cite `[D2 (sqlite)]`. `check` finds nothing, and its decisions row reads `2 · 1 active · 1 superseded`. The test writes its own plan rather than starting from `init`, since S1 already covers that.
+
+  **4.** Agents here are told to read `keyframes.md`, but Claude Code doesn't load `AGENTS.md` in this repo
+
+  The snippet opens `AGENTS.md`, ahead of the checkride block, so an agent reads why before how. A test in `docs.test.ts` fails if it drifts from what `init` prints. A dry run of `checkride agent-setup --no-hook` showed it would write only `AGENTS.md`, and the real run changed only the block's hash and its list of active checks. This session's own context held `CLAUDE.md` and not `AGENTS.md`, because `CLAUDE.md` links to it as markdown rather than importing it. So the snippet reaches every agent but the one this repo runs most, and `docs/agents.md` recommends an `@AGENTS.md` line for exactly this case. That's P17.
+
+  **5.** The pnpm this repo develops with is pinned in `packageManager`, because `devEngines` breaks `npm publish`
+
+  The plan named either field. In a scratch package, npm 11 refused to pack one whose `devEngines` names pnpm (`EBADDEVENGINES`), and corepack's pnpm rejected a version range there. So the field is `packageManager`, set to `pnpm@11.28.5`. That's an exact pin where `engines` had said `>=9.0.0`, and it's the version corepack already runs here. `npm pack --dry-run` lists the same 169 files as step 13's: `bin/`, `dist/`, `schema/`, `LICENSE`, `README.md` and `package.json`.
