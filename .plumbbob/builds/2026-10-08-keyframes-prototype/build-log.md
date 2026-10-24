@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 15 — docs(agents): give this repo's agents the keyframes snippet
+**Current step:** 16 — chore(package): keep the pnpm engine out of the published package
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -37,7 +37,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 12. docs(pilots): add the record the pilots fill in
 - ☑ 13. chore(release): publish a 0.x for the pilots to install
 - ☑ 14. test(e2e): hold the first-plan and second-editor scenarios
-- ☐ 15. docs(agents): give this repo's agents the keyframes snippet
+- ☑ 15. docs(agents): give this repo's agents the keyframes snippet
 - ☐ 16. chore(package): keep the pnpm engine out of the published package
 
 ## Park list
@@ -526,3 +526,4 @@ folder, so it rides the branch into the PR.)*
   npm still returns 404 for `@robmclarty/keyframes`. `v0.2.0` is tagged on origin, and step 16 changes `package.json` after that tag, so the first version on npm will be a patch at range 8's stop. The file's first prerequisite now says to publish a 0.x and run `npx @robmclarty/keyframes --version` from an empty directory, without naming a version that would go stale.
 
 - 2026-10-24 — step 14 checkpointed · 65e4ac8d5 — test(e2e): hold the first-plan and second-editor scenarios (1 drift, 6m)
+- 2026-10-24 — step 15 checkpointed · 8fd4857c6 — docs(agents): give this repo's agents the keyframes snippet (3m)
