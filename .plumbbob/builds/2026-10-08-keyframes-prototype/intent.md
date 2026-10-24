@@ -120,7 +120,7 @@ Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and st
 16. [x] chore(package): keep the pnpm engine out of the published package, **done when:** `package.json`'s `engines` names only `node`; this repo still states the pnpm it develops with, in a field consumers don't check (`packageManager` or `devEngines`); `npm pack --dry-run` still lists only what step 13's done-when allows; and the gate is green
     - seam: `package.json`
     - model: sonnet (one field moves)
-17. [ ] docs(dogfood): finish I6 in this repo's plan, **done when:** `keyframes.md`'s I6 (drafting-interview) reads "An agent that interviews the owner, or drafts a first plan from existing notes, for a person to edit. Only after the pilots, since it would muddy H1.", the spec draft's wording, which its owner approved at range 8's stop; nothing else in `keyframes.md` changes; and `keyframes check --strict` stays green
+17. [x] docs(dogfood): finish I6 in this repo's plan, **done when:** `keyframes.md`'s I6 (drafting-interview) reads "An agent that interviews the owner, or drafts a first plan from existing notes, for a person to edit. Only after the pilots, since it would muddy H1.", the spec draft's wording, which its owner approved at range 8's stop; nothing else in `keyframes.md` changes; and `keyframes check --strict` stays green
     - seam: `keyframes.md`
     - model: sonnet (one line its owner already approved)
 18. [ ] docs(agents): have Claude Code read AGENTS.md, **done when:** `CLAUDE.md` pulls in `AGENTS.md` with an `@AGENTS.md` line ([D20 (claude-imports-agents)](#d20)), and a test in `test/integration/docs.test.ts` keeps it so

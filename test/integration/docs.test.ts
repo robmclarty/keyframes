@@ -165,6 +165,13 @@ describe('the docs and the spec agree with init', () => {
   });
 });
 
+describe("this repo's CLAUDE.md", () => {
+  test('pulls in AGENTS.md with an @AGENTS.md line, since Claude Code follows no markdown link', () => {
+    const claude = readFileSync(new URL('../../CLAUDE.md', import.meta.url), 'utf8');
+    expect(claude.split('\n')).toContain('@AGENTS.md');
+  });
+});
+
 describe('docs/format.md and the spec agree', () => {
   test('on the sections, and the variants check reads, row for row', () => {
     const format = doc('format.md');
