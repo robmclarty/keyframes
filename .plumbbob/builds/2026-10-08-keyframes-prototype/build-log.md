@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 18 — docs(agents): have Claude Code read AGENTS.md
+**Current step:** 19 — fix(init): give the snippet a check command that runs where keyframes isn't installed
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -40,7 +40,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 15. docs(agents): give this repo's agents the keyframes snippet
 - ☑ 16. chore(package): keep the pnpm engine out of the published package
 - ☑ 17. docs(dogfood): finish I6 in this repo's plan
-- ☐ 18. docs(agents): have Claude Code read AGENTS.md
+- ☑ 18. docs(agents): have Claude Code read AGENTS.md
 - ☐ 19. fix(init): give the snippet a check command that runs where keyframes isn't installed
 
 ## Park list
@@ -596,3 +596,4 @@ folder, so it rides the branch into the PR.)*
   The plan named either field. In a scratch package, npm 11 refused to pack one whose `devEngines` names pnpm (`EBADDEVENGINES`), and corepack's pnpm rejected a version range there. So the field is `packageManager`, set to `pnpm@11.28.5`. That's an exact pin where `engines` had said `>=9.0.0`, and it's the version corepack already runs here. `npm pack --dry-run` lists the same 169 files as step 13's: `bin/`, `dist/`, `schema/`, `LICENSE`, `README.md` and `package.json`.
 
 - 2026-10-24 — step 17 checkpointed · 4c4e3a50d — docs(dogfood): finish I6 in this repo's plan (<1m)
+- 2026-10-24 — step 18 checkpointed · 99e5f56dc — docs(agents): have Claude Code read AGENTS.md (<1m)

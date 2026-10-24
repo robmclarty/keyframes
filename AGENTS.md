@@ -17,7 +17,10 @@ This project's intent is in `keyframes.md`. Read it before you change code.
 - When your work relies on an item, cite it as `[C3 (slug)]` in your summary or commit message.
 - Don't edit `keyframes.md` unless a person asks you to. If it looks wrong or incomplete, say so
   and propose the change.
-- After changing anything the plan points at, run `keyframes check`.
+- After changing anything the plan points at, run `npx @robmclarty/keyframes check`.
+
+In this repo, `pnpm check` runs it as its `keyframes` check, on the code in this tree rather than
+the published package.
 
 <!-- checkride:begin hash=v19d7d3f7611b901cd -->
 

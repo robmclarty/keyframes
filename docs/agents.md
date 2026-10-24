@@ -19,11 +19,12 @@ This project's intent is in `keyframes.md`. Read it before you change code.
 - When your work relies on an item, cite it as `[C3 (slug)]` in your summary or commit message.
 - Don't edit `keyframes.md` unless a person asks you to. If it looks wrong or incomplete, say so
   and propose the change.
-- After changing anything the plan points at, run `keyframes check`.
+- After changing anything the plan points at, run `npx @robmclarty/keyframes check`.
 ```
 
-The snippet is guidance, and an agent can ignore it. It names no tool, so it works with any agent
-that reads instructions from a file.
+The snippet is guidance, and an agent can ignore it. It names no agent or harness, so it works with
+any agent that reads instructions from a file. It runs the check with `npx`, which fetches
+keyframes when the repo doesn't install it, so the check needs only Node 24 or later.
 
 ## Where it goes
 
@@ -57,8 +58,8 @@ With several agents in one repo, paste it once into `AGENTS.md`, and point the o
 
 - **Leave the plan to people.** An agent proposes a change to `keyframes.md` when it looks wrong
   or incomplete, and a person decides.
-- **Run `keyframes check`** after changing anything the plan points at, such as a test that holds
-  a constraint.
+- **Run `npx @robmclarty/keyframes check`** after changing anything the plan points at, such as a
+  test that holds a constraint.
 
 ## For harness authors
 

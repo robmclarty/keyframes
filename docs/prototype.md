@@ -470,7 +470,7 @@ The snippet asks agents to:
 - cite the items they relied on, as `[C3 (slug)]`, in their summary or commit message;
 - leave `keyframes.md` alone unless a person asks, and propose a change when it looks wrong or
   incomplete;
-- run `keyframes check` after changing anything the plan points at.
+- run `npx @robmclarty/keyframes check` after changing anything the plan points at.
 
 This part is guidance, and an agent can ignore it. H3 measures how much it doesn't.
 
@@ -670,7 +670,7 @@ This project's intent is in `keyframes.md`. Read it before you change code.
 - When your work relies on an item, cite it as `[C3 (slug)]` in your summary or commit message.
 - Don't edit `keyframes.md` unless a person asks you to. If it looks wrong or incomplete, say so
   and propose the change.
-- After changing anything the plan points at, run `keyframes check`.
+- After changing anything the plan points at, run `npx @robmclarty/keyframes check`.
 ```
 
 ## Appendix C: this repo's plan, a draft
