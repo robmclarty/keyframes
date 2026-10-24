@@ -10,8 +10,8 @@
 
 - **Problem:** Every project carries intent that never gets written down in one place: why it exists, what matters, what must hold, how it should feel. It lives in people's heads, chat threads, PR comments and stale READMEs, so new people piece it together slowly, and agents see none of it unless someone pastes it into a prompt.
 - **Smallest thing that solves it:** One markdown file, `keyframes.md`, where people write that intent as prose (Intent) and short ID'd items (Principles, Map, Constraints, Scenarios, Decisions, Taste, Questions, Ideas); a snippet that tells agents to read it, cite it and stop before crossing a constraint; and a small CLI, `keyframes init` and `keyframes check`, that keeps the file consistent and checks what can be checked, the same way every time. When goals conflict, the earlier one wins: easy to express, easy for a second person to extend, guiding for agents, deterministically checked.
-- **Done looks like:** `keyframes init` and `keyframes check` work in any repo, in any language, with no config; this repo has its own `keyframes.md`, checked in its own gate; and three pilot repos have plans written by their owners, with the findings and a decision on what to build next in `docs/pilots.md`. The pilots test four hypotheses ([the spec's table](../../../docs/prototype.md#what-the-prototype-tests)): a plan is quick to write (H1), quick for a second person to read and extend (H2), changes what agents do (H3), and its findings are mostly worth knowing (H4).
-- **Explicitly NOT doing:** checking the Map against the code; running anything (tests, linters, subprocesses, network calls, LLMs); knowing about any other tool, harness, language or CI system beyond plain-text snippets; a folder form, a config file, a formatter or auto-fix; parsing Mermaid; scanning code, commits or PRs for citations; reading git history.
+- **Done looks like:** `keyframes init` and `keyframes check` work in any repo, in any language, with no config; this repo has its own `keyframes.md`, checked in its own gate, with its scenarios held by tests where a test can hold them and its agents told to read it; and `docs/pilots.md` is ready for three pilot repos to record their results and the closing call. The pilots run after this build, on a public 0.x, and test four hypotheses ([the spec's table](../../../docs/prototype.md#what-the-prototype-tests)): a plan is quick to write (H1), quick for a second person to read and extend (H2), changes what agents do (H3), and its findings are mostly worth knowing (H4). Their closing call is the next build's first decision.
+- **Explicitly NOT doing:** running the pilots, which take their owners' time over weeks and follow this build; checking the Map against the code; running anything (tests, linters, subprocesses, network calls, LLMs); knowing about any other tool, harness, language or CI system beyond plain-text snippets; a folder form, a config file, a formatter or auto-fix; parsing Mermaid; scanning code, commits or PRs for citations; reading git history.
 
 ## Architecture sketch
 
@@ -72,7 +72,7 @@ bin/keyframes.js ──► src/cli.ts       parses the command line, returns the
 
 ## Steps
 
-Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and step 3 closes the findings from step 2's review. Each later step names the spec section its done-when is measured against. Step 13 was added later and builds before step 12; [Build order](#build-order) holds the sequence.
+Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and step 3 closes the findings from step 2's review. Each later step names the spec section its done-when is measured against. Step 13 was added later and builds before step 12. Steps 14 to 16 were added when the pilots moved out of the build, to close its loose ends; [Build order](#build-order) holds the sequence.
 
 1. [x] chore(scaffold): realign the scaffold to the prototype spec, **done when:** the rules in `rules/` and `AGENTS.md` cite the prototype spec; `no-subprocess` has no `src/extract/` exception and `node-builtins-only` no TypeScript exception; the README and the `package.json` description match the Frame; and the gate is green
    - seam: `rules/`, `rule-tests/`, `test/integration/layout-rules.test.ts`, `AGENTS.md`, `README.md`, `package.json`
@@ -104,11 +104,20 @@ Steps 1 and 2 landed before this build began, in `4edd048` and `789f1bc`, and st
     - model: opus (docs written for people, and tests over their examples)
 11. [x] test(dogfood): give this repo its own plan, **done when:** a person has edited the spec's [draft plan](../../../docs/prototype.md#appendix-c-this-repos-plan-a-draft) and committed it as `keyframes.md`, and `keyframes check --strict` runs green as a slot in this repo's gate, after the build that makes `dist/`
     - seam: `keyframes.md`, `checkride.config.json`
-12. [ ] docs(pilots): run the pilots, **done when:** `docs/pilots.md` holds each pilot repo's results and the closing decision ([Pilots](../../../docs/prototype.md#pilots))
+12. [ ] docs(pilots): add the record the pilots fill in, **done when:** `docs/pilots.md` holds a table for the repos and their readers, a results table for H1 to H4, a record to copy per pilot, the questions the build left for the pilots, and the closing call as a table over every section, pointer form, variant, finding and budget the spec lists, with the finding codes matching the ones `check` emits ([Pilots](../../../docs/prototype.md#pilots))
     - seam: `docs/pilots.md`
-13. [ ] chore(release): publish a 0.x for the pilots to install, **done when:** a `prepack` script builds `dist/` clean before every pack; `npm pack --dry-run` lists only `bin/`, `dist/`, `schema/` and the package's own files; a person has published a public 0.x ([D14 (npm-for-pilots)](#d14)); and `npx @robmclarty/keyframes --version` prints it from an empty directory
+13. [x] chore(release): publish a 0.x for the pilots to install, **done when:** a `prepack` script builds `dist/` clean before every pack; `npm pack --dry-run` lists only `bin/`, `dist/`, `schema/` and the package's own files; a person has published a public 0.x ([D14 (npm-for-pilots)](#d14)); and `npx @robmclarty/keyframes --version` prints it from an empty directory
     - seam: `package.json`, `.claude/version.json`, `.claude/version.md`
     - model: sonnet (mechanical packaging; a person publishes)
+14. [ ] test(e2e): hold the first-plan and second-editor scenarios, **done when:** `test/e2e/first-plan.test.ts` has a test titled "first plan" that runs the bin's `init` in an empty directory, writes a little intent and a few items, and gets a clean `check`, then breaks one item and gets a finding that shows its usual form; `test/e2e/second-editor.test.ts` has a test titled "second editor" that replaces a decision, marks the old one `superseded-by:`, cites the new one elsewhere, and gets a passing `check`; and S1 and S2 in `keyframes.md` lose only their `(new)` markers and read `linked` under `--strict`
+    - seam: `test/e2e/`, `keyframes.md`
+    - model: sonnet (two end-to-end tests the scenarios spell out)
+15. [ ] docs(agents): give this repo's agents the keyframes snippet, **done when:** `AGENTS.md` carries the snippet `keyframes init` prints, word for word, and a test keeps it so; its checkride block, refreshed with `checkride agent-setup --no-hook` rather than by hand, lists the `keyframes` slot among the active checks; and `README.md`'s Status and `docs/archive/README.md` name `keyframes.md` as this repo's plan and `docs/prototype.md` as the spec it was built to
+    - seam: `AGENTS.md`, `README.md`, `docs/archive/README.md`, `test/integration/docs.test.ts`
+    - model: sonnet (doc edits and one test)
+16. [ ] chore(package): keep the pnpm engine out of the published package, **done when:** `package.json`'s `engines` names only `node`; this repo still states the pnpm it develops with, in a field consumers don't check (`packageManager` or `devEngines`); `npm pack --dry-run` still lists only what step 13's done-when allows; and the gate is green
+    - seam: `package.json`
+    - model: sonnet (one field moves)
 
 ## Build order
 
@@ -119,11 +128,11 @@ order. `plumbbob order 7 8 5 10 6` (`/plumbbob:order`) writes it, and `status`, 
 `/plumbbob:build`, and the card's Next Up agree. A step keeps its number for life; this
 line is where the sequence lives.)*
 
-3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 12
+12, 14, 15, 16
 
 ## Build ranges
 
-Type `/plumbbob:run` once per range: the first lands the CLI fix, the spec's new wording and the scanner, the parser lands in one run, the report and the docs each stop for your read, and the last three stop for things only you can do.
+Type `/plumbbob:run` once per range: the first lands the CLI fix, the spec's new wording and the scanner, the parser lands in one run, the report and the docs each stop for your read, the next three stop for things only you can do, and the last lands the loose ends before you publish.
 
 1. `/plumbbob:build 3-5`, **stop:** review the CLI fix, the spec's new wording and the scanner, then split step 6 with `/plumbbob:step` into items with their findings, then the variants
    - model: opus
@@ -136,7 +145,9 @@ Type `/plumbbob:run` once per range: the first lands the CLI fix, the spec's new
 5. `/plumbbob:build 11`, **stop:** at step 11's pause, edit the draft plan yourself, since `keyframes.md` lands only once a person stands behind every line
 6. `/plumbbob:build 13`, **stop:** at step 13's pause, publish the 0.x to npm yourself, since it takes your account
    - model: sonnet
-7. `/plumbbob:build 12`, **stop:** at step 12's pause, make the pilots' closing call (keep, change or cut each section, variant and finding, then what to build next), then `/plumbbob:finish`
+7. `/plumbbob:build 12`, **stop:** at step 12's pause, read the pilot record the way a pilot owner would, before the loose ends land
+8. `/plumbbob:build 14-16`, **stop:** review the scenario tests, the snippet in `AGENTS.md` and `package.json`, then `/plumbbob:finish`, and publish a patch for the pilots yourself (`/version patch`, then `npm publish`)
+   - model: sonnet
 
 ## Open questions
 
@@ -155,3 +166,4 @@ Type `/plumbbob:run` once per range: the first lands the CLI fix, the spec's new
 - 2026-10-08: strict near-miss errors versus lenient variants → chose one usual form with accepted variants and notes that never fail; because a format that's annoying to use never gets learned, and errors stay for what's unclear or broken ([D9 (easy-to-get-right)](#d9), [D10 (errors-for-unclear)](#d10)).
 - 2026-10-08: steps tracked by hand versus a plumbbob build → moved them into this plan and kept the work already landed as steps 1 and 2; because the spec's steps were already in plumbbob's format, and a checklist kept by hand had no review pause.
 - 2026-10-22: refine's eight open questions → took every lean, recorded as [D13 (crash-exits-2)](#d13) to [D18 (recruit-early)](#d18), with [D8 (spec-stays-live)](#d8) kept, [D9 (easy-to-get-right)](#d9) widened to the pointer keywords, and step 13 added before the pilots; because each kept the format forgiving, the steps reviewable and every done-when measurable.
+- 2026-10-23: the pilots in this build versus after it → moved them out, re-scoped step 12 to the record they fill in, and added steps 14 to 16 for the loose ends; because the pilots run on people's time over weeks, nothing in the code waits on them, and their closing call is the next build's first decision.

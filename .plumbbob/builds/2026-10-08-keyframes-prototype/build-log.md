@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 13 — chore(release): publish a 0.x for the pilots to install
+**Current step:** 12 — docs(pilots): run the pilots
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -35,7 +35,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 10. feat(init): write the template, snippet and docs
 - ☑ 11. test(dogfood): give this repo its own plan
 - ☐ 12. docs(pilots): run the pilots
-- ☐ 13. chore(release): publish a 0.x for the pilots to install
+- ☑ 13. chore(release): publish a 0.x for the pilots to install
 
 ## Park list
 
@@ -404,3 +404,52 @@ folder, so it rides the branch into the PR.)*
   **5.** Two tangents parked, both outside this step's seam
 
   P13 is the two missing e2e tests behind S1 and S2. P14 is `AGENTS.md`: it doesn't carry the keyframes snippet yet, so agents in this repo aren't told to read `keyframes.md`, and its generated checkride block still lists the active checks without `keyframes`. Both are for a later boundary.
+
+- 2026-10-23 — step 13 checkpointed · fdc91301f — chore(release): publish a 0.x for the pilots to install (1 red, 565m)
+
+  **Summary**: The package is ready to publish: `prepack` deletes `dist/` and rebuilds it before every pack, the tarball holds only `bin/`, `dist/`, `schema/` and the package's own files, `publishConfig` makes the scoped package public, and the packed tarball prints its version through `npx` from an empty directory. Publishing to npm takes your account, so that part is yours.
+
+  1. The publish is yours once this step lands, and I'd release 0.2.0 rather than the 0.1.1 in `package.json`
+  2. `prepack` deletes `dist/` and rebuilds it with `--force`, since a plain `tsc --build` leaves an emptied `dist/` empty
+  3. The pack lists 169 files, all under `bin/`, `dist/` and `schema/`, plus `LICENSE`, `README.md` and `package.json`
+  4. `publishConfig` makes the scoped package public, and `npm publish --dry-run` confirms it
+  5. The packed tarball runs through `npx` from an empty directory
+
+  **Readout**:
+
+  ```text
+  check        green: 11 of 11 checks
+  done-when    not met: the public 0.x waits on your publish
+               → the empty-directory npx run used the packed tarball
+  decisions    1 of 1 honored
+  constraints  11 of 11 honored
+  seam         held: 2 of 3 declared, no strays
+  diff         +15 -4 across 2 files
+  spent        9h 25m · 2 turns · 6s gate · 1 red run
+  ```
+
+  **Verdict**: ○ Out of plumb (done-when not met)
+
+  **Recommendation**: Say `looks good` to land the packaging. Then run `git stash push -- .plumbbob`, `/version minor`, `git stash pop`, `npm publish`, and finally `npx @robmclarty/keyframes --version` from an empty directory. `/version` refuses a dirty tree, and only the checkpoint can commit this step's work, so the release has to come after the landing. Stashing the record around it keeps the `v0.2.0` tag to exactly the packaging npm serves.
+
+  **1.** The publish is yours once this step lands, and I'd release 0.2.0 rather than the 0.1.1 in `package.json`
+
+  npm has no versions of `@robmclarty/keyframes` yet (`npm view` returns 404). `v0.1.1` is already tagged at `98c97f0`, a commit with no CLI, and its changelog entry says "The `keyframes` CLI itself isn't built yet". Publishing 0.1.1 now would put a working CLI under a tag and notes that say it doesn't exist. A minor bump gives the first public release a version, tag and changelog entry of its own.
+
+  My first recommendation was to release at this pause, before the checkpoint. That can't work: `/version minor` refused, because its engine won't bump a dirty tree, and only the checkpoint may commit this step's `package.json` and `.claude/version.md`. A checkpoint also leaves plumbbob's record (`checkpoints`, `stats.json`, `intent.md`, `build-log.md`) modified until the next one, so `/version` will refuse again right after the landing unless that record is stashed. The order that works: say `looks good` to land the packaging, then `git stash push -- .plumbbob`, `/version minor`, `git stash pop`. The `v0.2.0` tag then holds exactly the packaging npm serves. Then run `npm publish` from your logged-in account and `npx @robmclarty/keyframes --version` from an empty directory, which should print `0.2.0`. The done-when's publish and registry `npx` clauses are met just after the step lands rather than before. `.claude/version.md` now lists the publish steps for every later release. Say so if you want the stash note added there before the step lands. `.claude/version.json` is unchanged, because a tag push still publishes nothing, so `publish.confirm` stays false.
+
+  **2.** `prepack` deletes `dist/` and rebuilds it with `--force`, since a plain `tsc --build` leaves an emptied `dist/` empty
+
+  I tested the obvious script first: with `dist/` moved away, `tsc --build` emitted nothing, because the root `tsconfig.tsbuildinfo` (where `composite` puts it, beside `rootDir: ./src`) still said every output was up to date. A pack after deleting `dist/` would have shipped a package without its CLI. The script is now `node --eval "require('node:fs').rmSync('dist', …)" && tsc --build --force`. Removing the folder clears outputs from deleted sources, `--force` ignores the stale build info, and `node --eval` runs on any OS where `rm -rf` wouldn't. To prove it, I planted `dist/stale.js` and ran `npm pack --dry-run`. The stale file was gone, and the rebuilt `dist/` matched the old one file for file.
+
+  **3.** The pack lists 169 files, all under `bin/`, `dist/` and `schema/`, plus `LICENSE`, `README.md` and `package.json`
+
+  The existing `files` list and its `!dist/**/*.test.*` line already keep the compiled tests out (zero `__tests__` paths in the list), so it needed no change. One thing does ship that shouldn't: `engines.pnpm` (`>=9.0.0`) constrains only this repo's development, but it goes to every consumer. `npx` ignores it, so it doesn't block the pilots, and I parked it (P15) rather than widen the step.
+
+  **4.** `publishConfig` makes the scoped package public, and `npm publish --dry-run` confirms it
+
+  npm publishes a scoped package as restricted by default, and on a free account that fails unless you pass `--access public`. With `publishConfig.access` set, a bare `npm publish` is enough, and the dry run printed `Publishing to https://registry.npmjs.org/ with tag latest and public access`.
+
+  **5.** The packed tarball runs through `npx` from an empty directory
+
+  `npm pack` wrote the tarball to a temp folder, and `npx --package=<tarball> keyframes --version` printed `0.1.1` and exited 0 from an empty directory. `keyframes check` there exited 2 with its "no keyframes.md" line, and the directory stayed empty. This is the done-when's last clause run against the tarball. The registry form, `npx @robmclarty/keyframes --version`, can only run after you publish.
