@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 12 — docs(pilots): run the pilots
+**Current step:** 14 — test(e2e): hold the first-plan and second-editor scenarios
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -34,8 +34,11 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 9. feat(report): count, budget, and render text and JSON
 - ☑ 10. feat(init): write the template, snippet and docs
 - ☑ 11. test(dogfood): give this repo its own plan
-- ☐ 12. docs(pilots): run the pilots
+- ☑ 12. docs(pilots): add the record the pilots fill in
 - ☑ 13. chore(release): publish a 0.x for the pilots to install
+- ☐ 14. test(e2e): hold the first-plan and second-editor scenarios
+- ☐ 15. docs(agents): give this repo's agents the keyframes snippet
+- ☐ 16. chore(package): keep the pnpm engine out of the published package
 
 ## Park list
 
@@ -55,9 +58,10 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - [x] the spec's Variants table should list what steps 6 and 7 accept beyond it (other spacing in a sub-line, en and em dashes, a leading zero or a bare [D9] in a citation or reference), and Items should say a no-bold item needs its section's letter and an unknown key counts only in the usual shape
 - [x] a ./ or doubled / in a pointer or Map path reads silently with no alternate-form note, unlike every other variant D9 lists
 - [x] item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example
-- [ ] S1 and S2 in keyframes.md point at e2e tests that don't exist yet (first-plan, second-editor), so both scenarios stay planned until someone writes them
-- [ ] AGENTS.md doesn't carry the keyframes snippet yet, so agents here aren't told to read keyframes.md, and its generated checkride block lists active checks without the new keyframes slot
-- [ ] package.json's engines.pnpm (>=9.0.0) ships to every consumer, though it constrains only this repo's development; move it to devEngines or packageManager so a pilot's yarn or pnpm doesn't warn
+- [x] S1 and S2 in keyframes.md point at e2e tests that don't exist yet (first-plan, second-editor), so both scenarios stay planned until someone writes them
+- [x] AGENTS.md doesn't carry the keyframes snippet yet, so agents here aren't told to read keyframes.md, and its generated checkride block lists active checks without the new keyframes slot
+- [x] package.json's engines.pnpm (>=9.0.0) ships to every consumer, though it constrains only this repo's development; move it to devEngines or packageManager so a pilot's yarn or pnpm doesn't warn
+- [ ] keyframes.md's I6 (drafting-interview) stops mid-sentence at 'drafts a first plan from'; the spec's draft goes on 'existing notes, for a person to edit. Only after the pilots, since it would muddy H1', so a person should finish or cut it
 
 ## Harvest  *(run `/plumbbob:harvest` at each step boundary, after green)*
 
@@ -89,6 +93,10 @@ Harvest results this boundary:
 - 2026-10-23, at range 4 of 7's stop: 2 parked ideas, classified.
 - **tangent**: park 11 · a ./ or doubled / in a pointer or Map path reads silently with no alternate-form note, unlike every other variant D9 lists → `check` reads these paths correctly, and whether `./` earns a note is a call for the pilots' variant review
 - **tangent**: park 12 · item-line notes show the generic - **C3 (one-writer)**: … rather than the item's own ID and slug, which reads oddly on C1 and C2 in format.md's variants example → the messages are correct and pinned by tests, so the wording can wait for the pilots' finding review
+- 2026-10-24, at the step 12 boundary: 3 parked ideas, classified.
+- **blocker**: park 13 · S1 and S2 in keyframes.md point at e2e tests that don't exist yet (first-plan, second-editor), so both scenarios stay planned until someone writes them → the refine already folded it into the plan as step 14, which writes both e2e tests and drops S1's and S2's `(new)` markers
+- **blocker**: park 14 · AGENTS.md doesn't carry the keyframes snippet yet, so agents here aren't told to read keyframes.md, and its generated checkride block lists active checks without the new keyframes slot → the refine already folded it into the plan as step 15, which adds the snippet to `AGENTS.md` and refreshes its checkride block
+- **blocker**: park 15 · package.json's engines.pnpm (>=9.0.0) ships to every consumer, though it constrains only this repo's development; move it to devEngines or packageManager so a pilot's yarn or pnpm doesn't warn → the refine already folded it into the plan as step 16, which moves `engines.pnpm` out before the first publish
 
 ## Log
 
@@ -453,3 +461,64 @@ folder, so it rides the branch into the PR.)*
   **5.** The packed tarball runs through `npx` from an empty directory
 
   `npm pack` wrote the tarball to a temp folder, and `npx --package=<tarball> keyframes --version` printed `0.1.1` and exited 0 from an empty directory. `keyframes check` there exited 2 with its "no keyframes.md" line, and the directory stayed empty. This is the done-when's last clause run against the tarball. The registry form, `npx @robmclarty/keyframes --version`, can only run after you publish.
+
+- 2026-10-24 — step 12 checkpointed · 8ff42cab9 — docs(pilots): add the record the pilots fill in (648m)
+
+  **Summary**: `docs/pilots.md` is the record the pilots fill in. It has a table for the repos and their readers, a results table for H1 to H4, one record to copy per pilot, the questions the build left for the pilots, and the closing call as a table with one row for every section, pointer form, variant, finding and budget the spec lists. Every cell is empty until a pilot runs, and the file says so on its first line.
+
+  1. The file is a blank record, since every result in it belongs to a pilot owner
+  2. The closing call is a table with one row per thing the spec says to keep, change or cut
+  3. The nine questions the build left for the pilots now sit where the pilots will read them
+  4. The file's publish line names no version, so it stays true once the first release is a patch
+
+  **Readout**:
+
+  ```text
+  check        green: 11 of 11 checks
+  done-when    met
+  decisions    1 of 1 honored
+  constraints  11 of 11 honored
+  seam         held: 1 of 1 declared, no strays
+  diff         +222 -0 across 1 file
+  spent        10h 48m · 4 turns · 9s gate · green first run
+  ```
+
+  **Verdict**: ◐ A hair off (1 commit outside the ledger)
+
+  **Recommendation**: Say `looks good` to land the record, then type `/plumbbob:run` for steps 14 to 16. The stop asks you to read the file the way a pilot owner would, and its first table is the one to fill in when you line up the repos. Nothing else in it needs a person until a pilot starts.
+
+  **1.** The file is a blank record, since every result in it belongs to a pilot owner
+
+  Under `~/Projects`, the only `keyframes.md` is this repo's own, and nothing records which repos or second readers were lined up. Every result is the owner's: their timing, their second reader's three sentences, their four tasks, and their triage of each finding. So each cell is empty, and each pilot's heading reads "Not run." The refine you approved moved the pilots out of this build, and step 12's done-when now asks for the record, not the results.
+
+  **2.** The closing call is a table with one row per thing the spec says to keep, change or cut
+
+  The file lists:
+
+  - the 9 sections;
+  - 4 pointer forms, with `(new)` counted as one;
+  - the 8 rows of the Variants table;
+  - all 25 finding codes, with their severities;
+  - the 6 budgets, which the spec calls starting values for the pilots to tune.
+
+  I diffed the finding codes against the ones `src/` emits, and the two lists match exactly. The protocol stays in the spec (D8 (spec-stays-live)). This file links to it and carries only what a pilot fills in.
+
+  **3.** The nine questions the build left for the pilots now sit where the pilots will read them
+
+  Several parks were harvested as tangents because "the pilots will show". That reason lived only in the build log, so the file's "What to watch for" list asks each one as a question an owner can answer:
+
+  - whether an unlinked constraint should warn;
+  - whether any plan hits the 2000-word budget;
+  - whether markup counts as words;
+  - setext headings;
+  - items with no bullet, or an indented one;
+  - slugs beyond ASCII;
+  - whether `./` in a path needs a note;
+  - the wording of item-line notes;
+  - unclosed comments.
+
+  I left out the park handles, since `P7` reads as a Principle in a keyframes doc.
+
+  **4.** The file's publish line names no version, so it stays true once the first release is a patch
+
+  npm still returns 404 for `@robmclarty/keyframes`. `v0.2.0` is tagged on origin, and step 16 changes `package.json` after that tag, so the first version on npm will be a patch at range 8's stop. The file's first prerequisite now says to publish a 0.x and run `npx @robmclarty/keyframes --version` from an empty directory, without naming a version that would go stale.

@@ -60,10 +60,10 @@ people write that down, so that others, human or agent, can work from it and ref
 
 - **S1 (first-plan)**: Someone runs `init`, writes a little intent and a few items, runs `check`,
   and gets either a clean report or a finding that says exactly how to fix it.
-  - held-by: file:test/e2e/first-plan.test.ts#"first plan" (new)
+  - held-by: file:test/e2e/first-plan.test.ts#"first plan"
 - **S2 (second-editor)**: A second person replaces a decision, marks the old one superseded,
   cites the new one elsewhere, and `check` passes.
-  - held-by: file:test/e2e/second-editor.test.ts#"second editor" (new)
+  - held-by: file:test/e2e/second-editor.test.ts#"second editor"
 - **S3 (agent-cites)**: An agent working in a repo with the snippet cites the items it relied on.
   - held-by: review
 
