@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes prototype
 
-**Current step:** 19 — fix(init): give the snippet a check command that runs where keyframes isn't installed
+**Current step:** none (at the boundary)
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -41,7 +41,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 16. chore(package): keep the pnpm engine out of the published package
 - ☑ 17. docs(dogfood): finish I6 in this repo's plan
 - ☑ 18. docs(agents): have Claude Code read AGENTS.md
-- ☐ 19. fix(init): give the snippet a check command that runs where keyframes isn't installed
+- ☑ 19. fix(init): give the snippet a check command that runs where keyframes isn't installed
 
 ## Park list
 
@@ -597,3 +597,51 @@ folder, so it rides the branch into the PR.)*
 
 - 2026-10-24 — step 17 checkpointed · 4c4e3a50d — docs(dogfood): finish I6 in this repo's plan (<1m)
 - 2026-10-24 — step 18 checkpointed · 99e5f56dc — docs(agents): have Claude Code read AGENTS.md (<1m)
+- 2026-10-24 — step 19 checkpointed · fbfbb999d — fix(init): give the snippet a check command that runs where keyframes isn't installed (2m)
+- 2026-10-24 — range 9 of 9's stop recorded — review I6, `CLAUDE.md` and the snippet's new last line, then `/plumbbob:finish`, and publish a patch for the pilots yourself (`/version patch`, then `npm publish`)
+
+  **Summary**: The three blockers from range 8's stop have landed. I6 in this repo's plan is no longer cut off mid-sentence. `CLAUDE.md` now imports `AGENTS.md`, so Claude Code sees the keyframes snippet. And the snippet's last line runs `npx @robmclarty/keyframes check`, which works where keyframes isn't installed, so it's the right line for the pilots to paste.
+
+  1. Step 19 also updated two copies its done-when didn't list: the spec's Agents list and the snippet's doc comment.
+  2. I6 now ends the way the spec's draft words it, and nothing else in `keyframes.md` changed.
+  3. `CLAUDE.md` imports `AGENTS.md` with an `@AGENTS.md` line, and a test fails if the line is removed.
+  4. The snippet's last line runs `npx @robmclarty/keyframes check`, word for word the same in all four copies.
+  5. `AGENTS.md` says that in this repo, `pnpm check` runs the plan check against this tree.
+
+  **Readout**:
+
+  ```text
+  steps        3 of 3 landed
+               - 17 4c4e3a5 · 18 99e5f56 · 19 fbfbb99
+  check        green: 11 of 11 checks, 3 landings
+  done-when    met
+  decisions    2 of 2 honored
+  constraints  11 of 11 honored
+  seam         held: 3 of 3 steps, no strays
+  diff         +27 -11 across 7 files
+  spent        4 min · green first run at every landing
+  ```
+
+  **Verdict**: ● Plumb
+
+  **Recommendation**: Reply `looks good`, then run `/plumbbob:finish`, and publish the patch yourself: stash `.plumbbob` around `/version patch`, then `npm publish` with your OTP. The published 0.2.0 still prints a snippet that ends in `keyframes check`, which fails for anyone who installed with npx, so the pilots should paste the snippet from this patch.
+
+  **1.** Step 19 also updated two copies its done-when didn't list: the spec's Agents list and the snippet's doc comment.
+
+  The done-when named four places for the snippet's last line, plus the "What it asks of agents" bullet in `docs/agents.md`. Two more places said the old thing. The spec's own list of what the snippet asks (its Agents section) still said to run `keyframes check`. And the doc comment on `SNIPPET` in `src/init/snippet.ts` said it "names no tool or harness", which stopped being true once the snippet named `npx` and the package. Both files were in the seam, so I updated them too, to match `docs/agents.md`. Neither change moves a test or a decision. They only keep a reader from finding the old wording in one place and the new in another.
+
+  **2.** I6 now ends the way the spec's draft words it, and nothing else in `keyframes.md` changed.
+
+  The plan's last line stopped at "drafts a first plan from". Step 17 added the closing line, "existing notes, for a person to edit. Only after the pilots, since it would muddy H1.", wrapped where the spec's Appendix C wraps it. A diff of the two I6 entries comes back empty. `keyframes check --strict` still reports no findings, with all six ideas open and 974 of 2000 words used.
+
+  **3.** `CLAUDE.md` imports `AGENTS.md` with an `@AGENTS.md` line, and a test fails if the line is removed.
+
+  Claude Code reads `CLAUDE.md` but doesn't follow a markdown link. The old `See [AGENTS.md](./AGENTS.md)` line therefore never loaded the snippet, which is what range 8's P17 found. The file now says why the import is there, then gives `@AGENTS.md` on a line of its own (D20 (claude-imports-agents)). A new test in `test/integration/docs.test.ts` checks that the line exists. With the line deleted, the test fails. With it restored, the test passes.
+
+  **4.** The snippet's last line runs `npx @robmclarty/keyframes check`, word for word the same in all four copies.
+
+  `src/init/snippet.ts`, the spec's Appendix B, `docs/agents.md` and `AGENTS.md` all carry the new line, and the existing docs tests still hold them equal. Pilots install with npx (D14 (npm-for-pilots)), so a bare `keyframes` isn't on their PATH. Meanwhile `npx keyframes` would fetch an unrelated package with that bare name (D21 (snippet-runs-npx)). `docs/agents.md` no longer says the snippet "names no tool". It now says the snippet names no agent or harness, and that its check needs only Node 24 or later because `npx` fetches keyframes when the repo doesn't install it.
+
+  **5.** `AGENTS.md` says that in this repo, `pnpm check` runs the plan check against this tree.
+
+  Inside this repo, `npx @robmclarty/keyframes check` would fetch the published package rather than run the code in the working tree, because a package isn't a dependency of itself. So a short paragraph right after the snippet says that `pnpm check` runs it here as its `keyframes` check, on the code in this tree. The paragraph sits outside the checkride block, so the block's hash didn't change.
