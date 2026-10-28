@@ -6,30 +6,61 @@ The spec's [Pilots](prototype.md#pilots) section is the protocol,
 [`pilot-playbook.md`](pilot-playbook.md) is the order to run it in, and this file holds what
 happened.
 
-**Status, 2026-10-23: no pilot has run.** Every result below is empty, and the closing call waits
-on all three repos.
+**Status, 2026-10-27: no pilot has run.** Version 0.3.0 is on npm, and the repos, the second
+reader and both H3 arms are chosen. Every result below is empty, and the closing call waits on all
+three repos.
 
 ## Before the first pilot
 
-- **Publish the package.** npm has no `@robmclarty/keyframes` yet, so
-  `npx @robmclarty/keyframes init` fails for a pilot owner. Publish a 0.x, then run
-  `npx @robmclarty/keyframes --version` from an empty directory.
-- **Name the repos and their second readers.** Together the three cover the spec's mix: at least
-  one isn't TypeScript, at least one has a second regular contributor, and at least one gets a
-  real share of its code from agents. The build's lean is two of your own agent-heavy TypeScript
-  tools and one non-TypeScript repo from someone else.
-- **Pick the two H3 models**, and use the same two in every repo, so the runs compare.
+- **Publish the package.** Done: `@robmclarty/keyframes@0.3.0` is on npm, and
+  `npx @robmclarty/keyframes --version` prints `0.3.0` from an empty directory.
+- **Name the repos and their second readers.** Done, below. The spec asks for one repo with a
+  second regular contributor, but none of the owner's repos has one, so a single reader, not named
+  here, reads all three without contributing to them. bbc isn't TypeScript, and all three get most
+  of their code from agents.
+- **Pick the two H3 models.** Done, below, and the same two run in every repo.
+
+Every repo in use gets a plan too, as the playbook's wide tier: storium, volley, runciter,
+checkride and plumbbob, beside the three below. plumbbob is also the first trial of splitting a
+plan by scope.
 
 | Pilot | Repo | Owner | Language | Second reader | Second contributor | Share from agents |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
+| 1 | bbc | Rob | Odin | One reader, not named | None | Most, by the owner's account |
+| 2 | fascicle | Rob | TypeScript | One reader, not named | None | Most, by the owner's account |
+| 3 | atis | Rob | TypeScript | One reader, not named | None | Most, by the owner's account |
 
 | H3 arm | Model | Harness |
 | --- | --- | --- |
-| Frontier | | |
-| Local, small built-in prompt | | |
+| Frontier | Claude Opus 5.5 | Claude Code |
+| Local, small built-in prompt | qwen3.8:27b-32k, on Ollama 0.34.2 on a Mac mini | pi 0.66.1, with an agent folder of its own |
+
+**Why pi for the local arm.** Measured on 2026-10-27 against that model, both harnesses load
+`AGENTS.md`, but their first requests differ:
+
+- **pi** sends 3,498 tokens, which the model reads in 29 seconds.
+- **opencode** sends 18,625 tokens, which take 172 seconds. Most of it is a list of every
+  installed skill, and a to-do tool.
+
+The `-32k` variant is plain `qwen3.8:27b` with its context pinned at 32,768 tokens, where the plain
+model takes the server's default. pi runs from a folder of its own (`PI_CODING_AGENT_DIR`) that
+holds only this `models.json`, so no installed skills join its prompt:
+
+```json
+{
+  "providers": {
+    "mini": {
+      "baseUrl": "http://<the mini>:11434/v1",
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "compat": { "supportsDeveloperRole": false, "supportsReasoningEffort": false },
+      "models": [{ "id": "qwen3.8:27b-32k", "contextWindow": 32768 }]
+    }
+  }
+}
+```
+
+Each run is a fresh session: `pi --no-session --provider mini --model qwen3.8:27b-32k`.
 
 ## Results
 
