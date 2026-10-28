@@ -2,7 +2,8 @@
 
 This is the record of the prototype's pilots: what each pilot repo showed for the four hypotheses
 in [What the prototype tests](prototype.md#what-the-prototype-tests), and the call they lead to.
-The spec's [Pilots](prototype.md#pilots) section is the protocol, and this file holds what
+The spec's [Pilots](prototype.md#pilots) section is the protocol,
+[`pilot-playbook.md`](pilot-playbook.md) is the order to run it in, and this file holds what
 happened.
 
 **Status, 2026-10-23: no pilot has run.** Every result below is empty, and the closing call waits
@@ -115,15 +116,14 @@ The build left these for the pilots to answer:
 - **Does any plan hit the 2000-word budget?** A folder of files waits until splitting is clearly
   better than cutting.
 - **Does markup count as words?** `- **C3 (one-writer)**:` costs three words of the budget now.
-- **Does anyone write a heading as a line of text over `---`?** `check` reads only `##` headings,
-  so that heading isn't a section.
-- **Does anyone write an item line with no bullet, or with its bullet one to three spaces in?**
-  Either reads as prose, with no finding.
-- **Does anyone want letters beyond ASCII in a slug?** `(café)` is `malformed-item` today.
-- **Does a `./` in a path need a note?** It reads silently, unlike every other variant.
-- **Do item-line notes read well?** They show a generic `- **C3 (one-writer)**: …`, not the
-  item's own ID and slug.
-- **Does anyone leave a comment unclosed?** It hides the rest of the plan with no finding.
+- **Does anyone write the new variants?** Before the pilots, `check` learned to read an
+  underlined heading, an item line with no bullet or with its bullet one to three spaces in, a
+  slug beyond ASCII, and a `./` or doubled slash in a path. Each variant earns an
+  `alternate-form` note, so H1's variants line shows whether anyone writes it.
+- **Does anyone leave a comment unclosed?** It hides the rest of the plan, and now it's
+  `unclosed-comment`. H4 shows whether that warning is worth its place.
+- **Do item-line notes read well?** They show the usual form with the item's own letter, such as
+  `- **C<n> (<slug>)**: …`, so one habit groups onto one line of the report.
 
 ## The closing call
 
@@ -165,6 +165,7 @@ Then choose what to build next.
 | Sub-line | | |
 | Citation | | |
 | Reference | | |
+| Path | | |
 
 ### Findings
 
@@ -194,6 +195,7 @@ Then choose what to build next.
 | `path-overlap` | warning | | |
 | `over-budget` | warning | | |
 | `unclosed-fence` | warning | | |
+| `unclosed-comment` | warning | | |
 | `alternate-form` | note | | |
 
 ### Budgets
