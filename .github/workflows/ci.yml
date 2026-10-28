@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# One run per ref: a new push to a PR supersedes its in-flight run; pushes to
+# main queue instead of cancelling, so every landed commit gets a full verdict.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: check (${{ matrix.os }}, node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # C2 (byte-identical) promises the same report on any OS, so the gate
+        # runs on Linux and macOS, at the supported floor (engines.node >=24)
+        # and the newest major. Windows waits for a pilot who needs it.
+        os: [ubuntu-latest, macos-latest]
+        node: ['24', '26']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Reads the pinned pnpm version from package.json#packageManager, so CI
+      # uses the exact pnpm that wrote the lockfile. Must run before setup-node
+      # so its pnpm cache can find the binary.
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Install Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The full gate keyframes dogfoods: types, lint, struct, dead, test, docs,
+      # links, spell, rule-tests, typecheck-tests, and this repo's own
+      # keyframes.md, checked strictly by the CLI the types slot just built.
+      - name: pnpm check
+        run: pnpm check
+
+      # A failing slot prints only its status line; the tool output that says
+      # *what* broke lives in .check/, which a hosted runner discards.
+      - name: Failing check output
+        if: failure()
+        run: |
+          [ -d .check ] || exit 0
+          failed=$(node -e '
+            const s = require("./.check/summary.json");
+            console.log(s.checks.filter(c => c.ok === false).map(c => c.name).join(" "));
+          ' 2>/dev/null) || failed=""
+          echo "failing slots: ${failed:-<none recorded>}"
+          for slot in $failed; do
+            for f in ".check/$slot.stdout.txt" ".check/$slot.stderr.txt"; do
+              [ -s "$f" ] || continue
+              echo "::group::$f"
+              cat "$f"
+              echo "::endgroup::"
+            done
+          done
+
+      - name: Upload check report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: check-${{ matrix.os }}-node${{ matrix.node }}
+          path: |
+            .check/
+            !.check/coverage/
+          retention-days: 14
+          if-no-files-found: ignore
