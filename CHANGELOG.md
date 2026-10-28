@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.3.0 — 2026-10-27
+
+The first version published to npm (v0.2.0 was tagged but never reached it), so `npx @robmclarty/keyframes` runs it in any repo. `check` reads more of what people write, and the pilots have a record and a playbook.
+
+### Added
+
+- `check` reads more variants, each with an `alternate-form` note that shows the usual form: a section heading underlined with a line of `-`, an item line with no bullet (written as a paragraph) or with its bullet one to three spaces in, a slug in any script such as `(café-crème)`, and a `./` or doubled slash in a path.
+- A comment that starts a line and never closes is now the `unclosed-comment` warning, since it hides the rest of the plan.
+- `docs/pilots.md` is the record the pilots fill in, and `docs/pilot-playbook.md` is the order to run them in, with the evidence each one collects for the next build.
+
+### Changed
+
+- Item-line notes show the usual form with the item's own letter, such as `- **C<n> (<slug>)**: …`, so one habit across many items still groups onto one line of the report.
+- Slugs compare in Unicode's NFC form, and the report schema's slug pattern accepts any script.
+
+### Fixed
+
+- The agent snippet's last line now runs `npx @robmclarty/keyframes check`, which works where `keyframes` isn't installed.
+- The published package names no pnpm engine, so installing it with npm or yarn gives no engine warning.
+
+### Internal
+
+- CI runs the full gate on Linux and macOS at Node 24 and 26. A pushed `vX.Y.Z` tag packs the package in a job with no publish rights, publishes it from a separate approval-gated job through npm trusted publishing, and turns this changelog's section into a GitHub Release.
+- End-to-end tests hold the first-plan and second-editor scenarios, so this repo's plan marks both linked.
+- This repo's `AGENTS.md` carries the keyframes snippet, `CLAUDE.md` imports it, and the plan's I6 is finished.
+- The prototype build is finished; its record is in `.plumbbob/builds/2026-10-08-keyframes-prototype/`.
+
 ## v0.2.0 — 2026-10-23
 
 The first working `keyframes` CLI, and the first release published to npm, so `npx @robmclarty/keyframes` runs it in any repo.

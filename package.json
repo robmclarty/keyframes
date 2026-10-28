@@ -1,6 +1,6 @@
 {
   "name": "@robmclarty/keyframes",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "One markdown file where people write a project's intent, for other people to build on and agents to be guided by, checked the same way every time.",
   "license": "Apache-2.0",
   "author": "Rob McLarty",
