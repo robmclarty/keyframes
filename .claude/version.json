@@ -21,6 +21,6 @@
   "publish": {
     "pushTag": true,
     "pushBranch": false,
-    "confirm": false
+    "confirm": true
   }
 }

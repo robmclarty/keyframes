@@ -2,18 +2,20 @@
 
 - **verify is null on purpose.** The checkride scaffold excludes `CHANGELOG.md` from both
   markdownlint and cspell, so no narrow check covers a release diff (version string and
-  changelog prose). The full `pnpm check` gate already runs at the end of every agent turn.
-- **Each release is tagged and the tag is pushed.** The remote is
-  `github.com/robmclarty/keyframes`, and `/version` creates an annotated `vX.Y.Z` tag and
-  pushes it. `confirm` stays false because nothing runs on a tag yet. The branch isn't pushed
-  by `/version`, so push `main` by hand after a release.
-- **npm publishing is by hand, after `/version`.** Nothing publishes on a tag push, so
-  `confirm` stays false. Once the release commit and tag exist, run `npm pack --dry-run` to
-  read the file list (only `bin/`, `dist/`, `schema/`, `LICENSE`, `README.md` and
-  `package.json`), then `npm publish` from a logged-in account. The `prepack` script deletes
-  `dist/` and rebuilds it with `tsc --build --force`, since a plain `tsc --build` trusts the
-  root `tsconfig.tsbuildinfo` and emits nothing into an empty `dist/`, and `publishConfig`
-  makes the scoped package public. Then run `npx @robmclarty/keyframes@<version> --version`
-  from an empty directory and check that it prints the new version.
-- **When npm publishing moves to CI** (e.g. a publish on tag), set `publish.confirm` to true,
-  because a tag push will then publish, and record the CI gate here.
+  changelog prose). The full `pnpm check` gate already runs at the end of every agent turn, and
+  again in the publish workflow before anything reaches npm.
+- **A pushed tag publishes, so `confirm` is true.** `/version` creates an annotated `vX.Y.Z` tag
+  and pushes it to `github.com/robmclarty/keyframes`. That starts two workflows:
+  - `publish.yaml`: its `build` job runs `pnpm check` and `npm pack` with no way to publish. Its
+    `publish` job then waits at the `npm-publish` environment for Rob's approval, and publishes
+    the packed tarball through npm trusted publishing, with provenance.
+  - `release.yaml`: turns the version's CHANGELOG section into a GitHub Release.
+- **The branch isn't pushed by `/version`,** so push `main` by hand after a release. A workflow
+  runs for a tag only once it's on `main`, so when a release adds or renames one, push `main`
+  before the tag.
+- **After approving,** run `npx @robmclarty/keyframes@<version> --version` from an empty
+  directory and check that it prints the new version.
+- **If the publish job fails,** fix the cause and use Run workflow on the Publish workflow, from
+  the tag; an already-published version is skipped. npm's trusted publisher for this package
+  allows publish but not dist-tag changes, so a dist-tag error points there. v0.3.0, the first
+  version on npm, was published by hand, so it carries no provenance.
