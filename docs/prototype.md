@@ -554,10 +554,13 @@ living reference for the format and the tool, so a change here that moves a step
   H4's data.
 - **Q3 (intent-structure):** should Intent have parsed parts (problem, who it's for, what good
   looks like, what it isn't)? *Lean:* no. The template suggests them, and Intent stays prose.
-- **Q4 (one-file):** will a large project need a folder of files? *Lean:* not until a pilot hits
-  the word budget and splitting is clearly better than cutting. Size may not be the only
-  pressure: a capability with its own instructions, such as a skill's folder, may want a plan of
-  its own that cites the root one (`I5 (scoped-plans)` in Appendix C).
+- **Q4 (one-file):** *resolved 2026-10-27.* A large project grows by scope, as `D8
+  (grow-by-scope)` in [`keyframes.md`](../keyframes.md) says: a plan that outgrows its budgets
+  splits instead of raising them. The root plan keeps the core, which holds everywhere, and a part
+  with reason to stand alone gets its own plan beside its code, which cites the root and adds to it
+  without overriding it. A project's decision history stays in a log outside the plan, as `D9
+  (log-apart)` says. Building it waits for the pilots, and plumbbob's split by hand is its first
+  trial ([`pilot-playbook.md`](pilot-playbook.md)).
 
 ## Appendix A: the template
 

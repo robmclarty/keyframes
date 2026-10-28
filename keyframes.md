@@ -71,6 +71,7 @@ people write that down, so that others, human or agent, can work from it and ref
 
 - **D1 (one-file)**: One `keyframes.md` at the repo root.
   - because: one place to look, and budgets keep it small.
+  - superseded-by: D8
 - **D2 (bracket-citations)**: A citation is only the bracketed form, `[C3 (slug)]`.
   - because: bare IDs collide with ordinary words like S3 and D3.
 - **D3 (file-pointers)**: `held-by:` has one pointer kind, `file:`, with optional `#"text"`.
@@ -86,6 +87,16 @@ people write that down, so that others, human or agent, can work from it and ref
   Ideas hold statements for future consideration.
   - because: "Rules" is too vague, since principles are rules too, and an idea written down
     shouldn't read as a question someone has to answer.
+- **D8 (grow-by-scope)**: A plan that outgrows its budgets splits by scope instead of raising
+  them. The root plan keeps the core, which holds everywhere. A part with reason to stand alone,
+  such as a deep module, gets its own plan beside its code, which says why, cites the root, and
+  adds to it without overriding it.
+  - because: an agent honours a handful of standing rules better than a hundred, and a part's
+    details matter only to work inside it.
+- **D9 (log-apart)**: The plan holds only what's in force. The history of decisions, and why each
+  one changed, lives in a log outside the plan.
+  - because: history isn't instruction, and every Decision in the plan is one an agent mustn't
+    reverse.
 
 ## Taste
 
@@ -99,7 +110,8 @@ people write that down, so that others, human or agent, can work from it and ref
 - **Q1 (section-names)**: Are these the right section names?
   - resolved-by: D7
 - **Q2 (unlinked-warns)**: Should an unlinked constraint warn? Decide after the pilots.
-- **Q3 (map-vs-code)**: Is checking the Map against the code the next thing to build?
+- **Q3 (map-vs-code)**: Is checking the Map against the code the next thing to build? Lean: yes,
+  sized by the drift the pilots find.
 
 ## Ideas
 
@@ -115,5 +127,9 @@ people write that down, so that others, human or agent, can work from it and ref
   looks relevant.
 - **I5 (scoped-plans)**: A plan scoped to one part or capability, such as a package or a skill's
   folder, checked the same way and citing the root plan.
+  - resolved-by: D8
 - **I6 (drafting-interview)**: An agent that interviews the owner, or drafts a first plan from
   existing notes, for a person to edit. Only after the pilots, since it would muddy H1.
+- **I7 (brownfield-split)**: Read an existing project and draft its split for a person to accept:
+  the root plan's core, a plan for each part that earns one, and a log for the rest. It's
+  drafting, so it belongs with I6, outside the checker [C1 (read-only-check)].

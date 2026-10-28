@@ -61,8 +61,18 @@ building.
 | Something the pilots surface | Keep one running list of anything you wanted from `keyframes` and didn't have. | It shows up in more than one repo |
 | A skill that teaches agents the format (I4) | Each time an agent edits `keyframes.md`, note whether `check` passed first time, and what it got wrong. | Agents' plan edits keep failing `check`, even with its messages to go on |
 
-Q4, whether a big project needs a folder of files, rides on the same numbers: note what you cut
-to fit the budget, and whether a part of the repo, such as a package, wanted a plan of its own.
+**Splitting by scope gets its first trial in plumbbob.** This repo's plan settles that a plan
+which outgrows its budgets splits by scope, and keeps its history in a log (D8 and D9), but
+`check` doesn't read a split yet. plumbbob's `docs/decisions.md` holds over a hundred decisions,
+so:
+
+1. Write plumbbob's root plan by hand, keeping only the core that holds everywhere. Leave the rest
+   in `docs/decisions.md`, which stays the log.
+2. Have an agent draft the same split from `docs/decisions.md`, and compare its core with yours.
+   That says whether a drafted split (I7) can be trusted.
+3. If a part wants a plan of its own, write it beside its code and check it alone with
+   `npx @robmclarty/keyframes check <its folder>`. Note what that can't do yet, such as citing the
+   root plan. Those notes are the design for scoped plans.
 
 ## Close
 
