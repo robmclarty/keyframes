@@ -88,6 +88,33 @@ Not run.
 
 Not run.
 
+## Wide tier
+
+The five other repos in use keep only the record's H1 and H4 parts: copy those two parts of the
+template below under each repo's heading as its plan starts. plumbbob's entry also holds the split
+trial's scores, as its
+[protocol](https://github.com/robmclarty/plumbbob/blob/main/docs/keyframes-split-trial.md) says.
+
+### storium
+
+Not run.
+
+### volley
+
+Not run.
+
+### runciter
+
+Not run.
+
+### checkride
+
+Not run.
+
+### plumbbob
+
+Not run.
+
 ## The record for one pilot
 
 Copy this under the pilot's heading when it starts, and fill it in as you go.
