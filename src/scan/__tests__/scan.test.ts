@@ -213,14 +213,29 @@ describe('comments', () => {
     );
   });
 
-  test('a comment that starts a line and never closes hides the rest of the file', () => {
-    expect(kinds(md('## Intent', 'Why.', '<!-- left open', '', '## Constraints'))).toEqual([
+  test('a comment that starts a line and never closes hides the rest of the file, with unclosed-comment', () => {
+    const source = md('## Intent', 'Why.', '<!-- left open', '', '## Constraints');
+    expect(kinds(source)).toEqual([
       [1, 'heading'],
       [2, 'text'],
       [3, 'blank'],
       [4, 'blank'],
       [5, 'blank'],
     ]);
+    expect(scan(source).findings).toEqual([
+      {
+        line: 3,
+        severity: 'warning',
+        code: 'unclosed-comment',
+        message: '"<!--" opens a comment that never closes, so the rest of the file is hidden; end it with "-->"',
+      },
+    ]);
+  });
+
+  test('unclosed-comment falls on the line of the comment left open, not on one that closed', () => {
+    const source = md('## Intent', '<!-- a note', 'that closes -->', 'Why.', '', '<!-- one left open');
+    expect(scan(source).findings.map(({ line, code }) => [line, code])).toEqual([[6, 'unclosed-comment']]);
+    expect(scan(md('## Intent', 'Why.', '<!-- one --> <!-- left open')).findings).toEqual([]);
   });
 
   test('a <!-- inside inline code is code, not a comment', () => {
@@ -432,6 +447,92 @@ describe('sections', () => {
   });
 });
 
+describe('setext headings', () => {
+  test('a line of text with a line of - under it is a ## heading, and with = under it a # heading', () => {
+    const source = md(
+      '## Intent',
+      'Why.',
+      '',
+      'Constraints',
+      '---',
+      '- **C1 (one-writer)**: Only one writer.',
+      '',
+      'Appendix',
+      '===',
+      'After.',
+    );
+    expect(kinds(source)).toEqual([
+      [1, 'heading'],
+      [2, 'text'],
+      [3, 'blank'],
+      [4, 'heading'],
+      [5, 'underline'],
+      [6, 'text'],
+      [7, 'blank'],
+      [8, 'heading'],
+      [9, 'underline'],
+      [10, 'text'],
+    ]);
+    expect(outline(source)).toEqual([
+      { title: 'Intent', name: 'intent', from: 1, to: 3 },
+      { title: 'Constraints', name: 'constraints', from: 4, to: 7 },
+    ]);
+  });
+
+  test('an underline can be one character long, up to three spaces in, with spaces after it', () => {
+    expect(kinds(md('Notes', '-', '', 'Glossary', '   ===  '))).toEqual([
+      [1, 'heading'],
+      [2, 'underline'],
+      [3, 'blank'],
+      [4, 'heading'],
+      [5, 'underline'],
+    ]);
+  });
+
+  test('an underlined section heading is a variant with a note, and an underlined free-prose one has none', () => {
+    const source = md('## Intent', 'Why.', '', 'Constraint', '----------', '', 'Notes', '---');
+    expect(scan(source).findings).toEqual([
+      {
+        line: 4,
+        severity: 'note',
+        code: 'alternate-form',
+        message: '"Constraint" reads fine; the usual form is "## Constraints"',
+      },
+      {
+        line: 4,
+        severity: 'note',
+        code: 'alternate-form',
+        message: '"Constraint" with a line of "-" under it reads fine; the usual form is "## Constraints"',
+      },
+    ]);
+  });
+
+  test('duplicate-section quotes an underlined heading as it is written', () => {
+    const { findings } = scan(md('## Intent', 'Why.', '## Constraints', '', 'Constraints', '---'));
+    expect(findings.map(({ code, message }) => [code, message])).toEqual([
+      [
+        'duplicate-section',
+        '"Constraints" repeats the section from line 3; merge them under one "## Constraints"',
+      ],
+      [
+        'alternate-form',
+        '"Constraints" with a line of "-" under it reads fine; the usual form is "## Constraints"',
+      ],
+    ]);
+  });
+
+  test.each([
+    ['a list item', ['- item', '---'], [[1, 'text'], [2, 'break']]],
+    ['the second line of a paragraph', ['First line', 'second line', '---'], [[1, 'text'], [2, 'text'], [3, 'break']]],
+    ['indented text', ['  Indented', '---'], [[1, 'text'], [2, 'break']]],
+    ['a blank line', ['', '---'], [[1, 'blank'], [2, 'break']]],
+    ['a heading', ['## Notes', '---'], [[1, 'heading'], [2, 'break']]],
+    ['a comment', ['<!--', 'Constraints', '---', '-->'], [[1, 'blank'], [2, 'blank'], [3, 'blank'], [4, 'blank']]],
+  ])('a line of - under %s underlines nothing', (_, lines, expected) => {
+    expect(kinds(md(...lines))).toEqual(expected);
+  });
+});
+
 describe('section findings', () => {
   test('duplicate-section names the line where the section first appeared', () => {
     const source = md(
@@ -544,6 +645,7 @@ describe('finding', () => {
         'path-overlap',
         'over-budget',
         'unclosed-fence',
+        'unclosed-comment',
       ],
     ],
     ['note', ['alternate-form']],

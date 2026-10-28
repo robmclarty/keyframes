@@ -1,5 +1,5 @@
 import { finding, type Finding, type Line, type SectionName } from '../scan/index.js';
-import { readBullet } from './bullet.js';
+import { readBullet, readParagraph, type Bullet } from './bullet.js';
 import { notAnItem, readItemLine, type ItemLine } from './item-line.js';
 import { headingOf, letterOf, wrongPlace, type Key, type Letter } from './kinds.js';
 import { readSubLine, type SubLineRead } from './sub-line.js';
@@ -43,6 +43,8 @@ type Draft = {
   readonly findings: Finding[];
   /** What an indented line that isn't a bullet continues: the item's text, a sub-line, or nothing. */
   target: 'text' | 'skip' | SubDraft;
+  /** Whether lines at column 0 still continue the item, as they do the paragraph of one with no bullet. */
+  paragraph: boolean;
 };
 
 /** An itemized section a line sits in, and the letter its items take. */
@@ -51,6 +53,32 @@ type Home = { readonly section: SectionName; readonly letter: Letter; readonly t
 /** Whether a line ends the item before it: anything visible at column 0. Code never does. */
 const endsItem = (line: Line): boolean =>
   line.kind !== 'blank' && line.kind !== 'code' && !line.text.startsWith(' ');
+
+/** The bullet a line opens with, or a paragraph of bold at column 0, which may be an item too. */
+const opening = (text: string): Bullet | undefined =>
+  readBullet(text) ?? (text.startsWith(' ') ? undefined : readParagraph(text));
+
+/** Whether a line is an item line, as written: a bullet or a paragraph that reads as one. */
+const isItemLine = (line: Line): boolean => {
+  const bullet = line.kind === 'text' ? opening(line.text) : undefined;
+  return bullet !== undefined && readItemLine(bullet).kind === 'item';
+};
+
+/**
+ * Whether a line starts an item, though it doesn't start at column 0: a bullet one to three spaces
+ * in that reads as an item line. Any other bullet that far in stays under whatever came before it.
+ */
+const startsIndented = (line: Line): boolean => {
+  const indent = line.kind === 'text' ? readBullet(line.text)?.indent : undefined;
+  return indent !== undefined && indent >= 1 && indent <= 3 && isItemLine(line);
+};
+
+/** Whether a line carries on the paragraph of an item with no bullet: text at column 0 that isn't a bullet or an item. */
+const continuesParagraph = (line: Line): boolean =>
+  line.kind === 'text' &&
+  !line.text.startsWith(' ') &&
+  readBullet(line.text) === undefined &&
+  !isItemLine(line);
 
 /** The itemized section a line sits in, or undefined in Intent, in free prose, or in no section. */
 const homeOf = (line: Line): Home | undefined => {
@@ -82,8 +110,11 @@ const wrongLetter = (item: ItemLine, line: Line, home: Home): Finding =>
     `${item.id} is under "## ${home.title}", but ${item.letter} items go under "${headingOf(item.section)}"; move it there, or give it a ${home.letter} number`,
   );
 
-/** A draft for an item line, with the findings the line earns on its own. */
-const open = (item: ItemLine, line: Line, placed: readonly Finding[]): Draft => {
+/**
+ * A draft for an item line, with the findings the line earns on its own. With no bullet, the lines
+ * of its paragraph carry it on.
+ */
+const open = (item: ItemLine, line: Line, placed: readonly Finding[], paragraph: boolean): Draft => {
   const slugless =
     item.slug === undefined
       ? [
@@ -105,24 +136,27 @@ const open = (item: ItemLine, line: Line, placed: readonly Finding[]): Draft => 
       ...item.notes.map((note) => finding('alternate-form', line.number, note)),
     ],
     target: 'text',
+    paragraph,
   };
 };
 
 /**
- * Reads a bullet at column 0. In an itemized section it's an item, malformed-item when it starts
- * like one but can't be read, or not-an-item. Anywhere else only a bold item counts, with
- * item-outside-section, and other bullets are prose.
+ * Reads a top-level bullet: one at column 0, or one to three spaces in. In an itemized section it's
+ * an item, malformed-item when it starts like one but can't be read, or not-an-item. Anywhere else
+ * only a bold item counts, with item-outside-section, and other bullets are prose. A paragraph that
+ * opens with bold is read the same way, except that one that isn't an item is only prose.
  */
 const topLevel = (line: Line, findings: Finding[]): Draft | undefined => {
-  const bullet = readBullet(line.text);
+  const bullet = opening(line.text);
   if (bullet === undefined) {
     return undefined;
   }
+  const paragraph = bullet.marker === '';
   const read = readItemLine(bullet);
   const home = homeOf(line);
   if (home === undefined) {
     return read.kind === 'item' && read.item.bold
-      ? open(read.item, line, [outside(read.item, line)])
+      ? open(read.item, line, [outside(read.item, line)], paragraph)
       : undefined;
   }
   if (read.kind === 'malformed') {
@@ -132,9 +166,11 @@ const topLevel = (line: Line, findings: Finding[]): Draft | undefined => {
   // With no bold, a letter from another section makes the line read two ways, so it isn't an item.
   if (read.kind === 'item' && (read.item.bold || read.item.section === home.section)) {
     const placed = read.item.section === home.section ? [] : [wrongLetter(read.item, line, home)];
-    return open(read.item, line, placed);
+    return open(read.item, line, placed, paragraph);
   }
-  findings.push(finding('not-an-item', line.number, notAnItem(bullet, home.letter)));
+  if (!paragraph) {
+    findings.push(finding('not-an-item', line.number, notAnItem(bullet, home.letter)));
+  }
   return undefined;
 };
 
@@ -172,6 +208,7 @@ const addSubLine = (draft: Draft, line: Line, read: Extract<SubLineRead, { kind:
  * other line continues whatever came before it, up to a blank line, which hands it back to the text.
  */
 const inside = (draft: Draft, line: Line): void => {
+  draft.paragraph = false;
   if (line.kind === 'blank') {
     draft.target = 'text';
     return;
@@ -258,8 +295,10 @@ const duplicates = (items: readonly Item[]): Finding[] => {
 
 /**
  * Reads the items in a scanned plan: each top-level bullet in an itemized section, the lines that
- * continue it, and the sub-lines under it, up to the next line at column 0. Every ID, slug and key
- * comes out in its usual form, and each variant it was written in earns an alternate-form note.
+ * continue it, and the sub-lines under it, up to the next line at column 0. An item with no bullet
+ * runs on over the rest of its paragraph first, and a bullet one to three spaces in that reads as
+ * an item line starts one. Every ID, slug and key comes out in its usual form, and each variant it
+ * was written in earns an alternate-form note.
  */
 export const readItems = (
   lines: readonly Line[],
@@ -268,7 +307,9 @@ export const readItems = (
   const findings: Finding[] = [];
   let draft: Draft | undefined;
   for (const line of lines) {
-    if (endsItem(line)) {
+    if (draft?.paragraph === true && continuesParagraph(line)) {
+      draft.text.push(line.text.trim());
+    } else if (endsItem(line) || startsIndented(line)) {
       draft = line.kind === 'text' ? topLevel(line, findings) : undefined;
       drafts.push(...(draft === undefined ? [] : [draft]));
     } else if (draft !== undefined) {

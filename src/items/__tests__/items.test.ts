@@ -85,6 +85,59 @@ describe('items', () => {
     );
   });
 
+  test('an item with no bullet runs on over its paragraph, and a line that reads as an item starts the next', () => {
+    const { items, findings } = read(
+      '## Constraints',
+      '**C1 (one-writer)**: Only the sync worker',
+      'writes to the database.',
+      '**C2 (no-egress)**: Nothing calls out.',
+      '  - held-by: review',
+      'A paragraph after it, at column 0.',
+    );
+    expect(items.map(({ id, text, subLines }) => [id, text, subLines.length])).toEqual([
+      ['C1', 'Only the sync worker\nwrites to the database.', 0],
+      ['C2', 'Nothing calls out.', 1],
+    ]);
+    const note = 'an item without a bullet reads fine; the usual form starts with "-": - **C<n> (<slug>)**: …';
+    expect(findings.map((each) => [each.line, each.message])).toEqual([
+      [2, note],
+      [4, note],
+    ]);
+  });
+
+  test('a paragraph that opens with bold is prose, with no finding, unless a colon or a dash follows its ID', () => {
+    expect(
+      read('## Decisions', '**D3 (sqlite)** was replaced by a server.', '', '**Note:** nothing here is an item.'),
+    ).toEqual({ items: [], findings: [] });
+  });
+
+  test('an item line one to three spaces in starts an item, even under another, while one four spaces in is prose', () => {
+    const { items, findings } = read(
+      '## Constraints',
+      '- **C1 (one-writer)**: Only one writer.',
+      '  - **C2 (no-egress)**: Nothing calls out.',
+      '    - **C3 (offline)**: Works offline.',
+    );
+    expect(items.map(({ id, text }) => [id, text])).toEqual([
+      ['C1', 'Only one writer.'],
+      ['C2', 'Nothing calls out.\n- **C3 (offline)**: Works offline.'],
+    ]);
+    expect(findings.map((each) => [each.line, each.message])).toEqual([
+      [3, 'an indented item reads fine; the usual form starts at column 0: - **C<n> (<slug>)**: …'],
+    ]);
+  });
+
+  test('a slug can be in any script, and an accent typed as its own mark reads as one typed with its letter', () => {
+    const { items, findings } = read(
+      '## Constraints',
+      '- **C1 (Caf\u00e9-Cr\u00e8me)**: Coffee.',
+      '- **C2 (cafe\u0301)**: An accent typed as its own mark.',
+      '- **C3 (\u65e5\u672c\u8a9e)**: Japanese.',
+    );
+    expect(items.map(({ slug }) => slug)).toEqual(['caf\u00e9-cr\u00e8me', 'caf\u00e9', '\u65e5\u672c\u8a9e']);
+    expect(findings).toEqual([]);
+  });
+
   test('the text can start on the line after the ID', () => {
     const { items, findings } = read(
       '## Constraints',
@@ -480,6 +533,9 @@ describe('variants', () => {
     ['leading zeros in the number', '- **C003 (one-writer)**: Only one writer.'],
     ['spaces for the hyphens in the slug', '- **C3 (one writer)**: Only one writer.'],
     ['underscores for the hyphens in the slug', '- **C3 (one_writer)**: Only one writer.'],
+    ['its bullet one space in', ' - **C3 (one-writer)**: Only one writer.'],
+    ['its bullet three spaces in', '   - **C3 (one-writer)**: Only one writer.'],
+    ['no bullet, as a paragraph', '**C3 (one-writer)**: Only one writer.'],
   ])('an item line with %s reads like the usual form, with one note', (_, line) => {
     readsLike(USUAL, ['## Constraints', line, '  - held-by: review'], 2);
   });
@@ -519,7 +575,21 @@ describe('variants', () => {
       '"__" bold reads fine; the usual form is "**"',
       'a leading zero in an ID reads fine; the usual form drops it: C3, not C03',
       'spaces in a slug read fine; the usual form joins its words with hyphens: (one-writer)',
-      'a colon inside the bold reads fine; the usual form puts it after the bold: - **C3 (one-writer)**: …',
+      'a colon inside the bold reads fine; the usual form puts it after the bold: - **C<n> (<slug>)**: …',
+    ]);
+  });
+
+  test("an item line's notes show the usual form with its own letter, so a habit groups by section", () => {
+    const { findings } = read(
+      '## Decisions',
+      '- **D1 (sqlite):** One file.',
+      '  - because: boring.',
+      '- **D2 (no-orm):** Plain SQL.',
+      '  - because: fewer layers.',
+    );
+    expect(findings.map((each) => [each.line, each.message])).toEqual([
+      [2, 'a colon inside the bold reads fine; the usual form puts it after the bold: - **D<n> (<slug>)**: …'],
+      [4, 'a colon inside the bold reads fine; the usual form puts it after the bold: - **D<n> (<slug>)**: …'],
     ]);
   });
 

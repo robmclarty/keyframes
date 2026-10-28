@@ -156,6 +156,16 @@ describe('citations', () => {
     ).toEqual([]);
   });
 
+  test('a citation matches a slug in any script, in any case, however its accents are typed', () => {
+    expect(
+      cite(
+        '## Constraints',
+        '- **C1 (caf\u00e9-cr\u00e8me)**: Coffee.',
+        'See [C1 (CAF\u00c9-CR\u00c8ME)] and [C1 (cafe\u0301-cre\u0300me)].',
+      ),
+    ).toEqual([]);
+  });
+
   test('a citation reads in any case, with no note', () => {
     expect(cite(...PLAN, 'See [c3 (One-Writer)].')).toEqual([]);
   });

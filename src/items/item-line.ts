@@ -46,9 +46,6 @@ type Pieces = {
   readonly gaps: readonly (readonly [string, string])[];
 };
 
-// The usual form, as notes show it.
-const USUAL = '- **C3 (one-writer)**: …';
-
 // A bold ID with an optional slug, then the colon inside or after the bold, a dash, or nothing.
 const BOLD =
   /^(\*\*|__)([A-Za-z])(\d+)(?:([ \t]*)\(([^()]*)\))?([ \t]*)(:?)([ \t]*)(\*\*|__)([ \t]*)([:\-–—]?)([ \t]*)(.*)$/;
@@ -57,7 +54,7 @@ const PLAIN = /^([A-Za-z])(\d+)([ \t]*)\(([^()]*)\)([ \t]*):([ \t]*)(.*)$/;
 // A bold ID followed by `(` or a colon: meant as an item, so failing to read it is an error.
 const STARTS = /^(?:\*\*|__)([A-Za-z])(\d+)(?:[ \t]*[(:]|(?:\*\*|__)[ \t]*:)/;
 // A bold ID followed by words and no parentheses, as in `**C4 one-writer**`.
-const UNBRACKETED = /^(\*\*|__)([A-Za-z])(\d+)[ \t]+([A-Za-z0-9][A-Za-z0-9 _-]*?)[ \t]*\1/;
+const UNBRACKETED = /^(\*\*|__)([A-Za-z])(\d+)[ \t]+([\p{L}\p{N}][\p{L}\p{N}\p{M} _-]*?)[ \t]*\1/u;
 const DASHES = new Set(['-', '–', '—']);
 
 /** The leading and trailing whitespace inside a slug's parentheses, which the usual form has none of. */
@@ -119,31 +116,47 @@ const fromPlain = (match: RegExpExecArray): Pieces => {
 };
 
 /** The note for what follows the bold, unless it's the usual colon after it. */
-const separatorNote = (pieces: Pieces): string | undefined => {
+const separatorNote = (pieces: Pieces, usual: string): string | undefined => {
   if (pieces.inner) {
-    return `a colon inside the bold reads fine; the usual form puts it after the bold: ${USUAL}`;
+    return `a colon inside the bold reads fine; the usual form puts it after the bold: ${usual}`;
   }
   if (DASHES.has(pieces.separator)) {
-    return `"${pieces.separator}" after the bold reads fine; the usual form is a colon: ${USUAL}`;
+    return `"${pieces.separator}" after the bold reads fine; the usual form is a colon: ${usual}`;
   }
   return pieces.separator === '' && pieces.open !== ''
-    ? `an item with no colon after the bold reads fine; the usual form has one: ${USUAL}`
+    ? `an item with no colon after the bold reads fine; the usual form has one: ${usual}`
     : undefined;
 };
 
-/** Every alternate-form note an item line earns, one for each kind of variant, in a fixed order. */
-const notesOf = (bullet: Bullet, pieces: Pieces, idNotes: readonly string[]): string[] => {
+/** The note for how a line starts, unless it's a `-` bullet at column 0. */
+const startNote = (bullet: Bullet, usual: string): string | undefined => {
+  if (bullet.marker === '') {
+    return `an item without a bullet reads fine; the usual form starts with "-": ${usual}`;
+  }
+  return bullet.indent === 0
+    ? undefined
+    : `an indented item reads fine; the usual form starts at column 0: ${usual}`;
+};
+
+/**
+ * Every alternate-form note an item line earns, one for each kind of variant, in a fixed order. Each
+ * shows the usual form with the item's letter, such as `- **C<n> (<slug>)**: …`, so the note reads
+ * the same on every item in a section, and the report can group a habit onto one line.
+ */
+const notesOf = (bullet: Bullet, pieces: Pieces, idNotes: readonly string[], usual: string): string[] => {
   const spacing =
-    bullet.space !== ' ' || pieces.gaps.some(([written, usual]) => written !== usual);
+    (bullet.marker !== '' && bullet.space !== ' ') ||
+    pieces.gaps.some(([written, gap]) => written !== gap);
   const notes = [
-    markerNote(bullet),
+    startNote(bullet, usual),
+    bullet.marker === '' ? undefined : markerNote(bullet),
     pieces.open === '__' ? '"__" bold reads fine; the usual form is "**"' : undefined,
     pieces.open === ''
-      ? `an item without bold reads fine; the usual form puts its ID and slug in bold: ${USUAL}`
+      ? `an item without bold reads fine; the usual form puts its ID and slug in bold: ${usual}`
       : undefined,
     ...idNotes,
-    separatorNote(pieces),
-    spacing ? `other spacing in an item line reads fine; the usual form is ${USUAL}` : undefined,
+    separatorNote(pieces, usual),
+    spacing ? `other spacing in an item line reads fine; the usual form is ${usual}` : undefined,
   ];
   return notes.filter((note) => note !== undefined);
 };
@@ -189,6 +202,7 @@ const judge = (bullet: Bullet, pieces: Pieces): ItemRead => {
       : malformed(bullet, ...trouble);
   }
   const slug = pieces.slug === undefined ? undefined : readSlug(pieces.slug);
+  const usual = `- **${id.letter}<n> (<slug>)**: …`;
   return {
     kind: 'item',
     item: {
@@ -198,7 +212,7 @@ const judge = (bullet: Bullet, pieces: Pieces): ItemRead => {
       slug: slug?.slug,
       text: pieces.text,
       bold: pieces.open !== '',
-      notes: notesOf(bullet, pieces, [...id.notes, ...(slug?.notes ?? [])]),
+      notes: notesOf(bullet, pieces, [...id.notes, ...(slug?.notes ?? [])], usual),
       quote: quote(bullet),
     },
   };
@@ -207,7 +221,9 @@ const judge = (bullet: Bullet, pieces: Pieces): ItemRead => {
 /**
  * Reads a top-level bullet as an item line: the usual `- **C3 (one-writer)**: …`, or one of its
  * variants. A bold ID followed by `(` or a colon is meant as an item, so if it can't be read it's
- * malformed; anything else, `- **C4 model**: …` included, is not an item.
+ * malformed; anything else, `- **C4 model**: …` included, is not an item. A paragraph, which is a
+ * bullet with no marker, needs a colon or a dash after its ID, since bold that opens a paragraph is
+ * often only emphasis: `**D3 (sqlite)** was replaced` is prose.
  */
 export const readItemLine = (bullet: Bullet): ItemRead => {
   const bold = BOLD.exec(bullet.content);
@@ -215,7 +231,8 @@ export const readItemLine = (bullet: Bullet): ItemRead => {
     const pieces = fromBold(bold);
     // With no slug, only a colon says the bold is an ID: `- **S3** holds uploads` is prose.
     if (pieces.slug !== undefined || pieces.inner || pieces.separator === ':') {
-      return judge(bullet, pieces);
+      const separated = pieces.inner || pieces.separator !== '';
+      return bullet.marker === '' && !separated ? { kind: 'other' } : judge(bullet, pieces);
     }
   }
   const plain = PLAIN.exec(bullet.content);

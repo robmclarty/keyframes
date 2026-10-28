@@ -1,6 +1,6 @@
 import type { Item } from '../items/index.js';
 import { finding, type Finding } from '../scan/index.js';
-import { OUTSIDE, readClaim, readPath, shown, type Path } from './paths.js';
+import { OUTSIDE, pathNote, readClaim, readPath, shown, type ReadPath } from './paths.js';
 import type { Repo } from './repo.js';
 
 /** What a pointer or path resolved to. `review` is the review pointer, which a person checks. */
@@ -15,8 +15,12 @@ export type PointerLink = { readonly pointer: string; readonly line: number; rea
 /** A sub-line of an item, as `readItems` reads it. */
 type SubLine = Item['subLines'][number];
 
-/** A `file:` pointer read into its parts. */
-type FilePointer = Path & { readonly text: string | undefined; readonly planned: boolean };
+/** A `file:` pointer read into its parts, with the pointer as written, without backticks or `(new)`. */
+type FilePointer = ReadPath & {
+  readonly text: string | undefined;
+  readonly planned: boolean;
+  readonly written: string;
+};
 
 /** A pointer read from what's written: the review pointer, a file pointer, or why it can't be read. */
 type Pointer =
@@ -93,7 +97,7 @@ const readPointer = (written: string): Pointer => {
   const path = readPath(hash === -1 ? rest : rest.slice(0, hash));
   return 'problem' in path
     ? { kind: 'bad', problem: path.problem }
-    : { kind: 'file', ...path, text: quoted, planned };
+    : { kind: 'file', ...path, text: quoted, planned, written: text };
 };
 
 /** A file pointer in its usual form, its text quoted with `\"` and `\\` escaped. */
@@ -162,7 +166,10 @@ const resolvePointer = (written: string, repo: Repo, line: number): readonly [Po
     ];
   }
   const [result, findings] = resolveFile(pointer, repo, line);
-  return [{ pointer: usual(pointer), line, result }, findings];
+  const note = pointer.varied
+    ? [finding('alternate-form', line, pathNote(pointer.written, usual(pointer)))]
+    : [];
+  return [{ pointer: usual(pointer), line, result }, [...findings, ...note]];
 };
 
 /** An item's status, from what its pointers resolved to; with no held-by it's unlinked. */

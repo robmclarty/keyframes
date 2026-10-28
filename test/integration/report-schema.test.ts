@@ -205,7 +205,7 @@ describe('the schema', () => {
     const spec = readFileSync(new URL('docs/prototype.md', REPO), 'utf8');
     const table = spec.slice(spec.indexOf('### Findings'), spec.indexOf('### The report'));
     const codes = [...table.matchAll(/^\| `([a-z-]+)` \| (?:error|warning|note) \|/gm)].map((match) => match[1]);
-    expect(codes).toHaveLength(25);
+    expect(codes).toHaveLength(26);
     expect(SCHEMA.$defs?.['finding']?.properties?.['code']?.enum).toEqual(codes);
   });
 });

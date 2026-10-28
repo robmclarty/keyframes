@@ -36,6 +36,8 @@ export type Section = {
   readonly title: string;
   /** The heading's line number. */
   readonly line: number;
+  /** Whether it's a setext heading: a line of text with a line of `-` under it. */
+  readonly underlined: boolean;
 };
 
 /** A line of the plan, and the section it's in. */
@@ -44,25 +46,42 @@ export type Line = ReadLine & {
   readonly section: Section | undefined;
 };
 
-/** A heading's level, and its text without the closing hashes it may end with. */
-const heading = (text: string): { readonly level: number; readonly title: string } => {
+/** A heading's level, its text, and whether it's underlined. */
+type Heading = { readonly level: number; readonly title: string; readonly underlined: boolean };
+
+// What a line that isn't a heading reads as.
+const NOT_A_HEADING: Heading = { level: 0, title: '', underlined: false };
+
+/**
+ * A heading's level and its text. A `#` heading counts its hashes, and its text drops the closing
+ * hashes it may end with. A setext heading is level 1 over a line of `=` and level 2 over `-`.
+ */
+const heading = (text: string, under: ReadLine | undefined): Heading => {
+  if (under?.kind === 'underline') {
+    return { level: under.text.trim().startsWith('=') ? 1 : 2, title: text.trim(), underlined: true };
+  }
   const rest = text.replace(/^#+/, '');
   const title = rest.trim();
   return {
     level: text.length - rest.length,
     title: /^#*$/.test(title) ? '' : title.replace(/[ \t]+#+$/, ''),
+    underlined: false,
   };
 };
 
 /** A known section's usual heading, such as `## Constraints`. */
 const usual = (name: SectionName): string => `## ${name.charAt(0).toUpperCase()}${name.slice(1)}`;
 
-/** What a `##` heading earns: duplicate-section when its section came earlier, a note when singular. */
+/**
+ * What a `##` heading earns: duplicate-section when its section came earlier, and a note when it's
+ * singular or underlined.
+ */
 const headingFindings = (section: Section, earlier: readonly Section[]): Finding[] => {
-  const { name, title, line } = section;
+  const { name, title, line, underlined } = section;
   if (name === undefined) {
     return [];
   }
+  const shown = underlined ? title : `## ${title}`;
   const first = earlier.find((other) => other.name === name);
   const findings: Finding[] = [];
   if (first !== undefined) {
@@ -70,13 +89,22 @@ const headingFindings = (section: Section, earlier: readonly Section[]): Finding
       finding(
         'duplicate-section',
         line,
-        `"## ${title}" repeats the section from line ${String(first.line)}; merge them under one "${usual(name)}"`,
+        `"${shown}" repeats the section from line ${String(first.line)}; merge them under one "${usual(name)}"`,
       ),
     );
   }
   if (title.toLowerCase() !== name) {
     findings.push(
-      finding('alternate-form', line, `"## ${title}" reads fine; the usual form is "${usual(name)}"`),
+      finding('alternate-form', line, `"${shown}" reads fine; the usual form is "${usual(name)}"`),
+    );
+  }
+  if (underlined) {
+    findings.push(
+      finding(
+        'alternate-form',
+        line,
+        `"${title}" with a line of "-" under it reads fine; the usual form is "${usual(name)}"`,
+      ),
     );
   }
   return findings;
@@ -108,9 +136,9 @@ const noIntent = (lines: readonly Line[], sections: readonly Section[]): Finding
 
 /**
  * Places every line in its section. A `##` heading starts one, a `###` or deeper heading stays
- * inside it, and a `#` heading closes it. A known section that appears twice is
- * `duplicate-section`, a singular heading is a variant with a note, and a plan with no Intent text
- * is `no-intent`.
+ * inside it, and a `#` heading closes it, and setext headings do the same by their level. A known
+ * section that appears twice is `duplicate-section`, a singular or underlined heading is a variant
+ * with a note, and a plan with no Intent text is `no-intent`.
  */
 export const readSections = (
   read: readonly ReadLine[],
@@ -119,12 +147,13 @@ export const readSections = (
   const sections: Section[] = [];
   const findings: Finding[] = [];
   let section: Section | undefined;
-  for (const line of read) {
-    const { level, title } = line.kind === 'heading' ? heading(line.text) : { level: 0, title: '' };
+  for (const [index, line] of read.entries()) {
+    const { level, title, underlined } =
+      line.kind === 'heading' ? heading(line.text, read[index + 1]) : NOT_A_HEADING;
     if (level === 1) {
       section = undefined;
     } else if (level === 2) {
-      section = { name: KNOWN.get(title.toLowerCase()), title, line: line.number };
+      section = { name: KNOWN.get(title.toLowerCase()), title, line: line.number, underlined };
       findings.push(...headingFindings(section, sections));
       sections.push(section);
     }

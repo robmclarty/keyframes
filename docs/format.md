@@ -104,7 +104,8 @@ come in any order.
 - **Each section appears once.** Heading text matches in any case.
 - **Code and comments are invisible to `check`.** Nothing inside a code block, inline code or an
   HTML comment is a heading, an item or a citation. That's why the starter's examples sit in
-  comments.
+  comments. A code block or a comment that never closes hides the rest of the file, so `check`
+  warns.
 
 ## Items
 
@@ -124,8 +125,9 @@ An item is a bullet at the start of a line, under its section:
   No two items share an ID. A deleted item's ID is never used again, so an old citation can't end
   up pointing at a different item. That one's a convention, since `check` can't see what was
   deleted.
-- **The slug**, `one-writer`, is a short name in lowercase words joined by hyphens. It's how
-  `check` notices a citation that still uses an item's old name.
+- **The slug**, `one-writer`, is a short name in lowercase words joined by hyphens, in any
+  language: `café-crème` works too. It's how `check` notices a citation that still uses an item's
+  old name.
 - **The text** follows the colon. Indented lines below it that aren't bullets carry it on. The
   item ends at the next line that starts at the left margin.
 - **Sub-lines** are bullets indented two spaces under the item, written `- key: value`. Indented
@@ -226,8 +228,9 @@ A citation is an item's ID and slug in square brackets: `[C1 (one-writer)]`.
   quote, `\\` is a backslash, and a comma doesn't split pointers.
 - **Paths are relative to the repo root and use `/`.** They match the repo's names with exact case,
   on every OS. An absolute path, a `..`, or a path that leads outside the repo is an error.
-  Backticks around a pointer or a path are ignored, and so are `./` and doubled slashes. A file
-  over 1 MiB isn't searched for text.
+  Backticks around a pointer or a path are ignored, since they keep markdown from reading a
+  path's underscores as emphasis. `./` and doubled slashes read fine, with a note. A file over
+  1 MiB isn't searched for text.
 - **One kind of pointer is enough**, *because* every test, lint rule and config entry lives in a
   file.
 
@@ -322,13 +325,14 @@ and `File:` all read fine. Paths are different: they match the repo's names with
 | Form | Usual | Also read, with a note |
 | --- | --- | --- |
 | Plan file | `keyframes.md` | The name in any other case: `KEYFRAMES.md` |
-| Heading | `## Constraints` | The singular: `## Constraint` |
-| Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. `__` for bold. No bold, when a colon follows the slug and the item is under its own section. The colon inside the bold, a dash (`-`, `–` or `—`) instead of it, or nothing when there's a slug. Other spacing |
+| Heading | `## Constraints` | The singular: `## Constraint`. The heading's text on a line of its own, with a line of `-` under it |
+| Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. A bullet one to three spaces in. No bullet, as a paragraph, when a colon or a dash follows the bold. `__` for bold. No bold, when a colon follows the slug and the item is under its own section. The colon inside the bold, a dash (`-`, `–` or `—`) instead of it, or nothing when there's a slug. Other spacing |
 | ID | `C3` | Leading zeros: `C03` |
 | Slug | `one-writer` | Spaces or underscores for the hyphens: `(one writer)` |
 | Sub-line | `- because: …`, two to five spaces in | A `*` or `+` bullet, at any indent under the item. A bold key, with the colon inside the bold or after it. A space or underscore for the key's hyphen: `held by:`. `path:` for `paths:`. Other spacing |
 | Citation | `[C3 (one-writer)]` | Other spacing: `[C3(one-writer)]`. A bare `[C3]` while C3 exists, though it can't notice a rename |
 | Reference | `superseded-by: D9` | Brackets, a slug, or both: `[D9]`, `D9 (sqlite)` or `[D9 (sqlite)]`. A slug must be the decision's own |
+| Path | `src/api/` | `.` segments and doubled slashes: `./src//api/` |
 
 A line that could mean two things isn't a variant. `check` reports it with the usual form, and
 never guesses.
@@ -356,11 +360,11 @@ words         33 of 2000
 keyframes.md:1  warning  no-intent       there's no "## Intent"; add one that says why this project exists and who it's for
 keyframes.md:1  note     alternate-form  "## Constraint" reads fine; the usual form is "## Constraints"
 keyframes.md:3  note     alternate-form  "*" bullets read fine; the usual form is "-" (lines 3, 4)
-keyframes.md:3  note     alternate-form  a colon inside the bold reads fine; the usual form puts it after the bold: - **C3 (one-writer)**: …
+keyframes.md:3  note     alternate-form  a colon inside the bold reads fine; the usual form puts it after the bold: - **C<n> (<slug>)**: …
 keyframes.md:3  note     alternate-form  spaces in a slug read fine; the usual form joins its words with hyphens: (one-writer)
 keyframes.md:4  note     alternate-form  "held by:" reads fine; the usual form is "held-by:"
 keyframes.md:5  note     alternate-form  "[C1(one-writer)]" reads fine; the usual form is [C1 (one-writer)]
-keyframes.md:5  note     alternate-form  an item without bold reads fine; the usual form puts its ID and slug in bold: - **C3 (one-writer)**: …
+keyframes.md:5  note     alternate-form  an item without bold reads fine; the usual form puts its ID and slug in bold: - **C<n> (<slug>)**: …
 
 1 warning · 8 notes
 ```
@@ -464,4 +468,5 @@ An error fails a run. A warning fails it only under `--strict`. A note never doe
 | `path-overlap` | warning | Two parts claim the same path, or one part's path is inside another's |
 | `over-budget` | warning | A [budget](#budgets) is exceeded |
 | `unclosed-fence` | warning | A code block never closes, so the rest of the file reads as code |
+| `unclosed-comment` | warning | A comment never closes, so the rest of the file is hidden |
 | `alternate-form` | note | A [variant](#other-ways-to-write-it) of a usual form, read exactly like it |

@@ -126,7 +126,7 @@
       "required": ["id", "section", "line", "text"],
       "properties": {
         "id": { "type": "string", "pattern": "^[PMCSDTQI][1-9][0-9]*$" },
-        "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "slug": { "type": "string", "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{M}]*(-[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{M}]*)*$" },
         "section": {
           "description": "The section the ID's letter belongs to.",
           "enum": ["principles", "map", "constraints", "scenarios", "decisions", "taste", "questions", "ideas"]
@@ -207,6 +207,7 @@
             "path-overlap",
             "over-budget",
             "unclosed-fence",
+            "unclosed-comment",
             "alternate-form"
           ]
         },

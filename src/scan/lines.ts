@@ -1,7 +1,10 @@
 import { finding, type Finding } from './finding.js';
 
-/** What a line is, once fences and comments are accounted for. */
-export type LineKind = 'blank' | 'text' | 'heading' | 'break' | 'fence' | 'code';
+/**
+ * What a line is, once fences and comments are accounted for. An underline is the line of `-` or
+ * `=` under a setext heading, whose text is the line above it.
+ */
+export type LineKind = 'blank' | 'text' | 'heading' | 'underline' | 'break' | 'fence' | 'code';
 
 /** A line on its own: what it is, and what's visible in it. */
 export type ReadLine = {
@@ -41,6 +44,10 @@ const CLOSE = /^( *)(`+|~+)[ \t]*$/;
 const HEADING = /^#{1,6}(?:[ \t]|$)/;
 // Three or more of one of `-`, `*` or `_`, spaced or not, such as `* * *`: not a bullet.
 const BREAK = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
+// A run of `=` or `-` alone on its line, which makes the line of text above it a setext heading.
+const UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
+// A list item's marker, which a setext heading's text can't start with.
+const LIST = /^(?:[-*+]|\d{1,9}[.)])(?:[ \t]|$)/;
 
 /** Expands each tab in a line's leading whitespace to four spaces. */
 const expandTabs = (line: string): string =>
@@ -209,6 +216,18 @@ const classify = (text: string): LineKind => {
   return BREAK.test(text) ? 'break' : 'text';
 };
 
+/**
+ * Whether a line underlines the one above it, making it a setext heading: the line above is one line
+ * of text at column 0 that isn't a list item, and the line before that isn't text, so it's neither
+ * part of a longer paragraph nor carried on from an item.
+ */
+const underlines = (text: string, above: ReadLine | undefined, before: ReadLine | undefined): boolean =>
+  UNDERLINE.test(text) &&
+  above?.kind === 'text' &&
+  /^\S/.test(above.text) &&
+  !LIST.test(above.text) &&
+  before?.kind !== 'text';
+
 /** A fence or code line: its text kept, and none of it prose. */
 const hidden = (number: number, kind: LineKind, line: string): ReadLine => ({
   number,
@@ -225,15 +244,27 @@ const unclosed = (fence: Fence): Finding =>
     `"${fence.opener}" opens a fence that never closes, so the rest of the file reads as code; end it with a line of ${fence.marker}`,
   );
 
+/** The warning for a comment that starts a line and never closes, on the line it opens. */
+const unclosedComment = (line: number): Finding =>
+  finding(
+    'unclosed-comment',
+    line,
+    `"<!--" opens a comment that never closes, so the rest of the file is hidden; end it with "-->"`,
+  );
+
 /**
  * Reads a plan's lines: which are fences and code, and what's visible in the rest once comments
- * and code spans are blanked. A fence left open runs to the end of the file, with `unclosed-fence`.
+ * and code spans are blanked. A line of text with a line of `-` or `=` under it is a setext heading.
+ * A fence left open runs to the end of the file, with `unclosed-fence`, and a comment left open
+ * hides the rest of it, with `unclosed-comment`.
  */
 export const readLines = (source: string): { lines: ReadLine[]; findings: Finding[] } => {
   const raw = normalize(source);
   const lines: ReadLine[] = [];
   let fence: Fence | undefined;
   let inComment = false;
+  // The line an open comment started on.
+  let opened = 0;
   for (const [index, line] of raw.entries()) {
     const number = index + 1;
     if (fence !== undefined) {
@@ -248,8 +279,23 @@ export const readLines = (source: string): { lines: ReadLine[]; findings: Findin
       continue;
     }
     const masked = mask(line, inComment, () => closesBeforeBlank(raw, index));
+    // A comment carried in from an earlier line closes at the line's first `-->`, so one still
+    // open after that opened on this line.
+    if (masked.open && (!inComment || line.includes('-->'))) {
+      opened = number;
+    }
     inComment = masked.open;
-    lines.push({ number, kind: classify(masked.text), text: masked.text, prose: masked.prose });
+    const above = lines.at(-1);
+    if (above !== undefined && underlines(masked.text, above, lines.at(-2))) {
+      lines[lines.length - 1] = { ...above, kind: 'heading' };
+      lines.push({ number, kind: 'underline', text: masked.text, prose: masked.prose });
+    } else {
+      lines.push({ number, kind: classify(masked.text), text: masked.text, prose: masked.prose });
+    }
   }
-  return { lines, findings: fence === undefined ? [] : [unclosed(fence)] };
+  const findings = [
+    ...(fence === undefined ? [] : [unclosed(fence)]),
+    ...(inComment ? [unclosedComment(opened)] : []),
+  ];
+  return { lines, findings };
 };

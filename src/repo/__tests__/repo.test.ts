@@ -161,6 +161,33 @@ describe('file pointers', () => {
   });
 });
 
+describe('dot segments and doubled slashes', () => {
+  test('in a pointer, they read fine, with a note that shows the usual form', () => {
+    const { links, findings } = resolve(held('file:./src//api/handler.ts'));
+    expect(links[0]?.heldBy?.map(({ pointer, result }) => [pointer, result])).toEqual([
+      ['file:src/api/handler.ts', 'resolved'],
+    ]);
+    expect(findings.map(({ line, code, message }) => [line, code, message])).toEqual([
+      [
+        3,
+        'alternate-form',
+        '"file:./src//api/handler.ts" reads fine; the usual form drops "./" and doubled slashes: file:src/api/handler.ts',
+      ],
+    ]);
+  });
+
+  test('in a Map path, they read fine, with a note, while backticks and a trailing slash earn none', () => {
+    const { links, findings } = resolve(mapped('./src//api/, `docs/`'));
+    expect(links[0]?.paths?.map(({ path, result }) => [path, result])).toEqual([
+      ['src/api/', 'resolved'],
+      ['docs/', 'resolved'],
+    ]);
+    expect(findings.map(({ code, message }) => [code, message])).toEqual([
+      ['alternate-form', '"./src//api/" reads fine; the usual form drops "./" and doubled slashes: src/api/'],
+    ]);
+  });
+});
+
 describe('pointer keywords', () => {
   test('review, file: and (new) match in any case, with no note', () => {
     expect(pointers('REVIEW, File:src/api/handler.ts, FILE:src/gone.ts (NEW), file:src/later.ts (New)')).toEqual({

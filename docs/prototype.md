@@ -89,12 +89,16 @@ spec as the first thing we build. That spec and its design documents are in
   spellings side by side are a read problem, since `check` never guesses which one is the plan.
   `init` always writes `keyframes.md`.
 - `##` headings divide it into sections. A `###` or deeper heading stays inside its section, so
-  people can group items under it. A `#` heading closes the current section.
+  people can group items under it. A `#` heading closes the current section. Markdown's
+  underlined (setext) headings read the same way: one line of text at column 0 with a line of `=`
+  under it is a `#` heading, and with a line of `-` under it a `##` heading, which is a
+  [variant](#variants) when it names a section.
 - The known sections are below. Heading text matches case-insensitively, after trimming. Any
   other `##` heading is free prose: kept, read by people and agents, and not parsed.
 - Every section is optional, and order is free. A known section that appears twice is an error.
 - Fenced code blocks (backticks or tildes), inline code and HTML comments are invisible to the
-  parser. Nothing inside them is a heading, an item or a citation.
+  parser. Nothing inside them is a heading, an item or a citation. A fence or a comment that never
+  closes hides the rest of the file, so it warns.
 
 | Section | Item letter | What goes there | Agents treat it as |
 | --- | --- | --- | --- |
@@ -121,7 +125,9 @@ In every known section except Intent, an item is a top-level list item, with its
 - **The item line** is `- **<letter><number> (<slug>)**: <text>`.
   - The letter matches the section.
   - The number is a positive integer with no leading zeros.
-  - The slug is lowercase letters and digits in hyphen-separated words, like `one-writer`.
+  - The slug is lowercase letters and digits in hyphen-separated words, like `one-writer`. The
+    letters can be in any script, like `café-crème`, and slugs compare in Unicode's NFC form, so
+    an accent typed as its own mark matches one typed with its letter.
   - The text isn't empty. Indented lines after it that aren't bullets continue it.
 - **IDs are unique in the file.** Gaps are fine. A deleted item's ID is never reused. That's a
   convention: the prototype can't see history.
@@ -129,7 +135,8 @@ In every known section except Intent, an item is a top-level list item, with its
   `- <key>: <value>`, where the key is lowercase letters and hyphens. Indented lines after it
   that aren't bullets continue its value. Each key appears at most once per item. Any other
   nested bullet is part of the item's prose.
-- **The item ends** at the next non-blank line at column 0.
+- **The item ends** at the next non-blank line at column 0. An item written as a paragraph, with
+  no bullet ([Variants](#variants)), runs on over the rest of its paragraph first.
 
 | Key | Allowed on | Value |
 | --- | --- | --- |
@@ -198,8 +205,9 @@ read as either, and prose never fails a run:
 - Inside `"<text>"`, `\"` and `\\` are escapes, and commas don't split pointers.
 - Paths are relative to the repo root and use `/`. Paths can't contain commas. An absolute path,
   a `..` segment, or a path that resolves outside the root is an error. Backticks around a pointer
-  or path are ignored, and so are `.` segments and doubled slashes: `./src//api/` reads as
-  `src/api/`, without a note.
+  or path are ignored, without a note, *because* they keep markdown from reading a path's
+  underscores as emphasis. `.` segments and doubled slashes are a [variant](#variants):
+  `./src//api/` reads as `src/api/`.
 
 ### Variants
 
@@ -213,13 +221,14 @@ a path matches with exact case, and the plan's own name in another case is a var
 | Form | Usual | Also accepted, with a note |
 | --- | --- | --- |
 | Plan file | `keyframes.md` | The name in any other case: `KEYFRAMES.md` |
-| Heading | `## Constraints` | The singular: `## Constraint` |
-| Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. `__` for bold. No bold, when a colon follows the slug and the item is under its own section. The colon inside the bold, a dash (`-`, `–` or `—`) instead of it, or nothing when there's a slug. Other spacing |
+| Heading | `## Constraints` | The singular: `## Constraint`. The heading's text on a line of its own, with a line of `-` under it |
+| Item line | `- **C3 (one-writer)**: …` | A `*`, `+` or numbered bullet. A bullet one to three spaces in. No bullet, as a paragraph, when a colon or a dash follows the bold. `__` for bold. No bold, when a colon follows the slug and the item is under its own section. The colon inside the bold, a dash (`-`, `–` or `—`) instead of it, or nothing when there's a slug. Other spacing |
 | ID | `C3` | Leading zeros: `C03` |
 | Slug | `one-writer` | Spaces or underscores for the hyphens: `(one writer)` |
 | Sub-line | `- because: …`, two to five spaces in | A `*` or `+` bullet, at any indent under the item. A bold key, with the colon inside the bold or after it. A space or underscore for the key's hyphen: `held by:`. `path:` for `paths:`. Other spacing |
 | Citation | `[C3 (one-writer)]` | Other spacing: `[C3(one-writer)]`. A bare `[C3]` while C3 exists, though it can't notice a rename |
 | Reference | `superseded-by: D9` | Brackets, a slug, or both: `[D9]`, `D9 (sqlite)` or `[D9 (sqlite)]`. A slug must be the decision's own |
+| Path | `src/api/` | `.` segments and doubled slashes: `./src//api/` |
 
 This is every variant `check` reads. An ID and a slug read the same way wherever they're written:
 in an item line, a citation or a reference. Every variant reads one way only. A line that could
@@ -347,13 +356,14 @@ fails it only under `--strict`, and a note never does.
 | `path-overlap` | warning | Two parts claim the same path, or one part's path is inside another's |
 | `over-budget` | warning | A budget is exceeded |
 | `unclosed-fence` | warning | A code fence never closes, so the rest of the file reads as code |
+| `unclosed-comment` | warning | A comment that starts a line never closes, so the rest of the file is hidden |
 | `alternate-form` | note | A [variant](#variants) of a usual form, read exactly like it |
 
 Every message says what it found and shows the usual form:
 
 ```text
 keyframes.md:14  warning  not-an-item     "- **C4 one-writer**" isn't read as an item; put its slug in parentheses: - **C4 (one-writer)**: …
-keyframes.md:22  note     alternate-form  "- **C5 (no-pii):**" reads fine; the usual form puts the colon after the bold: - **C5 (no-pii)**: …
+keyframes.md:22  note     alternate-form  a colon inside the bold reads fine; the usual form puts it after the bold: - **C<n> (<slug>)**: …
 ```
 
 ### The report
@@ -676,8 +686,9 @@ This project's intent is in `keyframes.md`. Read it before you change code.
 ## Appendix C: this repo's plan, a draft
 
 The starting point for the step `test(dogfood): give this repo its own plan`, and the fullest
-example of the format. A person edits it before it's committed; it isn't committed as written.
-Targets that don't exist yet are marked `(new)`. The three rule files under C1 exist today.
+example of the format. That step committed it, edited, as `keyframes.md` at the repo root, which is
+the plan to change; this draft stays as the example. Every target it points at exists now, so it
+marks none `(new)`.
 
 ````markdown
 # keyframes
@@ -712,15 +723,15 @@ people write that down, so that others, human or agent, can work from it and ref
 ## Map
 
 - **M1 (scan)**: Reads markdown into sections, items, sub-lines and citations.
-  - paths: src/scan/ (new), src/items/ (new), src/cite/ (new)
+  - paths: src/scan/, src/items/, src/cite/
 - **M2 (repo)**: A read-only, exact-case view of the repo for pointers and paths.
-  - paths: src/repo/ (new)
+  - paths: src/repo/
 - **M3 (check)**: Turns a parsed plan and a repo view into findings and counts.
-  - paths: src/check/ (new)
+  - paths: src/check/
 - **M4 (report)**: Renders the result as text or JSON.
-  - paths: src/report/ (new), schema/report.schema.json (new)
+  - paths: src/report/, schema/report.schema.json
 - **M5 (cli)**: Commands, flags, exit codes and the starter template.
-  - paths: src/cli.ts (new), src/init/ (new), bin/keyframes.js (new)
+  - paths: src/cli.ts, src/init/, bin/keyframes.js
 
 ## Constraints
 
@@ -731,21 +742,21 @@ people write that down, so that others, human or agent, can work from it and ref
     file:rules/no-subprocess.yml#"id: no-subprocess"
 - **C2 (byte-identical)**: The same plan and tree give byte-identical output on any OS, from any
   working directory.
-  - held-by: file:test/integration/determinism.test.ts#"byte-identical" (new)
+  - held-by: file:test/integration/determinism.test.ts#"byte-identical"
 - **C3 (no-runtime-deps)**: The published package has no runtime dependencies.
   - held-by: review
 - **C4 (fresh-template)**: `check` on a fresh template reports exactly one finding, `no-intent`.
-  - held-by: file:src/init/__tests__/init.test.ts#"fresh template" (new)
+  - held-by: file:src/init/__tests__/init.test.ts#"fresh template"
 - **C5 (stands-alone)**: No format rule names a language, toolchain or product.
 
 ## Scenarios
 
 - **S1 (first-plan)**: Someone runs `init`, writes a little intent and a few items, runs `check`,
   and gets either a clean report or a finding that says exactly how to fix it.
-  - held-by: file:test/e2e/first-plan.test.ts#"first plan" (new)
+  - held-by: file:test/e2e/first-plan.test.ts#"first plan"
 - **S2 (second-editor)**: A second person replaces a decision, marks the old one superseded,
   cites the new one elsewhere, and `check` passes.
-  - held-by: file:test/e2e/second-editor.test.ts#"second editor" (new)
+  - held-by: file:test/e2e/second-editor.test.ts#"second editor"
 - **S3 (agent-cites)**: An agent working in a repo with the snippet cites the items it relied on.
   - held-by: review
 

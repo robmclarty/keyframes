@@ -28,6 +28,7 @@ const SEVERITIES = {
   'path-overlap': 'warning',
   'over-budget': 'warning',
   'unclosed-fence': 'warning',
+  'unclosed-comment': 'warning',
   'alternate-form': 'note',
 } as const satisfies Readonly<Record<string, Severity>>;
 

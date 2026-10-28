@@ -1,7 +1,7 @@
 /** A list bullet: how far in it sits, its marker, the whitespace after it, and the rest of the line. */
 export type Bullet = {
   readonly indent: number;
-  /** `-`, `*`, `+`, or a number with `.` or `)`. */
+  /** `-`, `*`, `+`, a number with `.` or `)`, or nothing for a line of bold that has no bullet. */
   readonly marker: string;
   readonly space: string;
   /** What follows the bullet, without trailing whitespace. */
@@ -23,6 +23,13 @@ export const readBullet = (text: string): Bullet | undefined => {
   const [, indent = '', marker = '', space = '', content = ''] = match;
   return { indent: indent.length, marker, space, content: content.trimEnd() };
 };
+
+/**
+ * A line at column 0 that opens with bold and no bullet, as a bullet with no marker, since an item
+ * may be written as a paragraph: `**C3 (one-writer)**: …`.
+ */
+export const readParagraph = (text: string): Bullet | undefined =>
+  /^(?:\*\*|__)/.test(text) ? { indent: 0, marker: '', space: '', content: text.trimEnd() } : undefined;
 
 /** Whether a bullet is numbered, as in `1.` or `1)`. */
 export const numbered = (bullet: Bullet): boolean => /^\d/.test(bullet.marker);
@@ -59,5 +66,5 @@ export const quote = (bullet: Bullet): string => {
   const bold = /^(\*\*|__)/.exec(content)?.[0];
   const close = bold === undefined ? -1 : content.indexOf(bold, 2);
   const head = close === -1 ? cut(content) : content.slice(0, close + 2);
-  return `${bullet.marker} ${head}`.trimEnd();
+  return bullet.marker === '' ? head : `${bullet.marker} ${head}`.trimEnd();
 };

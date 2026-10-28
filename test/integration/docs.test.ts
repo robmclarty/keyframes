@@ -186,6 +186,7 @@ describe('docs/format.md and the spec agree', () => {
       'Sub-line',
       'Citation',
       'Reference',
+      'Path',
     ]);
   });
 
@@ -193,7 +194,7 @@ describe('docs/format.md and the spec agree', () => {
     const codes = (text: string, heading: string): string[][] =>
       table(text, heading).map(([code = '', severity = '']) => [code.replaceAll('`', ''), severity]);
     const format = codes(doc('format.md'), '### Findings');
-    expect(format).toHaveLength(25);
+    expect(format).toHaveLength(26);
     expect(format).toEqual(codes(SPEC, '### Findings'));
     for (const [code = '', severity] of format) {
       expect(finding(code as Code, 1, '').severity).toBe(severity);

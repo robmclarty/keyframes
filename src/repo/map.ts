@@ -1,6 +1,6 @@
 import type { Item } from '../items/index.js';
 import { finding, type Finding } from '../scan/index.js';
-import { OUTSIDE, readClaim, readPath, shown, type Path } from './paths.js';
+import { OUTSIDE, pathNote, readClaim, readPath, shown, type Path } from './paths.js';
 import type { Result } from './pointers.js';
 import type { Repo } from './repo.js';
 
@@ -79,7 +79,12 @@ const resolveWritten = (
     };
   }
   const [result, findings] = resolvePath(path, planned, repo, line);
-  return { link: { path: shown(path), line, result }, findings, claim: { ...path, id, line } };
+  const note = path.varied ? [finding('alternate-form', line, pathNote(text, shown(path)))] : [];
+  return {
+    link: { path: shown(path), line, result },
+    findings: [...findings, ...note],
+    claim: { path: path.path, directory: path.directory, id, line },
+  };
 };
 
 /**
