@@ -13,7 +13,14 @@ import { finding, type Code } from '../../src/scan/index.js';
 // what `check` finds in it, such as `<!-- check: clean -->` or `<!-- check: no-intent, 2
 // alternate-form -->`. A text block that starts with `keyframes.md` is a report, and must be what
 // `check` prints for the example plan above it.
-const DOCS = ['format.md', 'agents.md'] as const;
+const DOCS = ['format.md', 'agents.md', 'getting-started.md'] as const;
+
+// How many reports each doc shows, so one that stops being recognised as a report fails.
+const REPORTS: Readonly<Record<(typeof DOCS)[number], number>> = {
+  'format.md': 3,
+  'agents.md': 0,
+  'getting-started.md': 2,
+};
 
 // The files the examples point at. A pointer an example marks `(new)`, or shows broken, is
 // deliberately missing.
@@ -145,7 +152,7 @@ describe('the example plans in the docs', () => {
         reports += 1;
       }
     }
-    expect(reports).toBe(name === 'format.md' ? 3 : 0);
+    expect(reports).toBe(REPORTS[name]);
   });
 });
 

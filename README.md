@@ -71,6 +71,8 @@ When `check` finds something, a person decides what's wrong: the plan, the code 
 The prototype is built and closed. Its pilots were stopped before they ran, so what comes after
 it waits until using it in projects shows what's needed.
 
+- [`docs/getting-started.md`](docs/getting-started.md) walks through a first plan: writing it,
+  pointing it at the repo, telling your agents and keeping it in step.
 - [`keyframes.md`](keyframes.md) is this repo's own plan, and its gate runs
   `keyframes check --strict` on it.
 - [`docs/prototype.md`](docs/prototype.md) is the spec the prototype was built to: the format,
