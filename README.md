@@ -75,5 +75,8 @@ The prototype is built, and three pilot repos try it next, to decide what comes 
 - [`docs/prototype.md`](docs/prototype.md) is the spec the prototype was built to: the format,
   the tool, and the pilots.
 - [`docs/pilots.md`](docs/pilots.md) is where the pilots record what they find.
+- [`docs/keyframes-and-storyboard.md`](docs/keyframes-and-storyboard.md) is where keyframes ends
+  and storyboard, the interviewer that drafts a plan, begins. In one line: keyframes reads the
+  tree, storyboard reads the prose, and a person writes the why.
 - [`docs/archive/`](docs/archive/) holds the first design and its research. It's historical
   reference, not current intent.

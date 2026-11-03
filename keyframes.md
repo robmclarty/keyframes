@@ -3,8 +3,10 @@
 ## Intent
 
 Every project carries intent that never gets written down in one place: why it exists, what
-matters, what must never happen, how it should feel. keyframes is one short markdown file where
-people write that down, so that others, human or agent, can work from it and refine it.
+matters, what must never happen, how it should feel. Left unwritten, it drifts: each agent and
+harness in a repo fills the gap its own way, and someone catches it late, in review, after the
+rework and the tokens are spent. keyframes is one short markdown file where people write that
+down, so that others, human or agent, can work from it and refine it.
 
 - **For:** solo builders and small teams who work alongside coding agents.
 - **Good looks like:** someone new reads the file in ten minutes and can explain the project
@@ -26,6 +28,11 @@ people write that down, so that others, human or agent, can work from it and ref
 - **P5 (easy-to-get-right)**: Each thing has one usual form that everything shows. Common variants
   work too, with a note, and only what's unclear or broken is an error.
   - because: nobody learns a format that punishes every slip, and nobody trusts one that guesses.
+- **P6 (constrain-not-block)**: A finding narrows the next step; it never leaves someone stuck.
+  There's always a legitimate way through: fix the line, mark the target `(new)`, or hold the
+  item by `review`.
+  - because: a check nobody can satisfy gets routed around, and then nobody trusts the plan
+    either.
 
 ## Map
 
@@ -133,3 +140,8 @@ people write that down, so that others, human or agent, can work from it and ref
 - **I7 (brownfield-split)**: Read an existing project and draft its split for a person to accept:
   the root plan's core, a plan for each part that earns one, and a log for the rest. It's
   drafting, so it belongs with I6, outside the checker [C1 (read-only-check)].
+- **I8 (tree-inventory)**: A read-only inventory of a tree, every line sourced: the directories
+  under the root, files that look like tests or rules, docs that look like logs, README's opening.
+  `init` could write it as comments beside each section, so `check` reports `no-intent`. It
+  inventories, never judges, so it stays inside the checker, where the split in
+  [I7 (brownfield-split)] doesn't.
