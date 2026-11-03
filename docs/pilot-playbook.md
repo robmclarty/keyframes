@@ -4,6 +4,9 @@ How to run the pilots, step by step. The spec's [Pilots](prototype.md#pilots) se
 protocol, and [`pilots.md`](pilots.md) is where the results go. This page is the order to do it in,
 and what to collect along the way so the closing call can rank the next build on evidence.
 
+**Stopped 2026-11-02, before any pilot ran.** [`pilots.md`](pilots.md) says why. This page stays
+as the order the pilots would have run in.
+
 ## The shape: wide and deep
 
 - **Wide: every repo you're working in.** Write a plan in each one and work as usual. That's
@@ -59,6 +62,7 @@ building.
 | Citations in code and commits | At the end, search each repo's commits and comments: `git log --grep='\[[A-Z][0-9]* ('` and `git grep -n '\[[A-Z][0-9]* ('`. Count the citations, and the ones a rename broke. | Agents cite outside the chat, and some of those citations go stale |
 | A scoped slice of the plan | Record each plan's word count, and the tokens H3 says the plan added. Note any local run that stalled reading the plan before it started work. | A plan nears the budget, or the plan's tokens visibly slow the local model |
 | Something the pilots surface | Keep one running list of anything you wanted from `keyframes` and didn't have. | It shows up in more than one repo |
+| A tree inventory (I8) | While writing each plan, note how long the Map and the first `held-by:` lines took, and which directories, test files and rule files you looked up by hand to write them. | The mechanical part of a first plan takes a real share of H1's time |
 | A skill that teaches agents the format (I4) | Each time an agent edits `keyframes.md`, note whether `check` passed first time, and what it got wrong. | Agents' plan edits keep failing `check`, even with its messages to go on |
 
 **Splitting by scope gets its first trial in plumbbob.** This repo's plan settles that a plan

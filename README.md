@@ -68,13 +68,15 @@ When `check` finds something, a person decides what's wrong: the plan, the code 
 
 ## Status
 
-The prototype is built, and three pilot repos try it next, to decide what comes after it.
+The prototype is built and closed. Its pilots were stopped before they ran, so what comes after
+it waits until using it in projects shows what's needed.
 
 - [`keyframes.md`](keyframes.md) is this repo's own plan, and its gate runs
   `keyframes check --strict` on it.
 - [`docs/prototype.md`](docs/prototype.md) is the spec the prototype was built to: the format,
-  the tool, and the pilots.
-- [`docs/pilots.md`](docs/pilots.md) is where the pilots record what they find.
+  the tool, and the pilots it planned.
+- [`docs/pilots.md`](docs/pilots.md) is the record the pilots would have filled in, kept with the
+  reason they stopped.
 - [`docs/keyframes-and-storyboard.md`](docs/keyframes-and-storyboard.md) is where keyframes ends
   and storyboard, the interviewer that drafts a plan, begins. In one line: keyframes reads the
   tree, storyboard reads the prose, and a person writes the why.

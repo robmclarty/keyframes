@@ -54,9 +54,9 @@ Neither tool judges code against intent, and that's the line to watch. keyframes
 isn't "a judge of prose", and the spec rules out LLMs in `check`. storyboard's job ends when a
 person accepts a draft. The first live interview drafted keyframes as "a product lint that checks
 the team's understanding of intent against what has been built", which is a third tool that
-doesn't exist. Whether a model can judge code against a plan reliably is what the
-[pilots' H3](pilots.md) measures. Where such a judge would live is a question for after that data,
-not before.
+doesn't exist. Whether a model can judge code against a plan reliably was the
+[pilots' H3](pilots.md) to measure, and the pilots stopped before they ran. So where such a judge
+would live stays an open question, and nothing builds one.
 
 **A rule of thumb for any new feature:** if it must give the same answer on every machine with no
 model, it's keyframes. If it proposes, asks, reads a repo and guesses, or judges, it's storyboard.
@@ -113,10 +113,10 @@ drafting its split belongs outside the checker. The split still does: placing it
 The inventory drafts and places nothing, so it can come inside. That's a change to an Idea, which
 a person made on 2026-11-02; the item is below.
 
-**When.** I6 says drafting waits until after the pilots, because a drafted plan would muddy H1:
-can an owner write a plan from the template alone? A pre-filled `init` would muddy it the same
-way. So build it after the pilots' closing call, or keep it out of the pilot repos, the rule
-storyboard already follows.
+**When.** I6 used to make drafting wait until after the pilots, because a drafted plan would
+muddy H1: can an owner write a plan from the template alone? A pre-filled `init` would have
+muddied it the same way. The pilots stopped on 2026-11-02 before any ran, so nothing waits on H1
+now, and the inventory waits only for someone to want it.
 
 **In [`keyframes.md`](../keyframes.md) since 2026-11-02:**
 

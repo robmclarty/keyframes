@@ -85,11 +85,11 @@ down, so that others, human or agent, can work from it and refine it.
   - because: every test, rule and config entry lives in a file, and naming tools would tie the
     format to them.
 - **D4 (no-config)**: The prototype has no config file.
-  - because: the pilots should show what needs configuring before we add knobs.
+  - because: use should show what needs configuring before we add knobs.
 - **D5 (counts-not-nags)**: Unlinked and review-only items are counted, not warned.
   - because: a warning should mean "probably a mistake".
 - **D6 (map-is-a-picture)**: The Map's Mermaid diagram isn't parsed in the prototype.
-  - because: checking the map against the code waits on what the pilots show.
+  - because: checking the map against the code waits until a project's Map drifts in use.
 - **D7 (section-names)**: Keep Constraints and Taste. Questions hold only real questions, and
   Ideas hold statements for future consideration.
   - because: "Rules" is too vague, since principles are rules too, and an idea written down
@@ -104,6 +104,11 @@ down, so that others, human or agent, can work from it and refine it.
   one changed, lives in a log outside the plan.
   - because: history isn't instruction, and every Decision in the plan is one an agent mustn't
     reverse.
+- **D10 (close-without-pilots)**: The prototype closes without running its pilots. Plans go into
+  projects as their owner has time, and the next build waits until using them shows what it
+  should be.
+  - because: the owner would rather put plans into projects as time allows than run a measured
+    trial.
 
 ## Taste
 
@@ -116,9 +121,10 @@ down, so that others, human or agent, can work from it and refine it.
 
 - **Q1 (section-names)**: Are these the right section names?
   - resolved-by: D7
-- **Q2 (unlinked-warns)**: Should an unlinked constraint warn? Decide after the pilots.
-- **Q3 (map-vs-code)**: Is checking the Map against the code the next thing to build? Lean: yes,
-  sized by the drift the pilots find.
+- **Q2 (unlinked-warns)**: Should an unlinked constraint warn?
+  - resolved-by: D5
+- **Q3 (map-vs-code)**: Is checking the Map against the code the next thing to build?
+  - resolved-by: D10
 
 ## Ideas
 
@@ -136,7 +142,7 @@ down, so that others, human or agent, can work from it and refine it.
   folder, checked the same way and citing the root plan.
   - resolved-by: D8
 - **I6 (drafting-interview)**: An agent that interviews the owner, or drafts a first plan from
-  existing notes, for a person to edit. Only after the pilots, since it would muddy H1.
+  existing notes, for a person to edit.
 - **I7 (brownfield-split)**: Read an existing project and draft its split for a person to accept:
   the root plan's core, a plan for each part that earns one, and a log for the rest. It's
   drafting, so it belongs with I6, outside the checker [C1 (read-only-check)].

@@ -30,7 +30,9 @@ spec as the first thing we build. That spec and its design documents are in
 - `keyframes init` and `keyframes check` work in any repo, in any language, with no config;
 - this repo has its own `keyframes.md`, checked in its own gate;
 - three pilot repos have a `keyframes.md` written by their owners, and the findings are recorded
-  in `docs/pilots.md` with a decision on what to build next.
+  in `docs/pilots.md` with a decision on what to build next. *Dropped 2026-11-02:* the prototype
+  closed without its pilots, as `D10 (close-without-pilots)` in [`keyframes.md`](../keyframes.md)
+  says.
 
 **Not doing in the prototype:**
 
@@ -233,7 +235,7 @@ a path matches with exact case, and the plan's own name in another case is a var
 This is every variant `check` reads. An ID and a slug read the same way wherever they're written:
 in an item line, a citation or a reference. Every variant reads one way only. A line that could
 mean two things isn't a variant: `check` reports it and shows the usual form, and never guesses.
-The list is a starting point, and the pilots will show which variants people actually write.
+The list is a starting point, and use will show which variants people actually write.
 [`format.md`](format.md) shows this table to people, and a test keeps the two the same.
 
 ### The Map
@@ -247,7 +249,7 @@ The list is a starting point, and the pilots will show which variants people act
 
 ### Budgets
 
-These are starting values, and the pilots will tune them. Every breach is a warning.
+These are starting values, for use to tune. Every breach is a warning.
 
 | What | Budget |
 | --- | --- |
@@ -512,6 +514,9 @@ living reference for the format and the tool, so a change here that moves a step
 
 ## Pilots
 
+*Not run.* The pilots were stopped on 2026-11-02, before any ran, and the prototype closed without
+them ([`pilots.md`](pilots.md)). This section stays as the protocol they would have followed.
+
 - **Repos.** Three, chosen by their owners. At least one isn't TypeScript, at least one has a
   second regular contributor, and at least one gets a real share of its code from agents.
 - **H1.** The owner runs `init`, writes the plan and times it. They note anything they wanted to
@@ -550,8 +555,9 @@ living reference for the format and the tool, so a change here that moves a step
   questions, and a separate Ideas section holds statements for future consideration. Each section
   has exactly one name, with no aliases, so the parser stays simple. A singular heading is a
   [variant](#variants) of that name, not an alias. H1 still watches for misplaced items.
-- **Q2 (unlinked-warns):** should a constraint with no `held-by:` warn? *Lean:* no. Revisit with
-  H4's data.
+- **Q2 (unlinked-warns):** *resolved 2026-11-02.* No: a constraint with no `held-by:` is counted,
+  not warned, as `D5 (counts-not-nags)` in [`keyframes.md`](../keyframes.md) says. The pilots
+  that would have revisited it never ran.
 - **Q3 (intent-structure):** should Intent have parsed parts (problem, who it's for, what good
   looks like, what it isn't)? *Lean:* no. The template suggests them, and Intent stays prose.
 - **Q4 (one-file):** *resolved 2026-10-27.* A large project grows by scope, as `D8
@@ -559,8 +565,8 @@ living reference for the format and the tool, so a change here that moves a step
   splits instead of raising them. The root plan keeps the core, which holds everywhere, and a part
   with reason to stand alone gets its own plan beside its code, which cites the root and adds to it
   without overriding it. A project's decision history stays in a log outside the plan, as `D9
-  (log-apart)` says. Building it waits for the pilots, and plumbbob's split by hand is its first
-  trial ([`pilot-playbook.md`](pilot-playbook.md)).
+  (log-apart)` says. Building it into `check` waits for a project that needs it. Until then, a
+  part's plan can be checked alone with `keyframes check <its folder>`.
 
 ## Appendix A: the template
 

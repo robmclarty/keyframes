@@ -6,9 +6,11 @@ The spec's [Pilots](prototype.md#pilots) section is the protocol,
 [`pilot-playbook.md`](pilot-playbook.md) is the order to run it in, and this file holds what
 happened.
 
-**Status, 2026-10-27: no pilot has run.** Version 0.3.0 is on npm, and the repos, the second
-reader and both H3 arms are chosen. Every result below is empty, and the closing call waits on all
-three repos.
+**Status, 2026-11-02: stopped before any pilot ran.** The prototype closes without them, as
+`D10 (close-without-pilots)` in [`keyframes.md`](../keyframes.md) says: plans go into projects as
+their owner has time, and the next build waits until using them shows what it should be. The
+repos, the reader and both H3 arms below were chosen and never used, and every result is empty.
+The record stays as the protocol the pilots would have followed.
 
 ## Before the first pilot
 
@@ -101,7 +103,9 @@ Not run.
 
 ### volley
 
-Not run.
+Not run. Its plan was written before the stop, but an agent drafted it on 2026-11-02 from
+volley's README, changelog, specs and build plans, and the owner approved it, so it measures no
+H1.
 
 ### runciter
 
@@ -271,12 +275,15 @@ The spec calls these starting values, for the pilots to tune.
 
 ### What to build next
 
-The spec's candidates:
+The spec's candidates, and one from the plan:
 
 - checking the Map against the code;
 - a formatter that puts the file in one canonical form;
 - scanning code and commits for citations;
 - giving agents a scoped slice of the plan;
+- a read-only inventory of the tree, I8 (tree-inventory), which shares its reader with the first
+  candidate and is what storyboard would consume for an existing project;
 - something the pilots surface.
 
-**Choice:** not made.
+**Choice:** none. The prototype closed without its pilots, so nothing is chosen until using it
+shows what to build.
