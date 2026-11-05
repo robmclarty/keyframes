@@ -179,6 +179,52 @@ describe("this repo's CLAUDE.md", () => {
   });
 });
 
+// The files the inkwell example's pointers and paths name. The test that holds its C4 is
+// deliberately missing, since the plan marks it `(new)`.
+const INKWELL = {
+  'src/editor/index.ts': '',
+  'src/store/index.ts': '',
+  'src/sync/worker.ts': '',
+  'server/relay/test/payload.test.ts': "test('rejects plaintext', () => {});\n",
+  'test/store/writers.test.ts': "test('only the sync worker writes', () => {});\n",
+  'test/e2e/offline-week.test.ts': "test('offline week', () => {});\n",
+  'test/e2e/conflict.test.ts': "test('both versions survive', () => {});\n",
+  'rules/no-note-in-logs.yml': 'id: no-note-in-logs\n',
+};
+
+describe('docs/inkwell_keyframes.md, the full example plan', () => {
+  const text = doc('inkwell_keyframes.md');
+  const report = check({ name: 'keyframes.md', text }, memoryRepo({ ...INKWELL, 'keyframes.md': text }));
+
+  test('checks clean, with no findings at all, so it passes --strict', () => {
+    expect(report.findings).toEqual([]);
+  });
+
+  test('is what docs/what-makes-a-good-keyframes.md says it is', () => {
+    const notes = doc('what-makes-a-good-keyframes.md');
+    const item = (id: string) => report.items.find((each) => each.id === id);
+    const statuses = Object.fromEntries(
+      report.items.filter((each) => each.status !== undefined).map((each) => [each.id, each.status]),
+    );
+    expect(statuses).toEqual({
+      C1: 'linked',
+      C2: 'linked',
+      C3: 'linked',
+      C4: 'planned',
+      C5: 'review',
+      S1: 'linked',
+      S2: 'linked',
+      S3: 'review',
+    });
+    expect(item('C3')?.heldBy?.map(({ result }) => result)).toEqual(['resolved', 'review']);
+    expect(item('D1')?.supersededBy).toBe('D3');
+    expect(item('Q1')?.resolvedBy).toBe('D3');
+    expect(report.items.filter((each) => each.section === 'map')).toHaveLength(5);
+    expect(item('M5')?.paths).toBeUndefined();
+    expect(notes).toContain(`At ${String(report.words.count)} of 2,000 words`);
+  });
+});
+
 describe('docs/format.md and the spec agree', () => {
   test('on the sections, and the variants check reads, row for row', () => {
     const format = doc('format.md');
