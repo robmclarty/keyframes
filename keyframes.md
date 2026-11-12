@@ -43,14 +43,16 @@ down, so that others, human or agent, can work from it and refine it.
 - **M3 (check)**: Turns a parsed plan and a repo view into findings and counts.
   - paths: src/check/
 - **M4 (report)**: Renders the result as text or JSON.
-  - paths: src/report/, schema/report.schema.json
+  - paths: src/report/, schema/report.schema.json, schema/context.schema.json (new)
 - **M5 (cli)**: Commands, flags, exit codes and the starter template.
   - paths: src/cli.ts, src/init/, bin/keyframes.js
+- **M6 (context)**: Picks the items and Map parts that apply to a set of paths.
+  - paths: src/context/ (new)
 
 ## Constraints
 
-- **C1 (read-only-check)**: `check` writes nothing, opens no network connection and starts no
-  process.
+- **C1 (read-only-check)**: `check` and `context` write nothing, open no network connection and
+  start no process.
   - held-by: file:rules/writes-only-in-init.yml#"id: writes-only-in-init",
     file:rules/no-network.yml#"id: no-network",
     file:rules/no-subprocess.yml#"id: no-subprocess"
@@ -73,6 +75,9 @@ down, so that others, human or agent, can work from it and refine it.
   - held-by: file:test/e2e/second-editor.test.ts#"second editor"
 - **S3 (agent-cites)**: An agent working in a repo with the snippet cites the items it relied on.
   - held-by: review
+- **S4 (context-for-paths)**: A harness runs `context` with the paths a step touches and gets
+  the plan's principles, constraints, scenarios and taste, with the Map parts each path meets.
+  - held-by: file:test/e2e/context.test.ts#"context for paths" (new)
 
 ## Decisions
 
@@ -109,6 +114,10 @@ down, so that others, human or agent, can work from it and refine it.
   should be.
   - because: the owner would rather put plans into projects as time allows than run a measured
     trial.
+- **D11 (context-now)**: Build `keyframes context [path…]` now, reading the root plan the way
+  `check` does.
+  - because: runciter's keyframes pack section is the use [D10 (close-without-pilots)] waits
+    for, and without a verb every reader parses `check --json` and picks the sections itself.
 
 ## Taste
 
@@ -151,3 +160,6 @@ down, so that others, human or agent, can work from it and refine it.
   `init` could write it as comments beside each section, so `check` reports `no-intent`. It
   inventories, never judges, so it stays inside the checker, where the split in
   [I7 (brownfield-split)] doesn't.
+- **I9 (context-verb)**: A `context` verb that prints the items that apply to the paths a task
+  touches, so a harness building an agent's context asks keyframes instead of parsing the report.
+  - resolved-by: D11
