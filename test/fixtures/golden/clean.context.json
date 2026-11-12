@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "plan": "keyframes.md",
+  "items": [
+    {
+      "id": "P1",
+      "slug": "local-first",
+      "section": "principles",
+      "line": 10,
+      "text": "The device holds the truth; the server only relays."
+    },
+    {
+      "id": "P2",
+      "slug": "boring-storage",
+      "section": "principles",
+      "line": 11,
+      "text": "Pick the storage nobody has to think about."
+    },
+    {
+      "id": "C1",
+      "slug": "one-writer",
+      "section": "constraints",
+      "line": 23,
+      "text": "Only the sync worker writes to the database.",
+      "because": "two writers made the replay disagree with the live state.",
+      "held_by": [
+        {
+          "pointer": "file:test/writes.test.ts#\"only the sync worker writes\"",
+          "result": "resolved"
+        }
+      ],
+      "status": "linked"
+    },
+    {
+      "id": "C2",
+      "slug": "no-text-in-logs",
+      "section": "constraints",
+      "line": 26,
+      "text": "Logs never hold a note's text.",
+      "held_by": [
+        {
+          "pointer": "file:test/logs.test.ts",
+          "result": "planned"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "C3",
+      "slug": "small-payloads",
+      "section": "constraints",
+      "line": 28,
+      "text": "A sync payload stays under 64 KiB.",
+      "held_by": [
+        {
+          "pointer": "review",
+          "result": "review"
+        }
+      ],
+      "status": "review"
+    },
+    {
+      "id": "C4",
+      "slug": "utf8",
+      "section": "constraints",
+      "line": 30,
+      "text": "Notes are UTF-8 everywhere, per [P2 (boring-storage)].",
+      "status": "unlinked"
+    },
+    {
+      "id": "S1",
+      "slug": "offline-edit",
+      "section": "scenarios",
+      "line": 34,
+      "text": "Someone edits on a plane, lands, and sees the edit on the laptop.",
+      "held_by": [
+        {
+          "pointer": "file:test/offline.test.ts#\"edits made offline sync on reconnect\"",
+          "result": "resolved"
+        },
+        {
+          "pointer": "review",
+          "result": "review"
+        }
+      ],
+      "status": "linked"
+    },
+    {
+      "id": "T1",
+      "slug": "quiet",
+      "section": "taste",
+      "line": 49,
+      "text": "Messages are short, and never cheerful."
+    }
+  ],
+  "paths": [
+    {
+      "path": "src/sync/worker.ts",
+      "parts": [
+        "M1"
+      ]
+    },
+    {
+      "path": "src/api/",
+      "parts": [
+        "M2"
+      ]
+    },
+    {
+      "path": "src/",
+      "parts": [
+        "M1",
+        "M2"
+      ]
+    },
+    {
+      "path": "docs/",
+      "parts": []
+    }
+  ],
+  "parts": [
+    {
+      "id": "M1",
+      "slug": "sync",
+      "section": "map",
+      "line": 15,
+      "text": "The sync worker, the only writer.",
+      "paths": [
+        {
+          "path": "src/sync/",
+          "result": "resolved"
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "slug": "api",
+      "section": "map",
+      "line": 17,
+      "text": "The HTTP API the phone talks to.",
+      "paths": [
+        {
+          "path": "src/api/handler.ts",
+          "result": "resolved"
+        },
+        {
+          "path": "src/api/routes.ts",
+          "result": "planned"
+        }
+      ]
+    }
+  ],
+  "errors": 0,
+  "warnings": 0
+}

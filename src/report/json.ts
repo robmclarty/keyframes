@@ -4,7 +4,7 @@ import type { Report } from '../check/index.js';
 const SCHEMA_VERSION = 1;
 
 /** An item as the JSON report carries it: keys in a fixed order, sub-line keys with underscores. */
-const itemJson = (item: Report['items'][number]): Readonly<Record<string, unknown>> => ({
+export const itemJson = (item: Report['items'][number]): Readonly<Record<string, unknown>> => ({
   id: item.id,
   slug: item.slug,
   section: item.section,

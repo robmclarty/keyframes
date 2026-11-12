@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "keyframes context --json",
+  "description": "What `keyframes context --json` writes: the plan's Principles, Constraints, Scenarios and Taste, each path given with the Map parts it meets, those parts, and the counts `check` would report. Items and parts are the report's items, under the same names. Within a schema_version, fields are only ever added, so a reader should ignore a field it doesn't know.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "plan",
+    "items",
+    "paths",
+    "parts",
+    "errors",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "plan": {
+      "description": "The plan's name in the repo root, as the root spells it.",
+      "type": "string"
+    },
+    "items": {
+      "description": "The items that print: Principles, Constraints, Scenarios and Taste, in that order, each section's items in line order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    },
+    "paths": {
+      "description": "One entry for each path given, in the order given, a repeat listed once where it first appears. Empty with no paths.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/path"
+      }
+    },
+    "parts": {
+      "description": "Every Map part some path meets, once, in Map order. Empty with no paths.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    },
+    "errors": {
+      "description": "The errors `check` would report on the plan.",
+      "$ref": "#/$defs/count"
+    },
+    "warnings": {
+      "description": "The warnings `check` would report on the plan.",
+      "$ref": "#/$defs/count"
+    }
+  },
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "line": {
+      "description": "A line of the plan, counting from 1.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "result": {
+      "description": "What a path or pointer resolved to; review is the review pointer, which a person checks.",
+      "enum": [
+        "resolved",
+        "planned",
+        "broken",
+        "review"
+      ]
+    },
+    "path": {
+      "description": "A path in its usual form, its trailing / kept as given, and the IDs of the Map parts it meets, in Map order. A part meets a path when one of its paths is the same path, or one is inside the other, compared without a trailing /.",
+      "type": "object",
+      "required": [
+        "path",
+        "parts"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^M[1-9][0-9]*$"
+          }
+        }
+      }
+    },
+    "item": {
+      "description": "An item, with its ID, slug and keys in their usual form, whatever variant the plan used, and the sub-lines it has.",
+      "type": "object",
+      "required": [
+        "id",
+        "section",
+        "line",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[PMCSDTQI][1-9][0-9]*$"
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{M}]*(-[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{M}]*)*$"
+        },
+        "section": {
+          "description": "The section the ID's letter belongs to.",
+          "enum": [
+            "principles",
+            "map",
+            "constraints",
+            "scenarios",
+            "decisions",
+            "taste",
+            "questions",
+            "ideas"
+          ]
+        },
+        "line": {
+          "$ref": "#/$defs/line"
+        },
+        "text": {
+          "description": "The item's prose without its ID or its sub-lines: its lines joined with a newline, their indentation removed.",
+          "type": "string"
+        },
+        "because": {
+          "type": "string"
+        },
+        "paths": {
+          "description": "A Map part's paths, each in its usual form; a directory ends in /.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "result"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "result": {
+                "$ref": "#/$defs/result"
+              }
+            }
+          }
+        },
+        "held_by": {
+          "description": "A Constraint's or Scenario's pointers, each in its usual form.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "pointer",
+              "result"
+            ],
+            "properties": {
+              "pointer": {
+                "type": "string"
+              },
+              "result": {
+                "$ref": "#/$defs/result"
+              }
+            }
+          }
+        },
+        "status": {
+          "description": "On Constraints and Scenarios: what their pointers add up to.",
+          "enum": [
+            "linked",
+            "planned",
+            "review",
+            "unlinked",
+            "broken"
+          ]
+        },
+        "superseded_by": {
+          "description": "The decision that replaces this one, by its ID, or the value as written when it names none.",
+          "type": "string"
+        },
+        "resolved_by": {
+          "description": "The decision that settled this question or idea, by its ID, or the value as written when it names none.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

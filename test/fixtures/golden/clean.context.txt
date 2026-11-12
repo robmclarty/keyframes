@@ -1,0 +1,31 @@
+## Principles
+
+- **P1 (local-first)**: The device holds the truth; the server only relays.
+- **P2 (boring-storage)**: Pick the storage nobody has to think about.
+
+## Constraints
+
+- **C1 (one-writer)**: Only the sync worker writes to the database.
+  - because: two writers made the replay disagree with the live state.
+  - held-by: file:test/writes.test.ts#"only the sync worker writes"
+- **C2 (no-text-in-logs)**: Logs never hold a note's text.
+  - held-by: file:test/logs.test.ts (new)
+- **C3 (small-payloads)**: A sync payload stays under 64 KiB.
+  - held-by: review
+- **C4 (utf8)**: Notes are UTF-8 everywhere, per [P2 (boring-storage)].
+
+## Scenarios
+
+- **S1 (offline-edit)**: Someone edits on a plane, lands, and sees the edit on the laptop.
+  - held-by: file:test/offline.test.ts#"edits made offline sync on reconnect", review
+
+## Taste
+
+- **T1 (quiet)**: Messages are short, and never cheerful.
+
+## Paths
+
+- src/sync/worker.ts: M1 (sync)
+- src/api/: M2 (api)
+- src/: M1 (sync), M2 (api)
+- docs/: none

@@ -43,7 +43,7 @@ down, so that others, human or agent, can work from it and refine it.
 - **M3 (check)**: Turns a parsed plan and a repo view into findings and counts.
   - paths: src/check/
 - **M4 (report)**: Renders the result as text or JSON.
-  - paths: src/report/, schema/report.schema.json, schema/context.schema.json (new)
+  - paths: src/report/, schema/report.schema.json, schema/context.schema.json
 - **M5 (cli)**: Commands, flags, exit codes and the starter template.
   - paths: src/cli.ts, src/init/, bin/keyframes.js
 - **M6 (context)**: Picks the items and Map parts that apply to a set of paths.
