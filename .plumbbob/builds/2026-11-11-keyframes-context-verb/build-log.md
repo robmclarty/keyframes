@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes context verb
 
-**Current step:** 3 — docs(spec): specify the context verb
+**Current step:** 4 — feat(context): select the items that apply to paths
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -25,7 +25,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 
 - ☑ 1. docs(plan): add the context verb to keyframes.md
 - ☑ 2. docs(notes): renumber the three notes past the plan's new IDs
-- ☐ 3. docs(spec): specify the context verb
+- ☑ 3. docs(spec): specify the context verb
 - ☐ 4. feat(context): select the items that apply to paths
 - ☐ 5. feat(report): render context as text and JSON with its schema
 - ☐ 6. feat(cli): add keyframes context
@@ -99,3 +99,53 @@ folder, so it rides the branch into the PR.)*
   `src/context/ (new)` on M6, `schema/context.schema.json (new)` on M4, and S4's `(new)` pointer each come off in the step that creates the target: steps 4, 5 and 7, as D17 (step-drops-new) says. Until then they count as planned, and the plan reads 4 scenarios, 2 linked, 1 planned and 1 held by review.
 
 - 2026-11-12 — step 2 checkpointed · 13ffbe5c2 — docs(notes): renumber the three notes past the plan's new IDs (1m)
+- 2026-11-12 — step 3 checkpointed · 4bbb97b98 — docs(spec): specify the context verb (3m)
+- 2026-11-12 — range 2 of 3's stop recorded — review the spec's `### context` section, the contract runciter builds against, before any code commits to it
+
+  **Summary**: The three notes now number their proposals after the plan's own IDs, and `docs/prototype.md` has a `### context` section that specifies the verb from command line to JSON shape, with the usage block listing it. The spec settles a few details the decisions left open, and those are what this review should look at before step 4 builds to them.
+
+  1. The JSON adds a top-level `parts` list that the decisions didn't name
+  2. The text output is markdown, closing on a `## Paths` section
+  3. Small calls the spec makes for step 6
+  4. The notes renumber to D12 and up
+
+  **Readout**:
+
+  ```text
+  steps        2 of 2 landed
+               - 2 13ffbe5 · 3 4bbb97b
+  check        green: 11 of 11 checks, 2 landings
+  done-when    met
+  decisions    honored:
+               - D16 (spec-first), D18 (four-sections), D19 (path-names-parts)
+               - D20 (print-despite-findings), D21 (cwd-root-many-paths)
+               - D14 (same-item-shape), D15 (no-budget), D12 (root-only)
+  constraints  6 of 6 honored
+  seam         held: 2 of 2 steps, no strays
+  diff         +177 -23 across 4 files
+               - docs/lookouts-contract.md +6 -6
+               - docs/prototype.md +156 -1
+               - docs/scoped-plans.md +7 -7
+               - docs/user-plan-and-runciter.md +8 -9
+  spent        4 min · green first run at every landing
+  ```
+
+  **Verdict**: ● Plumb
+
+  **Recommendation**: Approve the spec as written, unless you'd rather inline `{ id, slug }` under each path than keep the top-level `parts` list. That list is the one shape choice runciter will feel, and once step 5's schema ships at `schema_version: 1` it can only gain fields, so this stop is the cheapest place to change it.
+
+  **1.** The JSON adds a top-level `parts` list that the decisions didn't name
+
+  D19 says each path lists the Map parts it meets, but not how a part is shown. The spec has each `paths` entry name the part IDs it meets (`{ "path": "src/sync/worker.ts", "parts": ["M2"] }`), and a top-level `parts` list holds each part that some path meets, once, in Map order, as the report's own Map item. That way runciter gets a part's `paths:` (its contract paths) without parsing the Map, and a part met by several paths isn't repeated. The other option was to inline `{ id, slug }` under each path, which is smaller but leaves runciter to look up the part's paths in `check --json`.
+
+  **2.** The text output is markdown, closing on a `## Paths` section
+
+  The text prints one `##` heading per section that has items, each item in its usual form with its sub-lines (`because:`, `held-by:`, a `(new)` kept), and a `## Paths` section with one line per path (`- src/sync/worker.ts: M2 (sync)`, or `none`). It can be pasted into a prompt as it is. It prints no header line or findings summary, so a clean plan prints the items and nothing else, as C6 (plan-items-bind) asks.
+
+  **3.** Small calls the spec makes for step 6
+
+  The stderr line reads `keyframes.md has 2 errors; run keyframes check to see them` (with `1 error` and `it` for one). A path given twice is listed once, where it first appears. An argument starting with `-` is read as a flag. A trailing `/` on a path is kept as given. Every path a part lists counts toward a meeting, `(new)` or not. `context` never exits 1.
+
+  **4.** The notes renumber to D12 and up
+
+  scoped-plans takes D12-D15 and S5 (Q4 and Q5 unchanged, since the plan stops at Q3), lookouts-contract takes D16, D17 and Q6, and the user-plan note takes D18 and Q7. Its I9 proposal is now a short pointer to the plan's I9 (context-verb), resolved by D11 (context-now). scoped-plans' "IDs continue from the plan as it stands" date moved to 2026-11-11.

@@ -47,7 +47,7 @@ down, so that others, human or agent, can work from it and refine it.
 - **M5 (cli)**: Commands, flags, exit codes and the starter template.
   - paths: src/cli.ts, src/init/, bin/keyframes.js
 - **M6 (context)**: Picks the items and Map parts that apply to a set of paths.
-  - paths: src/context/ (new)
+  - paths: src/context/
 
 ## Constraints
 
