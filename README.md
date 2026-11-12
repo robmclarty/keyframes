@@ -52,6 +52,10 @@ items cite, as in `[C3 (one-writer)]`:
   a real item, and that every file the plan points at exists. It runs nothing, judges no prose and
   writes nothing, and it gives the same answer on every machine. It claims only what it checked: a
   pointer *resolves*; it's never *enforced*.
+- **`keyframes context` hands a harness its slice.** Beside `init`, which writes a starter plan,
+  and `check`, it takes the paths a task touches and prints the plan's principles, constraints,
+  scenarios and taste, with the Map parts each path meets, as markdown or as JSON, so a harness
+  building an agent's context asks keyframes rather than parsing the file.
 
 When `check` finds something, a person decides what's wrong: the plan, the code or the check.
 

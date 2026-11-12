@@ -157,6 +157,13 @@ describe('the example plans in the docs', () => {
 });
 
 describe('the docs and the spec agree with init', () => {
+  test('docs/agents.md names context --json as the call for a context pack, beside check --json', () => {
+    const harness = doc('agents.md').split('## For harness authors')[1] ?? '';
+    expect(harness).toContain('`keyframes check --json`');
+    expect(harness).toContain('`keyframes context --json`');
+    expect(harness).toContain('schema/context.schema.json');
+  });
+
   test('docs/agents.md shows the snippet init prints, word for word', () => {
     expect(fences(doc('agents.md')).filter((fence) => fence.body === SNIPPET)).toHaveLength(1);
   });

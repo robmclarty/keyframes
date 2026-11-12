@@ -68,3 +68,12 @@ sub-lines and what each pointer and path resolved to, beside the counts and find
 [`schema/report.schema.json`](../schema/report.schema.json). A harness can hand an agent just the
 items that touch its work, without parsing markdown, and keyframes needs to know nothing about the
 harness.
+
+For a context pack, the call is `keyframes context --json` with the paths a task touches, run from
+the repo root: `keyframes context src/sync/worker.ts docs/ --json`. It prints the plan's
+Principles, Constraints, Scenarios and Taste, in that order, each item exactly as the report
+carries it, and for each path the Map parts it meets, so the harness picks no sections itself.
+Every item prints, with no cap, so a harness that needs to cut cuts from the bottom: Taste first,
+Constraints last. Its shape is [`schema/context.schema.json`](../schema/context.schema.json), and
+the spec's [context](prototype.md#context) section says how paths meet parts. A plan with findings
+still prints and exits 0, and the JSON's `errors` and `warnings` say whether to trust it.
