@@ -284,11 +284,13 @@ The format is built for a file that many people edit over a long time.
 ```text
 keyframes init [dir]                        write a starter keyframes.md; refuse if one exists
 keyframes check [dir] [--json] [--strict]   check the plan against itself and the repo
+keyframes context [path…] [--json]          print the items that apply to the paths
 keyframes --help | --version
 ```
 
 `dir` defaults to the working directory. It's the repo root, and the plan is `<dir>/keyframes.md`,
-found in any case ([The file](#the-file)).
+found in any case ([The file](#the-file)). `context` always takes the working directory as the
+root, and its arguments are paths inside it ([context](#context)).
 
 An unexpected error in any command prints one line, `keyframes: <message>`, and exits 2, *because*
 1 must only ever mean the plan has errors, and 2 already means no verdict was reached.
@@ -455,6 +457,159 @@ knowing anything about the harness:
 Within a `schema_version`, fields are only ever added, so a reader should ignore a field it doesn't
 know. The step `feat(report): count, budget, and render text and JSON` settled this item shape,
 along with the schema that describes it.
+
+### context
+
+`context` prints the items in the plan that apply to some paths in the repo, so a harness that
+builds an agent's context asks keyframes for them rather than parsing the report and picking
+sections itself.
+
+```text
+keyframes context [path…] [--json]
+```
+
+- **The root and the plan.** The root is the working directory, and `context` takes no `dir`. It
+  finds the plan exactly as `check` does ([The file](#the-file)) and reads it through the same
+  check, so the two commands always agree on what an item says. Only the root plan is read.
+- **Paths.** It takes zero or more paths, relative to the root and written as Map paths are
+  ([The Map](#the-map)). `./` and doubled `/` fold to the usual form, which the output shows; a
+  trailing `/` is kept as given. A path need not exist, since a step can name a file it will
+  create. An absolute path, a `..` segment, a `\` or an empty path is a usage problem. A path given
+  twice is listed once, where it first appears. An argument that starts with `-` is read as a flag.
+- **What prints.** Principles, Constraints, Scenarios and Taste, in that order, the format's order,
+  whatever order the plan writes them in. Items within a section keep their line order. The Intent
+  prose, the Map's items, Decisions, Questions and Ideas never print. Every item prints whatever
+  the paths, since an item in the root plan holds everywhere; there's no cap or budget, and a
+  reader that needs to cut should cut from the bottom, so Taste goes first and Constraints last.
+- **What a path adds.** For each path, the Map parts it meets: a part meets a path when one of the
+  part's `paths:` is the same path, or one is inside the other, compared without a trailing `/`.
+  That's the rule `path-overlap` uses. So `src/report/` and `src/report/text.ts` both meet a part
+  at `src/report/`, a file part meets only itself and the directories above it, and `src/` meets
+  every part under it. Every path a part lists counts, `(new)` or not. A path that meets no part
+  lists none. Parts are listed in their Map order.
+- **Findings and exit codes.** A plan with findings still prints, and `context` exits 0, *because*
+  an agent handed no intent at all is worse off than one handed a plan with a broken citation
+  (the plan's [P6 (constrain-not-block)](../keyframes.md)). When the plan has errors, one line on
+  stderr says so: `keyframes.md has 2 errors; run keyframes check to see them`, with `1 error` and
+  `it` for one. Warnings and notes say nothing.
+  `context` never exits 1. It exits 2 for a usage or read problem, exactly as `check` does: no
+  plan, two plans whose names differ only in case, an unreadable or non-UTF-8 plan, a bad flag, a
+  path it can't read, or an unexpected error.
+- **Determinism.** The same plan, tree and arguments give byte-identical output, under the rules
+  `check` follows ([check](#check)).
+
+**The text output** is markdown, ready to paste into a prompt. Each section that has items gets a
+`##` heading and its items in their usual form, with the sub-lines they have in their usual form
+beneath them. An item's later lines are indented two spaces, and a `(new)` pointer keeps its
+marker. When paths were given, a `## Paths` section closes it, one line for each path naming the
+parts it meets, or `none`. A clean plan prints only this, and a plan with no such items and no
+paths prints nothing. For `keyframes context src/sync/worker.ts docs/`:
+
+```text
+## Principles
+
+- **P1 (boring-tech)**: Pick the dull tool that already works.
+  - because: every new tool is one more thing to learn and keep.
+
+## Constraints
+
+- **C1 (one-writer)**: Only the sync worker writes to the database.
+  - because: two writers made the replay disagree with the live state.
+  - held-by: file:test/writes.test.ts#"only the sync worker writes"
+
+## Scenarios
+
+- **S1 (offline-week)**: Someone edits offline for a week, reconnects, and loses nothing.
+  - held-by: review
+
+## Taste
+
+- **T1 (plain-errors)**: An error message says what to do next.
+
+## Paths
+
+- src/sync/worker.ts: M2 (sync)
+- docs/: none
+```
+
+**The JSON output**, with `--json`, is one object. Its schema is `schema/context.schema.json`,
+which ships in the package beside the report's, and has its own `schema_version`, so the two
+outputs version apart. For the same command with `--json`:
+
+```json
+{
+  "schema_version": 1,
+  "plan": "keyframes.md",
+  "items": [
+    {
+      "id": "P1",
+      "slug": "boring-tech",
+      "section": "principles",
+      "line": 9,
+      "text": "Pick the dull tool that already works.",
+      "because": "every new tool is one more thing to learn and keep."
+    },
+    {
+      "id": "C1",
+      "slug": "one-writer",
+      "section": "constraints",
+      "line": 21,
+      "text": "Only the sync worker writes to the database.",
+      "because": "two writers made the replay disagree with the live state.",
+      "held_by": [{ "pointer": "file:test/writes.test.ts#\"only the sync worker writes\"", "result": "resolved" }],
+      "status": "linked"
+    },
+    {
+      "id": "S1",
+      "slug": "offline-week",
+      "section": "scenarios",
+      "line": 27,
+      "text": "Someone edits offline for a week, reconnects, and loses nothing.",
+      "held_by": [{ "pointer": "review", "result": "review" }],
+      "status": "review"
+    },
+    {
+      "id": "T1",
+      "slug": "plain-errors",
+      "section": "taste",
+      "line": 32,
+      "text": "An error message says what to do next."
+    }
+  ],
+  "paths": [
+    { "path": "src/sync/worker.ts", "parts": ["M2"] },
+    { "path": "docs/", "parts": [] }
+  ],
+  "parts": [
+    {
+      "id": "M2",
+      "slug": "sync",
+      "section": "map",
+      "line": 16,
+      "text": "Sends local changes out and applies the ones that arrive.",
+      "paths": [
+        { "path": "src/sync/", "result": "resolved" },
+        { "path": "test/sync/", "result": "resolved" }
+      ]
+    }
+  ],
+  "errors": 0,
+  "warnings": 0
+}
+```
+
+- `items` holds the items that print, in the order the text prints them. Each is exactly the
+  report's item ([The report](#the-report)): the same fields under the same names, in the same
+  order, with a field it doesn't have left out.
+- `paths` has one entry for each path, in the order given, in its usual form, with the IDs of the
+  parts it meets in Map order. With no paths it's empty.
+- `parts` holds every part some path meets, once, in Map order, each the report's Map item, so a
+  reader gets a part's own `paths:` without parsing the Map. With no paths it's empty.
+- `errors` and `warnings` are the counts `check` would report, so a reader can tell a plan to
+  trust from one to fix without running `check` as well.
+
+Within a `schema_version`, fields are only ever added, so a reader should ignore a field it doesn't
+know.
 
 ### init
 

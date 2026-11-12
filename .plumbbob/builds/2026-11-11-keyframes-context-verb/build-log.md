@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes context verb
 
-**Current step:** 2 — docs(notes): renumber the three notes past the plan's new IDs
+**Current step:** 3 — docs(spec): specify the context verb
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -24,7 +24,7 @@ line above. Only ONE step is in flight; a step is done only after a checkpoint:
 check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 
 - ☑ 1. docs(plan): add the context verb to keyframes.md
-- ☐ 2. docs(notes): renumber the three notes past the plan's new IDs
+- ☑ 2. docs(notes): renumber the three notes past the plan's new IDs
 - ☐ 3. docs(spec): specify the context verb
 - ☐ 4. feat(context): select the items that apply to paths
 - ☐ 5. feat(report): render context as text and JSON with its schema
@@ -97,3 +97,5 @@ folder, so it rides the branch into the PR.)*
   **2.** Three (new) markers wait for later steps
 
   `src/context/ (new)` on M6, `schema/context.schema.json (new)` on M4, and S4's `(new)` pointer each come off in the step that creates the target: steps 4, 5 and 7, as D17 (step-drops-new) says. Until then they count as planned, and the plan reads 4 scenarios, 2 linked, 1 planned and 1 held by review.
+
+- 2026-11-12 — step 2 checkpointed · 13ffbe5c2 — docs(notes): renumber the three notes past the plan's new IDs (1m)
