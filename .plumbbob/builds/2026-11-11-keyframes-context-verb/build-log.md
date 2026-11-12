@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes context verb
 
-**Current step:** 6 — feat(cli): add keyframes context
+**Current step:** 7 — test(e2e): hold the context scenario
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -28,7 +28,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 3. docs(spec): specify the context verb
 - ☑ 4. feat(context): select the items that apply to paths
 - ☑ 5. feat(report): render context as text and JSON with its schema
-- ☐ 6. feat(cli): add keyframes context
+- ☑ 6. feat(cli): add keyframes context
 - ☐ 7. test(e2e): hold the context scenario
 - ☐ 8. docs(agents): tell harnesses about keyframes context
 
@@ -152,3 +152,4 @@ folder, so it rides the branch into the PR.)*
 
 - 2026-11-12 — step 4 checkpointed · 511c01d22 — feat(context): select the items that apply to paths (1 drift, 3m)
 - 2026-11-12 — step 5 checkpointed · c33998d34 — feat(report): render context as text and JSON with its schema (1 drift, 3m)
+- 2026-11-12 — step 6 checkpointed · 1f8f49cab — feat(cli): add keyframes context (2m)

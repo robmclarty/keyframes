@@ -77,7 +77,7 @@ down, so that others, human or agent, can work from it and refine it.
   - held-by: review
 - **S4 (context-for-paths)**: A harness runs `context` with the paths a step touches and gets
   the plan's principles, constraints, scenarios and taste, with the Map parts each path meets.
-  - held-by: file:test/e2e/context.test.ts#"context for paths" (new)
+  - held-by: file:test/e2e/context.test.ts#"context for paths"
 
 ## Decisions
 
