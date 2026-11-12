@@ -75,7 +75,7 @@ keyframes context [path…] [--json]          src/cli.ts (M5)
 7. [x] test(e2e): hold the context scenario, **done when:** `test/e2e/context.test.ts` has a test titled "context for paths" that runs the bin's `init` in an empty directory, writes a few items and a Map part, runs `context <path> --json`, and gets the items and parts the spec says; S4 in `keyframes.md` loses only its `(new)` marker [D17 (step-drops-new)](#d17); and `keyframes check --strict` reads S4 as `linked`
    - seam: `test/e2e/context.test.ts`, `keyframes.md`
    - model: sonnet (the scenario spells the test out)
-8. [ ] docs(agents): tell harnesses about keyframes context, **done when:** `docs/agents.md`, where it names `check --json` for harnesses, names `context --json` as the call for a context pack, and `README.md` lists the verb beside `init` and `check`, with `pnpm check` green in full
+8. [x] docs(agents): tell harnesses about keyframes context, **done when:** `docs/agents.md`, where it names `check --json` for harnesses, names `context --json` as the call for a context pack, and `README.md` lists the verb beside `init` and `check`, with `pnpm check` green in full
    - seam: `docs/agents.md`, `README.md`, `test/integration/docs.test.ts`
    - model: sonnet (doc edits)
 

@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes context verb
 
-**Current step:** 8 — docs(agents): tell harnesses about keyframes context
+**Current step:** none (at the boundary)
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -30,7 +30,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 5. feat(report): render context as text and JSON with its schema
 - ☑ 6. feat(cli): add keyframes context
 - ☑ 7. test(e2e): hold the context scenario
-- ☐ 8. docs(agents): tell harnesses about keyframes context
+- ☑ 8. docs(agents): tell harnesses about keyframes context
 
 ## Park list
 
@@ -154,3 +154,65 @@ folder, so it rides the branch into the PR.)*
 - 2026-11-12 — step 5 checkpointed · c33998d34 — feat(report): render context as text and JSON with its schema (1 drift, 3m)
 - 2026-11-12 — step 6 checkpointed · 1f8f49cab — feat(cli): add keyframes context (2m)
 - 2026-11-12 — step 7 checkpointed · b57d633e0 — test(e2e): hold the context scenario (1m)
+- 2026-11-12 — step 8 checkpointed · df09bae52 — docs(agents): tell harnesses about keyframes context (<1m)
+- 2026-11-12 — range 3 of 3's stop recorded — review the verb end to end, and decide whether to cut a release for runciter to install, which is yours to publish
+
+  **Summary**: `keyframes context [path…] [--json]` works end to end. A pure `selectContext` over the report picks Principles, Constraints, Scenarios and Taste in the format's order, plus each path's Map parts. Two renderers print it as markdown or as JSON against a new `schema/context.schema.json`. The CLI wires it up with the exit codes the spec gives. An e2e test holds S4, which now reads `linked`, and `docs/agents.md` and the README tell harnesses about it. All three `(new)` markers are gone from `keyframes.md`, and `pnpm check` is green across all 11 slots.
+
+  1. Steps 4 and 5 each changed a few files outside their seams, and both landed a hair off.
+  2. The errors line on stderr has no `keyframes: ` prefix, which is what the spec says, but other stderr lines have one.
+  3. A bad path is caught when the command line is parsed, before the plan is read.
+  4. The text output follows the spec's example, and the golden files pin it on the clean and findings trees.
+  5. Two smaller notes for the release.
+
+  **Readout**:
+
+  ```text
+  steps        5 of 5 landed
+               - 4 511c01d · 5 c33998d · 6 1f8f49c · 7 b57d633 · 8 df09bae
+  check        green: 11 of 11 checks, 5 landings
+  done-when    met
+  decisions    honored:
+               - D13 (reads-through-check), D14 (same-item-shape)
+               - D15 (no-budget), D17 (step-drops-new), D18 (four-sections)
+               - D19 (path-names-parts), D20 (print-despite-findings)
+               - D21 (cwd-root-many-paths)
+  constraints  6 of 6 honored
+  seam         strayed: 4 paths outside 2 steps' seams
+               - step 4: src/repo/index.ts
+               - step 5: test/helpers/json-schema.ts and 2 others
+  diff         +1659 -124 across 25 files
+               - README.md +4 -0
+               - docs/agents.md +9 -0
+               - keyframes.md +3 -3
+               - schema/context.schema.json +192 -0
+               - src/__tests__/cli.test.ts +112 -0
+               - src/cli.ts +61 -13
+               - src/context/__tests__/context.test.ts +187 -0
+               - and 18 more
+  spent        11 min · green first run at every landing · 2 drift warnings
+  ```
+
+  **Verdict**: ◐ A hair off (seam strayed)
+
+  **Recommendation**: Review the verb from a real repo, then cut a minor release with `/version` for runciter to install, and publish it yourself. It's a new command, it doesn't change `check`, and both outputs, the schema and the scenario are pinned by tests. Before you tag it, decide whether the errors line gets the `keyframes: ` prefix (section 2): once runciter reads stderr, that line is part of the contract.
+
+  **1.** Steps 4 and 5 each changed a few files outside their seams, and both landed a hair off.
+
+  Step 4 exported `readPath` from `src/repo/index.ts` one step early. The `no-deep-sibling-import` rule keeps `src/context/` from reaching into `src/repo/paths.ts`, and step 6's seam already named that export. Step 5 moved the JSON Schema validator out of `test/integration/report-schema.test.ts` into `test/helpers/json-schema.ts`, so the report and context schema tests share it instead of carrying two copies. It also added the golden context cases to `test/integration/golden.test.ts`, because the fixtures folder holds data, not tests. No behaviour outside the verb changed.
+
+  **2.** The errors line on stderr has no `keyframes: ` prefix, which is what the spec says, but other stderr lines have one.
+
+  The spec quotes the line as `keyframes.md has 2 errors; run keyframes check to see them`, and the CLI prints exactly that. Every other stderr line (usage, read problems, unexpected errors) starts with `keyframes: `. A harness that merges the two streams would see one line without the prefix. If you want the prefix, change the spec first, since runciter builds against it.
+
+  **3.** A bad path is caught when the command line is parsed, before the plan is read.
+
+  An absolute path, a `..` segment, a backslash or an empty path exits 2 with the usage block, even in a directory with no plan. `selectContext` reads the paths with `readPath` too, so the function also works on its own, and the CLI's fallback for a path problem coming back from it can't be reached in practice.
+
+  **4.** The text output follows the spec's example, and the golden files pin it on the clean and findings trees.
+
+  Items print in their usual form. An item's or a sub-line's later lines are indented, a planned pointer keeps `(new)`, and `## Paths` names each part as `M1 (api)`, or `none`. A plan with no such items and no paths prints an empty string, with no newline either. The JSON keeps the report's own `itemJson`, and a test checks that the context schema's `item`, `result`, `line` and `count` defs match the report schema's exactly.
+
+  **5.** Two smaller notes for the release.
+
+  `test/e2e/bin.test.ts` still only asserts that `schema/report.schema.json` ships. The package's `files` lists `schema/`, so the new schema ships too, but nothing pins it. Separately, one manual check ran `npx tsx` to read S4's status, and that fetched `tsx` into the npm cache. It's not a project dependency, and nothing in the tree changed.
