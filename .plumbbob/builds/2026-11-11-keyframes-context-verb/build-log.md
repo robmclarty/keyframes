@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes context verb
 
-**Current step:** 1 — docs(plan): add the context verb to keyframes.md
+**Current step:** 2 — docs(notes): renumber the three notes past the plan's new IDs
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -23,7 +23,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 line above. Only ONE step is in flight; a step is done only after a checkpoint:
 check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 
-- ☐ 1. docs(plan): add the context verb to keyframes.md
+- ☑ 1. docs(plan): add the context verb to keyframes.md
 - ☐ 2. docs(notes): renumber the three notes past the plan's new IDs
 - ☐ 3. docs(spec): specify the context verb
 - ☐ 4. feat(context): select the items that apply to paths
@@ -65,3 +65,35 @@ end, and an older step's detail is a scroll away. Add your own decision/event li
 you point at to say "I did that: the LLM helped, but those were my calls."
 `/plumbbob:finish` reads this for the report; `plumbbob finish` commits it with the build
 folder, so it rides the branch into the PR.)*
+
+- 2026-11-12 — step 1 checkpointed · 759670d06 — docs(plan): add the context verb to keyframes.md (24m)
+
+  **Summary**: `keyframes.md` now has I9 (context-verb), resolved by D11 (context-now), plus S4 (context-for-paths) held by a `(new)` pointer to the e2e test, a new Map part M6 (context), and the context schema added to M4. C1 now names `context` beside `check`. Rob picked each wording in the question dialog. `keyframes check --strict` reports no findings, and `pnpm check` is green.
+
+  1. Rob chose the text, and the agent wrote it in
+  2. Three (new) markers wait for later steps
+
+  **Readout**:
+
+  ```text
+  check        green: 11 of 11 checks
+  done-when    met
+  decisions    1 of 1 honored
+  constraints  6 of 6 honored
+  seam         held: 1 of 1 declared, no strays
+  diff         +15 -3 across 1 file
+               - keyframes.md +15 -3
+  spent        24 min · 2 turns · 9s gate · green first run
+  ```
+
+  **Verdict**: ● Plumb
+
+  **Recommendation**: Reply `looks good` to land step 1. All four additions match what you picked, and the plan is clean under `--strict`, so step 2 can renumber the notes past D11, S4, M6 and I9.
+
+  **1.** Rob chose the text, and the agent wrote it in
+
+  The plan's note said this step was Rob's to write. At the pause Rob asked to finish it through questions, and picked the drafted wording for I9 and D11, S4, the Map (a new M6 part, with the schema in M4) and C1. Answering the dialog was Rob accepting the text (P1 people-own-it), so I wrote it into `keyframes.md` as chosen.
+
+  **2.** Three (new) markers wait for later steps
+
+  `src/context/ (new)` on M6, `schema/context.schema.json (new)` on M4, and S4's `(new)` pointer each come off in the step that creates the target: steps 4, 5 and 7, as D17 (step-drops-new) says. Until then they count as planned, and the plan reads 4 scenarios, 2 linked, 1 planned and 1 held by review.

@@ -28,7 +28,7 @@ items at the end, numbered to land after [`scoped-plans.md`](scoped-plans.md) an
 
 - **People own the plan** (P1, people-own-it). No lookout writes `keyframes.md`. A lookout
   may *propose* an edit, as a case file a person accepts; the edit is then the person's.
-- **`check` runs nothing and reads only the plan** (C1, read-only-check, and D16 below). It
+- **`check` runs nothing and reads only the plan** (C1, read-only-check, and D17 below). It
   doesn't open `lookouts.yaml`. The cross-check lives in the tool that owns the lookouts, which
   reads `keyframes check --json`.
 - **IDs are forever.** A deleted item's ID is never reused, so a lookout citing `D4` can't end up
@@ -90,11 +90,11 @@ add`, the Tower's form, drafts from `unguarded` findings). The plan gains one pl
 
 ## Items proposed for `keyframes.md`
 
-- **D15 (watch-key)**: A `watch:` sub-line on a Decision or Constraint says, in plain words, what
+- **D16 (watch-key)**: A `watch:` sub-line on a Decision or Constraint says, in plain words, what
   in the world could make it wrong. `check` checks only where it goes and counts it.
   - because: decisions that depend on the outside world decay, and the person who made one is
     the only one who knows what it's sensitive to.
-- **D16 (one-way-contract)**: Tools read plans and act on their items by ID, through
+- **D17 (one-way-contract)**: Tools read plans and act on their items by ID, through
   `check --json`; no tool writes a plan, the plan never cites the tools, and `check` never reads
   their files.
   - because: the plan is what people set, and an agent that could edit it could edit what binds
@@ -103,8 +103,8 @@ add`, the Tower's form, drafts from `unguarded` findings). The plan gains one pl
   sign in")? Lean: not yet; a Scenario that decays is usually held by a Constraint that can carry
   it.
 
-These numbers continue after [`scoped-plans.md`](scoped-plans.md)'s D11–D14, S4, Q4 and Q5,
-which land first. D16 merges this note's one-way contract with
+These numbers continue after [`scoped-plans.md`](scoped-plans.md)'s D12–D15, S5, Q4 and Q5,
+which land first. D17 merges this note's one-way contract with
 [`user-plan-and-runciter.md`](user-plan-and-runciter.md)'s readers-not-writers, which said the same
-thing; that note cites D16 rather than proposing its own. If the order changes, renumber whichever
+thing; that note cites D17 rather than proposing its own. If the order changes, renumber whichever
 lands later.

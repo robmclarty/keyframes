@@ -518,35 +518,35 @@ build in order, and each lands green under `pnpm check`.
 9. test(e2e): hold the split-plan scenario, **done when:** `test/e2e/split-plan.test.ts` has a
    test titled "split plan" that runs the bin on a plan over its budgets, moves one part's items
    into a plan beside its code, names the part in the Map, cites the root from it, and gets a clean
-   `check` with the budget warning gone; and S4 in `keyframes.md` loses its `(new)` marker
+   `check` with the budget warning gone; and S5 in `keyframes.md` loses its `(new)` marker
 
 ## Changes to the plan
 
 For a person to add to [`keyframes.md`](../keyframes.md). IDs continue from the plan as it stands
-on 2026-11-04.
+on 2026-11-11.
 
 ```markdown
-- **D11 (map-is-the-index)**: A part's plan is the `keyframes.md` in that part's path, and
+- **D12 (map-is-the-index)**: A part's plan is the `keyframes.md` in that part's path, and
   `check` reads the plans the Map reaches. It looks for a stray plan only directly below the
   plan, and beside and directly below the parts' paths.
   - because: the Map is where people already say what the parts are, and walking the whole tree
     would read other projects' plans in dependency folders, which nothing can tell apart without
     naming a toolchain.
-- **D12 (cite-by-part)**: A bare citation resolves in its plan or the nearest above, by ID and
+- **D13 (cite-by-part)**: A bare citation resolves in its plan or the nearest above, by ID and
   slug. A citation into a part carries the part's slug, `[sync/C2 (one-writer)]`, looked up in
   the nearest Map that has it, so siblings cite each other.
   - because: parts cite the root far more than anything else, and the root's items should read
     the same in every plan.
-- **D13 (parts-add)**: A part's items hold inside its directory and add to the plans above it. A
+- **D14 (parts-add)**: A part's items hold inside its directory and add to the plans above it. A
   reference never names an item below its plan.
   - because: an agent has to be able to trust the root alone, everywhere.
-- **D14 (one-plan-one-way)**: Every plan is read the same way, root or part: the same sections,
+- **D15 (one-plan-one-way)**: Every plan is read the same way, root or part: the same sections,
   grammar, budgets and findings, and a part may carry Principles of its own.
   - because: one format to learn, and a package that leaves takes a working plan with it.
 ```
 
 ```markdown
-- **S4 (split-plan)**: A plan grows past its budgets. Someone moves one part's items into a plan
+- **S5 (split-plan)**: A plan grows past its budgets. Someone moves one part's items into a plan
   beside its code, names the part in the Map, cites the root from it, and `check` passes with the
   budget warning gone and nothing lost.
   - held-by: file:test/e2e/split-plan.test.ts#"split plan" (new)

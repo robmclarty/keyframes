@@ -92,22 +92,21 @@ and it is useful without runciter: an agent's harness can print it into a prompt
 ## Changes to the plan
 
 To add to [`keyframes.md`](../keyframes.md) when this is accepted. The IDs continue after
-[`scoped-plans.md`](scoped-plans.md) (D11–D14, S4, Q4, Q5) and
-[`lookouts-contract.md`](lookouts-contract.md) (D15, D16, Q6). This note's readers-not-writers
-Decision is folded into that note's D16 (one-way-contract), which says the same thing, so it isn't
-proposed again here; this note relies on [D16 (one-way-contract)].
+[`scoped-plans.md`](scoped-plans.md) (D12–D15, S5, Q4, Q5) and
+[`lookouts-contract.md`](lookouts-contract.md) (D16, D17, Q6). This note's readers-not-writers
+Decision is folded into that note's D17 (one-way-contract), which says the same thing, so it isn't
+proposed again here; this note relies on [D17 (one-way-contract)].
 
-- **D17 (user-plan)**: A `keyframes.md` at the user's config path is the plan above every repo
+- **D18 (user-plan)**: A `keyframes.md` at the user's config path is the plan above every repo
   root; a root cites it as `[user:ID (slug)]`; it adds to nothing and nothing overrides it.
   - because: standing rules a person holds across repos are intent, and intent has a format.
 - **Q7 (waived-by)**: How does a repo say a user constraint does not apply to it, so that a
   missing `held-by:` is not a finding? Lean: `waived-by:` on the root item that cites it, with
   a reason, counted in the report (D5, counts-not-nags).
-- **I9 (context-verb)**: `keyframes context <path>` prints the items that apply to a path,
-  resolved up the chain, for harnesses that build an agent's context.
 
-I9 doesn't depend on the user plan; it resolves a scoped chain just as well, so it can be added
-as an Idea on its own before the rest of this note is settled.
+The `context` verb this note first proposed is no longer a proposal here: the plan already has it
+as I9 (context-verb), resolved by D11 (context-now), and builds it for the root plan alone. If
+this note's user plan lands, `context` would read one level higher.
 
 ## Open questions
 
