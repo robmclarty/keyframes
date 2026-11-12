@@ -13,7 +13,7 @@ step boundaries. The antidote to "my plan got lost in the noise."
 
 # Build log: keyframes context verb
 
-**Current step:** 5 — feat(report): render context as text and JSON with its schema
+**Current step:** 6 — feat(cli): add keyframes context
 **Heavy check:** checkride (set a "check" key in .plumbbob/settings.json to override)
 
 ## Steps
@@ -27,7 +27,7 @@ check green + checkpoint taken, via `/plumbbob:verify` or `/plumbbob:build`.)*
 - ☑ 2. docs(notes): renumber the three notes past the plan's new IDs
 - ☑ 3. docs(spec): specify the context verb
 - ☑ 4. feat(context): select the items that apply to paths
-- ☐ 5. feat(report): render context as text and JSON with its schema
+- ☑ 5. feat(report): render context as text and JSON with its schema
 - ☐ 6. feat(cli): add keyframes context
 - ☐ 7. test(e2e): hold the context scenario
 - ☐ 8. docs(agents): tell harnesses about keyframes context
@@ -151,3 +151,4 @@ folder, so it rides the branch into the PR.)*
   scoped-plans takes D12-D15 and S5 (Q4 and Q5 unchanged, since the plan stops at Q3), lookouts-contract takes D16, D17 and Q6, and the user-plan note takes D18 and Q7. Its I9 proposal is now a short pointer to the plan's I9 (context-verb), resolved by D11 (context-now). scoped-plans' "IDs continue from the plan as it stands" date moved to 2026-11-11.
 
 - 2026-11-12 — step 4 checkpointed · 511c01d22 — feat(context): select the items that apply to paths (1 drift, 3m)
+- 2026-11-12 — step 5 checkpointed · c33998d34 — feat(report): render context as text and JSON with its schema (1 drift, 3m)

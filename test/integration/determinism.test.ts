@@ -55,6 +55,34 @@ describe('the report, text and JSON, run from two working directories, is', () =
   });
 });
 
+/** The bytes `keyframes context` writes to stdout, run from `cwd` with `args`. */
+const contextFrom = (cwd: string, ...args: string[]): Buffer => {
+  let stdout = '';
+  process.chdir(cwd);
+  try {
+    run(['context', ...args], {
+      stdout: (text) => {
+        stdout += text;
+      },
+      stderr: () => {},
+    });
+  } finally {
+    process.chdir(START);
+  }
+  return Buffer.from(stdout, 'utf8');
+};
+
+describe('the context, text and JSON, run from the tree and from a copy of it elsewhere, is', () => {
+  // context reads the working directory as the root, so the copy is the other working directory.
+  test('context byte-identical', () => {
+    for (const args of [['src/', './src//api/handler.ts', 'docs/'], ['src/', 'docs/', '--json']]) {
+      const inTree = contextFrom(TREE, ...args);
+      expect(inTree.length).toBeGreaterThan(0);
+      expect(contextFrom(COPY, ...args).equals(inTree)).toBe(true);
+    }
+  });
+});
+
 describe('the report, whatever the line endings, BOM or tabs, is the same', () => {
   // A plan's lines, then the same plan with CRLF, a BOM, and tabs for its leading spaces.
   const PLAN = [

@@ -47,6 +47,7 @@ describe('help', () => {
     expect(stderr).toBe('');
     expect(stdout).toContain('keyframes init [dir]');
     expect(stdout).toContain('keyframes check [dir] [--json] [--strict]');
+    expect(stdout).toContain('keyframes context [path…] [--json]');
     expect(stdout).toContain('keyframes --help | --version');
     expect(stdout).toContain('2  a usage or read problem, or an unexpected error');
   });
@@ -70,11 +71,26 @@ describe('usage problems exit 2, say what is wrong, and show the usage', () => {
     ['keyframes check --jsn', 'unknown flag "--jsn"'],
     ['keyframes init --json', "init doesn't take --json"],
     ['keyframes check a b', 'check takes one directory, not 2'],
+    ['keyframes context --strict', "context doesn't take --strict"],
   ])('%s', (line, problem) => {
     const { code, stdout, stderr } = cli(line);
     expect(code).toBe(2);
     expect(stdout).toBe('');
     expect(stderr).toMatch(new RegExp(`^keyframes: ${problem}\n\nUsage:\n`));
+  });
+});
+
+describe('a context path that escapes the root, has a backslash or is empty is a usage problem', () => {
+  test.each([
+    ['keyframes context /etc', '"/etc" is absolute; paths are relative to the repo root'],
+    ['keyframes context src ../up', '"../up" has a ".." segment; paths stay inside the repo'],
+    ['keyframes context src\\api', '"src\\api" uses "\\"; paths use "/"'],
+    ['keyframes context ', '"" names no path'],
+  ])('%s exits 2, saying why, and shows the usage', (line, problem) => {
+    const { code, stdout, stderr } = cli(line);
+    expect({ code, stdout }).toEqual({ code: 2, stdout: '' });
+    expect(stderr.startsWith(`keyframes: ${problem}`)).toBe(true);
+    expect(stderr).toMatch(/\n\nUsage:\n/);
   });
 });
 
@@ -89,6 +105,21 @@ const TREES: Readonly<Record<string, string | Uint8Array>> = {
   'empty/README.md': '',
   'blank/README.md': '',
   'here/README.md': '',
+  'ctx/keyframes.md': [
+    '## Intent',
+    'Why.',
+    '## Map',
+    '- **M1 (api)**: The API.',
+    '  - paths: src/api/',
+    '## Taste',
+    '- **T1 (calm)**: Calm.',
+    '## Decisions',
+    '- **D1 (node)**: Node.',
+    '  - because: it works.',
+    '',
+  ].join('\n'),
+  'ctx/src/api/a.ts': '',
+  'twice/keyframes.md': '## Intent\nWhy.\n## Taste\n- **T1 (a)**: Per [T8 (gone)] and [T9 (gone)].\n',
 };
 
 let scratch = '';
@@ -203,5 +234,86 @@ describe('init writes a starter plan only where there is none', () => {
     expect(cli(line)).toEqual({ code: 2, stdout: '', stderr: `keyframes: ${problem}\n` });
     expect(readFileSync(join('warns', 'keyframes.md'), 'utf8')).toBe(before);
     expect(readdirSync('upper')).toEqual(['KEYFRAMES.md']);
+  });
+});
+
+/** Runs `line` from `dir` inside the scratch directory, as context always reads the working directory. */
+const cliIn = (dir: string, line: string) => {
+  process.chdir(dir);
+  try {
+    return cli(line);
+  } finally {
+    process.chdir(scratch);
+  }
+};
+
+describe('context prints the items that apply to the paths, from the working directory', () => {
+  test('keyframes context prints the items and no paths', () => {
+    expect(cliIn('ctx', 'keyframes context')).toEqual({
+      code: 0,
+      stdout: '## Taste\n\n- **T1 (calm)**: Calm.\n',
+      stderr: '',
+    });
+  });
+
+  test('keyframes context ./src//api/a.ts docs/ names the parts each path meets, in its usual form', () => {
+    expect(cliIn('ctx', 'keyframes context ./src//api/a.ts docs/')).toEqual({
+      code: 0,
+      stdout: '## Taste\n\n- **T1 (calm)**: Calm.\n\n## Paths\n\n- src/api/a.ts: M1 (api)\n- docs/: none\n',
+      stderr: '',
+    });
+  });
+
+  test('keyframes context src/ --json writes one JSON object instead', () => {
+    const { code, stdout, stderr } = cliIn('ctx', 'keyframes context src/ --json');
+    expect({ code, stderr }).toEqual({ code: 0, stderr: '' });
+    expect(JSON.parse(stdout)).toMatchObject({
+      schema_version: 1,
+      plan: 'keyframes.md',
+      items: [{ id: 'T1' }],
+      paths: [{ path: 'src/', parts: ['M1'] }],
+      parts: [{ id: 'M1' }],
+      errors: 0,
+      warnings: 0,
+    });
+  });
+
+  test('keyframes --json context gone/ takes the flag before the command, and a path that need not exist', () => {
+    const { code, stdout } = cliIn('ctx', 'keyframes --json context gone/');
+    expect(code).toBe(0);
+    expect(JSON.parse(stdout)).toMatchObject({ paths: [{ path: 'gone/', parts: [] }] });
+  });
+
+  test('keyframes context, on a plan with an error, still prints and exits 0, with one line on stderr', () => {
+    expect(cliIn('fails', 'keyframes context')).toEqual({
+      code: 0,
+      stdout: '## Taste\n\n- **T1 (calm)**: Per [T9 (gone)].\n',
+      stderr: 'keyframes.md has 1 error; run keyframes check to see it\n',
+    });
+  });
+
+  test('keyframes context --json, on a plan with an error, carries its count', () => {
+    const { code, stdout, stderr } = cliIn('fails', 'keyframes context --json');
+    expect({ code, stderr }).toEqual({ code: 0, stderr: 'keyframes.md has 1 error; run keyframes check to see it\n' });
+    expect(JSON.parse(stdout)).toMatchObject({ errors: 1, warnings: 0 });
+  });
+
+  test('keyframes context, on a plan with two errors, says how many', () => {
+    expect(cliIn('twice', 'keyframes context').stderr).toBe('keyframes.md has 2 errors; run keyframes check to see them\n');
+  });
+
+  test('keyframes context, on a plan with only a warning, says nothing on stderr', () => {
+    expect(cliIn('warns', 'keyframes context')).toEqual({ code: 0, stdout: '## Taste\n\n- **T1**: No slug.\n', stderr: '' });
+  });
+
+  test.each([
+    ['empty', `there's no keyframes.md to check; "keyframes init" writes one`],
+    ['binary', "keyframes.md isn't UTF-8 text"],
+  ])('keyframes context, in %s, exits 2 on a read problem', (dir, problem) => {
+    expect(cliIn(dir, 'keyframes context')).toEqual({ code: 2, stdout: '', stderr: `keyframes: ${problem}\n` });
+  });
+
+  test('keyframes context src/, beside KEYFRAMES.md, finds the plan in any case', () => {
+    expect(cliIn('upper', 'keyframes context src/')).toEqual({ code: 0, stdout: '## Paths\n\n- src/: none\n', stderr: '' });
   });
 });
