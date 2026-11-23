@@ -48,6 +48,21 @@
         "budget": { "$ref": "#/$defs/count" }
       }
     },
+    "adjusted_budgets": {
+      "description": "The budgets this run checked against that aren't their defaults, as `--budget` set them, in the order the format lists the budgets. Empty when every budget is its default.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "budget", "default"],
+        "properties": {
+          "name": {
+            "enum": ["words", "item", "principles", "map", "constraints", "scenarios", "decisions", "taste", "questions", "ideas"]
+          },
+          "budget": { "$ref": "#/$defs/count" },
+          "default": { "$ref": "#/$defs/count" }
+        }
+      }
+    },
     "items": {
       "description": "Every item in the plan, in line order.",
       "type": "array",

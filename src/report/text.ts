@@ -79,6 +79,22 @@ const summary = ({ errors, warnings, notes }: Report): string => {
 };
 
 /**
+ * The budgets row, naming each budget the run adjusted with its default, as in `map 8 (default 7)`,
+ * or no row when every budget is its default.
+ */
+const budgetsRow = ({ adjustedBudgets }: Report): string[] =>
+  adjustedBudgets.length === 0
+    ? []
+    : [
+        row(
+          'budgets',
+          adjustedBudgets
+            .map(({ name, budget, default: base }) => `${name} ${String(budget)} (default ${String(base)})`)
+            .join(' · '),
+        ),
+      ];
+
+/**
  * Renders a report as text: the plan's name, its counts, its findings, and a summary. Sections the
  * plan doesn't have are left out, and so is any count that's zero, after the first.
  */
@@ -87,6 +103,7 @@ export const renderText = (report: Report): string => {
     row('intent', report.intent ? 'yes' : 'no'),
     ...report.sections.map(sectionRow),
     row('words', `${String(report.words.count)} of ${String(report.words.budget)}`),
+    ...budgetsRow(report),
   ];
   const findings = findingLines(report.plan, shown(report.findings));
   const body = findings.length === 0 ? [] : [...findings, ''];

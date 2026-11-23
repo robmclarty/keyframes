@@ -2,7 +2,7 @@ import { referenceId, resolveCitations } from '../cite/index.js';
 import { readItems, type Item } from '../items/index.js';
 import { resolvePointers, type Repo } from '../repo/index.js';
 import { finding, scan, type Finding } from '../scan/index.js';
-import { budgets, countWords, WORDS } from './budgets.js';
+import { adjustedBudgets, BUDGETS, countWords, overBudget, type Budgets } from './budgets.js';
 import { countSections } from './counts.js';
 import { PLAN, type Plan } from './plan.js';
 import type { Entry, Report, ReportItem } from './report.js';
@@ -59,9 +59,10 @@ const reportItem = ({ item, links }: Entry): ReportItem => ({
 /**
  * Checks a plan against itself and a read-only repo, and returns the report: the plan's counts, its
  * items, and every finding, in report order. It's a pure function of the plan and the tree: no
- * clock, no writes, and the repo is only read.
+ * clock, no writes, and the repo is only read. `budgets` are `BUDGETS` unless the caller adjusts
+ * them, as `--budget` does.
  */
-export const check = (plan: Plan, repo: Repo): Report => {
+export const check = (plan: Plan, repo: Repo, budgets: Budgets = BUDGETS): Report => {
   const scanned = scan(plan.text);
   const read = readItems(scanned.lines);
   const linked = resolvePointers(read.items, repo);
@@ -76,7 +77,7 @@ export const check = (plan: Plan, repo: Repo): Report => {
     ...read.findings,
     ...resolveCitations(scanned.lines, read.items),
     ...linked.findings,
-    ...budgets(scanned.lines, read.items, words),
+    ...overBudget(scanned.lines, read.items, words, budgets),
   ]);
   const count = (severity: Finding['severity']): number =>
     findings.filter((each) => each.severity === severity).length;
@@ -87,7 +88,8 @@ export const check = (plan: Plan, repo: Repo): Report => {
       scanned.sections.map((section) => section.name),
       entries,
     ),
-    words: { count: words, budget: WORDS },
+    words: { count: words, budget: budgets.words },
+    adjustedBudgets: adjustedBudgets(budgets),
     items: entries.map(reportItem),
     findings,
     errors: count('error'),

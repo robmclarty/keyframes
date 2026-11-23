@@ -72,6 +72,9 @@ describe('usage problems exit 2, say what is wrong, and show the usage', () => {
     ['keyframes init --json', "init doesn't take --json"],
     ['keyframes check a b', 'check takes one directory, not 2'],
     ['keyframes context --strict', "context doesn't take --strict"],
+    ['keyframes context --budget=map:8', "context doesn't take --budget"],
+    ['keyframes check --budget', '--budget takes a value, as in --budget=map:8'],
+    ['keyframes check --json=yes', '--json takes no value'],
   ])('%s', (line, problem) => {
     const { code, stdout, stderr } = cli(line);
     expect(code).toBe(2);
@@ -176,6 +179,46 @@ describe('check exits by what it found', () => {
       ].join('\n'),
       stderr: '',
     });
+  });
+});
+
+describe('check --budget adjusts a budget for the run', () => {
+  test('a lower budget warns, a later flag wins, and the words row shows the budget in force', () => {
+    const lowered = cli('keyframes check upper --strict --budget=words:2');
+    expect(lowered.code).toBe(1);
+    expect(lowered.stdout).toContain('words         3 of 2\n');
+    expect(lowered.stdout).toContain('the plan has 3 words outside code and comments; the budget is 2');
+    expect(cli('keyframes check upper --strict --budget=words:2 --budget=words:3,map:8').code).toBe(0);
+  });
+
+  test('the report names each adjusted budget with its default, and only those', () => {
+    const { stdout } = cli('keyframes check upper --budget=map:8,words:2000,item:80');
+    expect(stdout).toContain('budgets       item 80 (default 60) · map 8 (default 7)\n');
+    expect(cli('keyframes check upper').stdout).not.toContain('budgets');
+    const json = JSON.parse(cli('keyframes check upper --json --budget=map:8').stdout) as Record<string, unknown>;
+    expect(json['adjusted_budgets']).toEqual([{ name: 'map', budget: 8, default: 7 }]);
+  });
+
+  test('a repeated flag still wins where it last appears', () => {
+    const { code, stdout } = cli('keyframes check upper --strict --budget=words:3 --budget=words:2 --budget=words:3');
+    expect(code).toBe(0);
+    expect(stdout).toContain('words         3 of 3\n');
+  });
+
+  test('a bad budget is a usage problem, found before the plan is looked for', () => {
+    const { code, stderr } = cli('keyframes check no-such-dir --budget=frob:3');
+    expect(code).toBe(2);
+    expect(stderr).toContain('keyframes: --budget: "frob" isn\'t a budget');
+  });
+
+  test.each([
+    ['keyframes check upper --budget=frob:3', '"frob" isn\'t a budget; the budgets are words, item, principles'],
+    ['keyframes check upper --budget=map:0', '"map:0" needs a whole number above zero, as in map:7'],
+    ['keyframes check upper --budget=map', '"map" needs a whole number above zero, as in map:7'],
+  ])('%s exits 2, saying what is wrong with it', (line, problem) => {
+    const { code, stdout, stderr } = cli(line);
+    expect({ code, stdout }).toEqual({ code: 2, stdout: '' });
+    expect(stderr).toContain(`keyframes: --budget: ${problem}`);
   });
 });
 

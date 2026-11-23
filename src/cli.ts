@@ -1,7 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { check, exitCode, findPlan, type Report } from './check/index.js';
+import { BUDGETS, check, exitCode, findPlan, readBudgets, type Budgets, type Report } from './check/index.js';
 import { selectContext } from './context/index.js';
 import { init, SNIPPET } from './init/index.js';
 import { KEYFRAMES } from './name.js';
@@ -27,21 +27,30 @@ type Request =
       /** The directory `init` and `check` take, or the paths `context` takes, as written. */
       readonly args: readonly string[];
       readonly flags: ReadonlySet<string>;
+      /** The budgets `check` runs with: the defaults, with each --budget flag applied in order. */
+      readonly budgets: Budgets;
     };
 
 // The flags each command takes. Help and version are separate: they work anywhere.
 const FLAGS: Readonly<Record<Command, readonly string[]>> = {
   init: [],
-  check: ['--json', '--strict'],
+  check: ['--json', '--strict', '--budget'],
   context: ['--json'],
 };
 
 const KNOWN_FLAGS: ReadonlySet<string> = new Set(Object.values(FLAGS).flat());
+
+// The flags that take a value, written after an equals sign: --budget=map:8.
+const VALUE_FLAGS: ReadonlySet<string> = new Set(['--budget']);
+
+/** A flag's name, without any value written after an equals sign. */
+const flagName = (flag: string): string => flag.split('=', 1)[0] ?? flag;
 const HELP_FLAGS: ReadonlySet<string> = new Set(['--help', '-h']);
 
 const USAGE = `Usage:
   keyframes init [dir]                        write a starter keyframes.md; refuse if one exists
-  keyframes check [dir] [--json] [--strict]   check the plan against itself and the repo
+  keyframes check [dir] [--json] [--strict] [--budget=<name>:<n>,…]
+                                              check the plan against itself and the repo
   keyframes context [path…] [--json]          print the items that apply to the paths
   keyframes --help | --version
 `;
@@ -49,7 +58,9 @@ const USAGE = `Usage:
 const HELP = `keyframes starts and checks keyframes.md, the file where a project's intent is written down.
 
 ${USAGE}
-dir is the repo root. It defaults to the working directory. context always takes the working
+dir is the repo root. It defaults to the working directory. --budget adjusts a budget for one run,
+as in --budget=map:8,words:2500; the budgets are words, item, principles, map, constraints,
+scenarios, decisions, taste, questions and ideas. context always takes the working
 directory as the root, and its paths are relative to it.
 
 Exit codes:
@@ -63,6 +74,23 @@ const isCommand = (name: string): name is Command => Object.hasOwn(FLAGS, name);
 
 /** A request that stops at a usage problem. */
 const usage = (problem: string): Request => ({ kind: 'usage', problem });
+
+/**
+ * The budgets the --budget flags set, applied in command-line order over the defaults so a later
+ * flag wins, or what's wrong with one. It takes the flags as written, since a set would drop a
+ * repeated flag and lose its place.
+ */
+const flagBudgets = (flags: readonly string[]): { readonly budgets: Budgets } | { readonly problem: string } => {
+  let budgets: Budgets = BUDGETS;
+  for (const flag of flags.filter((each) => flagName(each) === '--budget')) {
+    const read = readBudgets(flag.slice('--budget='.length), budgets);
+    if ('problem' in read) {
+      return read;
+    }
+    budgets = read.budgets;
+  }
+  return { budgets };
+};
 
 /**
  * Reads a command line into a request, or the first usage problem in it.
@@ -80,7 +108,7 @@ const parse = (argv: readonly string[]): Request => {
   }
   const flags = argv.filter((arg) => arg.startsWith('-'));
   const [command, ...dirs] = argv.filter((arg) => !arg.startsWith('-'));
-  const unknown = flags.find((flag) => !KNOWN_FLAGS.has(flag));
+  const unknown = flags.find((flag) => !KNOWN_FLAGS.has(flagName(flag)));
   if (unknown !== undefined) {
     return usage(`unknown flag "${unknown}"`);
   }
@@ -90,9 +118,18 @@ const parse = (argv: readonly string[]): Request => {
   if (!isCommand(command)) {
     return usage(`unknown command "${command}"`);
   }
-  const misplaced = flags.find((flag) => !FLAGS[command].includes(flag));
+  const misplaced = flags.find((flag) => !FLAGS[command].includes(flagName(flag)));
   if (misplaced !== undefined) {
-    return usage(`${command} doesn't take ${misplaced}`);
+    return usage(`${command} doesn't take ${flagName(misplaced)}`);
+  }
+  const shaped = flags.find((flag) => VALUE_FLAGS.has(flagName(flag)) !== flag.includes('='));
+  if (shaped !== undefined) {
+    const name = flagName(shaped);
+    return usage(VALUE_FLAGS.has(name) ? `${name} takes a value, as in ${name}=map:8` : `${name} takes no value`);
+  }
+  const budgets = flagBudgets(flags);
+  if ('problem' in budgets) {
+    return usage(`--budget: ${budgets.problem}`);
   }
   if (command === 'context') {
     const unread = dirs.map((path) => ({ path, read: readPath(path) })).find(({ read }) => 'problem' in read);
@@ -102,7 +139,7 @@ const parse = (argv: readonly string[]): Request => {
   } else if (dirs.length > 1) {
     return usage(`${command} takes one directory, not ${String(dirs.length)}`);
   }
-  return { kind: 'command', command, args: dirs, flags: new Set(flags) };
+  return { kind: 'command', command, args: dirs, flags: new Set(flags), budgets: budgets.budgets };
 };
 
 /** The version in this package's package.json, one level above this file in src/ and dist/. */
@@ -132,17 +169,17 @@ const rootOf = (dir: string | undefined): { readonly root: string } | { readonly
 };
 
 /**
- * Checks the plan in `root`, writes the report to stdout, and returns the exit code it earns. A
- * plan that can't be found or read is a read problem: it goes to stderr and exits 2.
+ * Checks the plan in `root` against `budgets`, writes the report to stdout, and returns the exit
+ * code it earns. A plan that can't be found or read is a read problem: it goes to stderr and exits 2.
  */
-const runCheck = (root: string, flags: ReadonlySet<string>, io: Io): number => {
+const runCheck = (root: string, flags: ReadonlySet<string>, budgets: Budgets, io: Io): number => {
   const repo = diskRepo(root);
   const found = findPlan(repo);
   if ('problem' in found) {
     io.stderr(`${KEYFRAMES}: ${found.problem}\n`);
     return 2;
   }
-  const report = check(found.plan, repo);
+  const report = check(found.plan, repo, budgets);
   io.stdout(flags.has('--json') ? renderJson(report) : renderText(report));
   return exitCode(report, flags.has('--strict'));
 };
@@ -206,7 +243,7 @@ const runCommand = (request: Extract<Request, { kind: 'command' }>, io: Io): num
   }
   switch (request.command) {
     case 'check':
-      return runCheck(found.root, request.flags, io);
+      return runCheck(found.root, request.flags, request.budgets, io);
     case 'context':
       return runContext(found.root, request.args, request.flags, io);
     default:

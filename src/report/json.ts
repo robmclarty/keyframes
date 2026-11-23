@@ -31,6 +31,11 @@ export const renderJson = (report: Report): string => {
       report.sections.map(({ name, items, breakdown }) => [name, { items, ...Object.fromEntries(breakdown) }]),
     ),
     words: { count: report.words.count, budget: report.words.budget },
+    adjusted_budgets: report.adjustedBudgets.map(({ name, budget, default: base }) => ({
+      name,
+      budget,
+      default: base,
+    })),
     items: report.items.map(itemJson),
     findings: report.findings.map(({ line, severity, code, message }) => ({ line, severity, code, message })),
     errors: report.errors,

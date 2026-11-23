@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { memoryRepo, type Repo } from '../../repo/index.js';
-import { check, exitCode, findPlan, type Report } from '../index.js';
+import { BUDGETS, check, exitCode, findPlan, readBudgets, type Report } from '../index.js';
 
 /** A plan from its lines, each ending in a newline. */
 const md = (...lines: string[]): string => lines.map((line) => `${line}\n`).join('');
@@ -350,6 +350,28 @@ describe('budgets', () => {
       ...Array.from({ length: 8 }, (_, index) => `- **P${String(index + 1)} (p${String(index)})**: Loose.`),
     ];
     expect(codes(plan).filter(([, code]) => code === 'over-budget')).toEqual([[3, 'over-budget']]);
+  });
+});
+
+describe('adjusted budgets', () => {
+  test('a raised budget lets a plan grow to it, and still warns past it', () => {
+    const map = (count: number) => [
+      ...INTENT,
+      '## Map',
+      ...Array.from({ length: count }, (_, index) => `- **M${String(index + 1)} (m${String(index)})**: A part.`),
+    ];
+    const at = (count: number) =>
+      check({ name: 'keyframes.md', text: md(...map(count)) }, memoryRepo({}), { ...BUDGETS, map: 8 });
+    expect(at(8).findings).toEqual([]);
+    expect(at(9).findings.map(({ message }) => message)).toEqual(['the plan has 9 parts; the budget is 8']);
+  });
+
+  test('readBudgets sets the pairs it names over the base, and says what is wrong with a bad one', () => {
+    expect(readBudgets('map:8, words:2500')).toEqual({ budgets: { ...BUDGETS, map: 8, words: 2500 } });
+    expect(readBudgets('item:80', { ...BUDGETS, map: 8 })).toEqual({ budgets: { ...BUDGETS, map: 8, item: 80 } });
+    expect(readBudgets('maps:8')).toMatchObject({ problem: expect.stringContaining('"maps" isn\'t a budget') as string });
+    expect(readBudgets('map:8.5')).toMatchObject({ problem: expect.stringContaining('whole number above zero') as string });
+    expect(readBudgets('map:8:9')).toMatchObject({ problem: expect.stringContaining('whole number above zero') as string });
   });
 });
 

@@ -99,12 +99,12 @@ down, so that others, human or agent, can work from it and refine it.
   Ideas hold statements for future consideration.
   - because: "Rules" is too vague, since principles are rules too, and an idea written down
     shouldn't read as a question someone has to answer.
-- **D8 (grow-by-scope)**: A plan that outgrows its budgets splits by scope instead of raising
-  them. The root plan keeps the core, which holds everywhere. A part with reason to stand alone,
-  such as a deep module, gets its own plan beside its code, which says why, cites the root, and
-  adds to it without overriding it.
-  - because: an agent honours a handful of standing rules better than a hundred, and a part's
-    details matter only to work inside it.
+- **D8 (grow-by-scope)**: The budgets are defaults, and splitting by scope is the usual way
+  through them: the root keeps the core, which holds everywhere; a part with reason to stand alone
+  gets its own plan beside its code, citing the root and adding to it. A project's maintainers may
+  adjust a budget instead.
+  - because: an agent honours a handful of standing rules better than a hundred, but where a
+    split starts to pay off differs by project, and the people who own the plan decide.
 - **D9 (log-apart)**: The plan holds only what's in force. The history of decisions, and why each
   one changed, lives in a log outside the plan.
   - because: history isn't instruction, and every Decision in the plan is one an agent mustn't

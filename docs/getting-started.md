@@ -392,10 +392,12 @@ You don't have to write it all at once. Good places to look:
 
 ### When it outgrows one file
 
-A plan that outgrows its budgets splits by scope instead of raising them, as this repo's own
+A plan that outgrows its budgets splits by scope, as this repo's own
 [`keyframes.md`](../keyframes.md) decides. The root plan keeps the core that holds everywhere. A
 part with reason to stand alone, such as a deep module, gets its own `keyframes.md` beside its
-code, which says why it stands alone and adds to the root without overriding it.
+code, which says why it stands alone and adds to the root without overriding it. The budgets are
+defaults, though: if a split isn't worth it yet, `check --budget` adjusts one instead, as in
+`--budget=map:8`, and the report names each budget it changed.
 
 `keyframes check packages/sync` checks a part's plan alone. It treats that folder as the repo
 root, so the part's pointers and paths are relative to it. It can't cite the root plan yet: there,

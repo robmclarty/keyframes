@@ -114,6 +114,7 @@ describe('the JSON report', () => {
       'intent',
       'sections',
       'words',
+      'adjusted_budgets',
       'items',
       'findings',
       'errors',

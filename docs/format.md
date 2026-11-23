@@ -311,7 +311,11 @@ A plan nobody can read in ten minutes stops being read, so `check` warns when on
 
 A word is any run of characters between spaces, markup included, so `- **C3 (one-writer)**:` is
 three. A budget is a warning, and fails a run only under `--strict`. These are starting values,
-and they'll change as people use the format.
+and they'll change as people use the format. Until they settle, `check --budget` adjusts any of
+them for one run, by name: `--budget=map:8,words:2500`. The names are `words`, `item`,
+`principles`, `map`, `constraints`, `scenarios`, `decisions`, `taste`, `questions` and `ideas`,
+and the report shows what it checked against: the `words` row gives the word budget in force, and
+a `budgets` row (`adjusted_budgets` in JSON) names each budget that isn't its default.
 
 ## Other ways to write it
 

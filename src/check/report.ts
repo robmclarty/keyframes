@@ -1,4 +1,5 @@
 import type { Item } from '../items/index.js';
+import type { AdjustedBudget } from './budgets.js';
 import type { resolvePointers } from '../repo/index.js';
 import type { Finding, SectionName } from '../scan/index.js';
 
@@ -51,6 +52,8 @@ export type Report = {
   /** The itemized sections the plan has, in the order of the format's table. */
   readonly sections: readonly SectionCount[];
   readonly words: { readonly count: number; readonly budget: number };
+  /** The budgets this run checked against that aren't their defaults, in `--budget`'s name order. */
+  readonly adjustedBudgets: readonly AdjustedBudget[];
   /** Every item, in line order. */
   readonly items: readonly ReportItem[];
   /** Sorted by line, then code, then message, with notes after errors and warnings. */

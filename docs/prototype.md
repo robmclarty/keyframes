@@ -412,6 +412,7 @@ knowing anything about the harness:
     "constraints": { "items": 6, "linked": 3, "planned": 1, "review": 1, "unlinked": 1, "broken": 0 }
   },
   "words": { "count": 1240, "budget": 2000 },
+  "adjusted_budgets": [],
   "items": [
     {
       "id": "M2",
@@ -717,7 +718,7 @@ them ([`pilots.md`](pilots.md)). This section stays as the protocol they would h
   looks like, what it isn't)? *Lean:* no. The template suggests them, and Intent stays prose.
 - **Q4 (one-file):** *resolved 2026-10-27.* A large project grows by scope, as `D8
   (grow-by-scope)` in [`keyframes.md`](../keyframes.md) says: a plan that outgrows its budgets
-  splits instead of raising them. The root plan keeps the core, which holds everywhere, and a part
+  splits, unless its maintainers adjust a budget with `check --budget` instead. The root plan keeps the core, which holds everywhere, and a part
   with reason to stand alone gets its own plan beside its code, which cites the root and adds to it
   without overriding it. A project's decision history stays in a log outside the plan, as `D9
   (log-apart)` says. Building it into `check` waits for a project that needs it. Until then, a
