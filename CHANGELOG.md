@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.4.0 — 2026-11-22
+
+A new `context` command gives a harness the parts of a plan that apply to the files a task touches, and `check`'s budgets are now defaults a project can adjust.
+
+### Added
+
+- `keyframes context [path…] [--json]` prints the plan's Principles, Constraints, Scenarios and Taste, plus the Map parts each path falls under, as markdown or as JSON described by the new `schema/context.schema.json`. It exits 0 whatever the plan's findings, with one stderr line when the plan has errors, so a harness building an agent's context can ask keyframes instead of parsing `check --json`.
+- `check --budget=name:n,…` adjusts any budget for one run: `words`, `item`, or any itemized section's count, as in `--budget=map:8,words:2500`. A later flag wins, and a bad name or count is a usage problem that exits 2.
+- When a budget isn't its default, the text report adds a `budgets` row naming it with its default, and the JSON report adds an `adjusted_budgets` array (empty when nothing is adjusted). `schema_version` stays 1.
+- `docs/getting-started.md` walks a first plan from `init` to CI, and `docs/inkwell_keyframes.md` is a full example plan, with `docs/what-makes-a-good-keyframes.md` explaining why it works.
+
+### Changed
+
+- The budgets are defaults: a plan that outgrows them usually splits by scope, but a project's maintainers may adjust a budget instead. `docs/format.md` and `docs/getting-started.md` say how.
+- `--json` and `--strict` now say they take no value when given one, as in `--json=yes`.
+
+### Internal
+
+- This repo's plan records growing by scope, keeping decision history in a log outside the plan, closing the prototype without its pilots, and building the `context` verb now.
+- The spec says how a plan splits by scope in enough detail to build from, and new notes cover user plans with runciter and the lookouts contract.
+- An end-to-end test holds the context scenario, and a test holds the inkwell example to what its notes say.
+- `/version` asks before pushing a release tag, since a pushed tag publishes.
+
 ## v0.3.0 — 2026-10-27
 
 The first version published to npm (v0.2.0 was tagged but never reached it), so `npx @robmclarty/keyframes` runs it in any repo. `check` reads more of what people write, and the pilots have a record and a playbook.
