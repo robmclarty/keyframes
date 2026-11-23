@@ -29,7 +29,7 @@ Done. All 8 steps landed and `pnpm check` is green. Steps 4 and 5 each changed f
 
 None were parked. Three things from the range 3 review are still open for whoever picks this up:
 
-- Whether the stderr errors line should start with `keyframes: ` like the CLI's other stderr lines. The spec currently says it doesn't.
+- Whether the stderr errors line should start with `keyframes:` like the CLI's other stderr lines. The spec currently says it doesn't.
 - `test/e2e/bin.test.ts` doesn't assert that `schema/context.schema.json` ships.
 - Cutting the release runciter will install.
 

@@ -160,7 +160,7 @@ folder, so it rides the branch into the PR.)*
   **Summary**: `keyframes context [path…] [--json]` works end to end. A pure `selectContext` over the report picks Principles, Constraints, Scenarios and Taste in the format's order, plus each path's Map parts. Two renderers print it as markdown or as JSON against a new `schema/context.schema.json`. The CLI wires it up with the exit codes the spec gives. An e2e test holds S4, which now reads `linked`, and `docs/agents.md` and the README tell harnesses about it. All three `(new)` markers are gone from `keyframes.md`, and `pnpm check` is green across all 11 slots.
 
   1. Steps 4 and 5 each changed a few files outside their seams, and both landed a hair off.
-  2. The errors line on stderr has no `keyframes: ` prefix, which is what the spec says, but other stderr lines have one.
+  2. The errors line on stderr has no `keyframes:` prefix, which is what the spec says, but other stderr lines have one.
   3. A bad path is caught when the command line is parsed, before the plan is read.
   4. The text output follows the spec's example, and the golden files pin it on the clean and findings trees.
   5. Two smaller notes for the release.
@@ -195,15 +195,15 @@ folder, so it rides the branch into the PR.)*
 
   **Verdict**: ◐ A hair off (seam strayed)
 
-  **Recommendation**: Review the verb from a real repo, then cut a minor release with `/version` for runciter to install, and publish it yourself. It's a new command, it doesn't change `check`, and both outputs, the schema and the scenario are pinned by tests. Before you tag it, decide whether the errors line gets the `keyframes: ` prefix (section 2): once runciter reads stderr, that line is part of the contract.
+  **Recommendation**: Review the verb from a real repo, then cut a minor release with `/version` for runciter to install, and publish it yourself. It's a new command, it doesn't change `check`, and both outputs, the schema and the scenario are pinned by tests. Before you tag it, decide whether the errors line gets the `keyframes:` prefix (section 2): once runciter reads stderr, that line is part of the contract.
 
   **1.** Steps 4 and 5 each changed a few files outside their seams, and both landed a hair off.
 
   Step 4 exported `readPath` from `src/repo/index.ts` one step early. The `no-deep-sibling-import` rule keeps `src/context/` from reaching into `src/repo/paths.ts`, and step 6's seam already named that export. Step 5 moved the JSON Schema validator out of `test/integration/report-schema.test.ts` into `test/helpers/json-schema.ts`, so the report and context schema tests share it instead of carrying two copies. It also added the golden context cases to `test/integration/golden.test.ts`, because the fixtures folder holds data, not tests. No behaviour outside the verb changed.
 
-  **2.** The errors line on stderr has no `keyframes: ` prefix, which is what the spec says, but other stderr lines have one.
+  **2.** The errors line on stderr has no `keyframes:` prefix, which is what the spec says, but other stderr lines have one.
 
-  The spec quotes the line as `keyframes.md has 2 errors; run keyframes check to see them`, and the CLI prints exactly that. Every other stderr line (usage, read problems, unexpected errors) starts with `keyframes: `. A harness that merges the two streams would see one line without the prefix. If you want the prefix, change the spec first, since runciter builds against it.
+  The spec quotes the line as `keyframes.md has 2 errors; run keyframes check to see them`, and the CLI prints exactly that. Every other stderr line (usage, read problems, unexpected errors) starts with `keyframes:`. A harness that merges the two streams would see one line without the prefix. If you want the prefix, change the spec first, since runciter builds against it.
 
   **3.** A bad path is caught when the command line is parsed, before the plan is read.
 
